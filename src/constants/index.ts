@@ -22,6 +22,7 @@ interface StripeDataMap extends Partial<Record<string, StripeData>> {
 
 export const PRICE_ID: Record<string, string> = {
     ES: "price_1St9gFIiQJtaidhOIrc57oIQ",
+    US: "price_1TTpEdIiQJtaidhOGImimPye",
     TEST: "price_1St9gPIiQJtaidhOwIQPuQkA",
     DEFAULT: "price_1St8jpIiQJtaidhOGVFFc7dt",
 };
@@ -35,8 +36,12 @@ export const STRIPE_DATA: StripeDataMap = {
         amount: 1999, // 19.99 EUR
         currency: "eur",
     },
+    US: {
+        amount: 3999, // 39.99 USD
+        currency: "usd",
+    },
     DEFAULT: {
-        amount: 1999, // 19.99 USD
+        amount: 1999, // 19.99 EUR
         currency: "eur",
     },
 };

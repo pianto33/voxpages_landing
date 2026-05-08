@@ -36,6 +36,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       geo_state,
       geo_city,
       geo_postal,
+      billing_country,
+      billing_state,
+      billing_city,
+      billing_postal,
+      billing_line1,
+      billing_line2,
     } = validatedData;
 
     if (!email || !priceId) {
@@ -62,6 +68,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (utm_content) metadata.utm_content = utm_content;
     if (utm_id) metadata.utm_id = utm_id;
 
+    // Billing address (preferida sobre geo IP cuando exista — es la fuente de
+    // verdad para sales tax USA y mapeo ZIP -> estado por AVS).
+    if (billing_country) metadata.billing_country = billing_country;
+    if (billing_state) metadata.billing_state = billing_state;
+    if (billing_city) metadata.billing_city = billing_city;
+    if (billing_postal) metadata.billing_postal = billing_postal;
+    if (billing_line1) metadata.billing_line1 = billing_line1;
+    if (billing_line2) metadata.billing_line2 = billing_line2;
+
     const setupIntent = await stripe.setupIntents.create({
       payment_method_types: ["card"],
       usage: "off_session",
@@ -72,6 +87,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       setupIntentId: setupIntent.id,
       email,
       priceId,
+      hasBillingCountry: !!billing_country,
+      hasBillingPostal: !!billing_postal,
+      hasBillingState: !!billing_state,
     });
 
     return res.status(200).json({

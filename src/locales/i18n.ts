@@ -8,6 +8,7 @@ import commonIT from "./translations/it/common.json";
 import commonPL from "./translations/pl/common.json";
 import commonHU from "./translations/hu/common.json";
 import commonCZ from "./translations/cz/common.json";
+import commonUS from "./translations/us/common.json";
 
 declare module "i18next" {
   interface CustomTypeOptions {
@@ -38,6 +39,9 @@ i18n
       },
       cz: {
         common: commonCZ,
+      },
+      us: {
+        common: commonUS,
       },
     },
     detection: {

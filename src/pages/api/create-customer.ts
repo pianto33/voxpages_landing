@@ -22,7 +22,20 @@ async function handler(
     );
     
     try {
-      const { name, email, country, state, city, postal } = validatedData;
+      const {
+        name,
+        email,
+        country,
+        state,
+        city,
+        postal,
+        billing_country,
+        billing_state,
+        billing_city,
+        billing_postal,
+        billing_line1,
+        billing_line2,
+      } = validatedData;
 
       const ipData = await fetchIPData();
       const forwarded = req.headers["x-forwarded-for"];
@@ -43,28 +56,43 @@ async function handler(
       if (city) metadata.geo_city = city;
       if (postal) metadata.geo_postal = postal;
 
+      // Billing address tiene prioridad sobre geo IP (fuente de verdad para sales tax)
+      if (billing_country) metadata.billing_country = billing_country;
+      if (billing_state) metadata.billing_state = billing_state;
+      if (billing_city) metadata.billing_city = billing_city;
+      if (billing_postal) metadata.billing_postal = billing_postal;
+      if (billing_line1) metadata.billing_line1 = billing_line1;
+      if (billing_line2) metadata.billing_line2 = billing_line2;
+
       const customerData: Stripe.CustomerCreateParams = {
         name: name,
         email: email,
         metadata: metadata,
       };
 
-      // Agregar dirección geolocalizada para Stripe Radar (solo si tenemos país)
-      if (country) {
+      // Customer.address: usar billing > geo IP (Stripe Tax y AVS prefieren el billing).
+      const addressCountry = billing_country || country;
+      const addressState = billing_state || state;
+      const addressCity = billing_city || city;
+      const addressPostal = billing_postal || postal;
+
+      if (addressCountry) {
         customerData.address = {
-          country: country,
+          country: addressCountry,
         };
-        
-        // Agregar campos opcionales
-        if (state) customerData.address.state = state;
-        if (city) customerData.address.city = city;
-        if (postal) customerData.address.postal_code = postal;
-        
-        logger.info("Customer creado con dirección geolocalizada y metadata", {
+
+        if (addressState) customerData.address.state = addressState;
+        if (addressCity) customerData.address.city = addressCity;
+        if (addressPostal) customerData.address.postal_code = addressPostal;
+        if (billing_line1) customerData.address.line1 = billing_line1;
+        if (billing_line2) customerData.address.line2 = billing_line2;
+
+        logger.info("Customer creado con dirección y metadata", {
           email,
-          country,
-          city,
-          hasPostal: !!postal,
+          addressCountry,
+          addressCity,
+          hasPostal: !!addressPostal,
+          source: billing_country ? "billing" : "geo_ip",
         });
       }
 

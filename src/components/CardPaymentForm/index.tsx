@@ -57,6 +57,15 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
     postal: string | null;
   } | null>(null);
   const [email, setEmail] = useState("");
+  // Billing address capturado desde el PaymentElement (necesario para sales tax USA)
+  const [billingAddress, setBillingAddress] = useState<{
+    country: string | null;
+    state: string | null;
+    city: string | null;
+    postal_code: string | null;
+    line1: string | null;
+    line2: string | null;
+  } | null>(null);
 
   useEffect(() => {
     const getIPAddress = async () => {
@@ -153,6 +162,12 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
           geo_state: geoData?.state || undefined,
           geo_city: geoData?.city || undefined,
           geo_postal: geoData?.postal || undefined,
+          billing_country: billingAddress?.country || undefined,
+          billing_state: billingAddress?.state || undefined,
+          billing_city: billingAddress?.city || undefined,
+          billing_postal: billingAddress?.postal_code || undefined,
+          billing_line1: billingAddress?.line1 || undefined,
+          billing_line2: billingAddress?.line2 || undefined,
         }),
       });
 
@@ -242,6 +257,21 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
                   address: "auto",
                 },
               },
+            }}
+            onChange={(event) => {
+              // Capturamos la billing address mientras el usuario completa el form,
+              // para enviarla como metadata del SetupIntent (sales tax USA).
+              const addr = (event as any)?.value?.billingDetails?.address;
+              if (addr) {
+                setBillingAddress({
+                  country: addr.country || null,
+                  state: addr.state || null,
+                  city: addr.city || null,
+                  postal_code: addr.postal_code || null,
+                  line1: addr.line1 || null,
+                  line2: addr.line2 || null,
+                });
+              }
             }}
           />
         </div>

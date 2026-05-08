@@ -7,6 +7,8 @@ const PRODUCTION_ORIGINS = [
   'https://landing.summaryvox.com',
   'https://landing-qa.summaryvox.com',
   'https://summaryvox.com',
+  'https://cross.summaryvox.com',
+  'https://cross-qa.summaryvox.com',
   'https://suscriptionlanding-git-qa-summaryvox-projects.vercel.app',
   'https://resume-book-git-qa-summaryvox-projects.vercel.app',
 ];

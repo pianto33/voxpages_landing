@@ -73,6 +73,14 @@ export const cityStateSchema = z
   .optional();
 
 /**
+ * Línea de dirección (line1/line2)
+ */
+export const addressLineSchema = z
+  .string()
+  .max(200, 'Línea de dirección demasiado larga')
+  .optional();
+
+/**
  * Dirección IP válida (IPv4 o IPv6)
  */
 export const ipAddressSchema = z
@@ -133,6 +141,13 @@ export const createCustomerSchema = z.object({
   state: cityStateSchema,
   city: cityStateSchema,
   postal: postalCodeSchema,
+  // Billing address (preferida sobre geo IP cuando exista).
+  billing_country: countryCodeSchema,
+  billing_state: cityStateSchema,
+  billing_city: cityStateSchema,
+  billing_postal: postalCodeSchema,
+  billing_line1: addressLineSchema,
+  billing_line2: addressLineSchema,
 });
 
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
@@ -148,6 +163,14 @@ export const createSubscriptionSchema = z.object({
   geo_state: cityStateSchema,
   geo_city: cityStateSchema,
   geo_postal: postalCodeSchema,
+  // Billing address provista por el wallet/PaymentElement (fuente de verdad
+  // para sales tax USA: country + ZIP -> Stripe mapea a estado vía AVS).
+  billing_country: countryCodeSchema,
+  billing_state: cityStateSchema,
+  billing_city: cityStateSchema,
+  billing_postal: postalCodeSchema,
+  billing_line1: addressLineSchema,
+  billing_line2: addressLineSchema,
   fbclid: fbclidSchema,
   utm_source: utmParamSchema,
   utm_medium: utmParamSchema,
@@ -181,6 +204,14 @@ export const createSetupIntentSchema = z.object({
   geo_state: cityStateSchema,
   geo_city: cityStateSchema,
   geo_postal: postalCodeSchema,
+  // Billing address recolectada por el wallet (Apple Pay / Google Pay / Link)
+  // o el PaymentElement. Es la pieza fundacional para sales tax USA.
+  billing_country: countryCodeSchema,
+  billing_state: cityStateSchema,
+  billing_city: cityStateSchema,
+  billing_postal: postalCodeSchema,
+  billing_line1: addressLineSchema,
+  billing_line2: addressLineSchema,
 });
 
 export type CreateSetupIntentInput = z.infer<typeof createSetupIntentSchema>;

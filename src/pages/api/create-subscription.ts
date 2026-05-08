@@ -26,6 +26,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 geo_state, 
                 geo_city, 
                 geo_postal,
+                billing_country,
+                billing_state,
+                billing_city,
+                billing_postal,
+                billing_line1,
+                billing_line2,
                 fbclid,
                 utm_source,
                 utm_medium,
@@ -42,6 +48,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             if (geo_state) metadata.geo_state = geo_state;
             if (geo_city) metadata.geo_city = geo_city;
             if (geo_postal) metadata.geo_postal = geo_postal;
+            if (billing_country) metadata.billing_country = billing_country;
+            if (billing_state) metadata.billing_state = billing_state;
+            if (billing_city) metadata.billing_city = billing_city;
+            if (billing_postal) metadata.billing_postal = billing_postal;
+            if (billing_line1) metadata.billing_line1 = billing_line1;
+            if (billing_line2) metadata.billing_line2 = billing_line2;
             if (fbclid) metadata.fbclid = fbclid;
             if (utm_source) metadata.utm_source = utm_source;
             if (utm_medium) metadata.utm_medium = utm_medium;

@@ -211,6 +211,16 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       const name = e.billingDetails?.name || 
         (e.billingDetails?.email ? e.billingDetails.email.split("@")[0] : null);
 
+      // Capturar billing address (Apple Pay / Google Pay / Link). Para sales tax USA
+      // alcanza con country + postal_code (Stripe mapea ZIP -> estado vía AVS).
+      const billingAddress = e.billingDetails?.address;
+      const billingCountry = billingAddress?.country || null;
+      const billingState = billingAddress?.state || null;
+      const billingPostal = billingAddress?.postal_code || null;
+      const billingCity = billingAddress?.city || null;
+      const billingLine1 = billingAddress?.line1 || null;
+      const billingLine2 = billingAddress?.line2 || null;
+
       if (!email || !name) {
         if (!isBot()) {
           checkoutConsole("onConfirm:abort", { reason: "falta email o nombre" });
@@ -279,6 +289,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           geo_state: geoData?.state || undefined,
           geo_city: geoData?.city || undefined,
           geo_postal: geoData?.postal || undefined,
+          billing_country: billingCountry || undefined,
+          billing_state: billingState || undefined,
+          billing_city: billingCity || undefined,
+          billing_postal: billingPostal || undefined,
+          billing_line1: billingLine1 || undefined,
+          billing_line2: billingLine2 || undefined,
         }),
       });
 
@@ -316,11 +332,23 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         return;
       }
 
-      // Construir billing_details para Stripe
+      // Construir billing_details para Stripe — incluir address para que Stripe la
+      // adjunte al PaymentMethod (clave para sales tax USA y AVS).
       const billingDetails: any = {
         email,
         name,
       };
+
+      if (billingCountry || billingPostal || billingState || billingCity || billingLine1) {
+        billingDetails.address = {
+          ...(billingCountry ? { country: billingCountry } : {}),
+          ...(billingState ? { state: billingState } : {}),
+          ...(billingCity ? { city: billingCity } : {}),
+          ...(billingPostal ? { postal_code: billingPostal } : {}),
+          ...(billingLine1 ? { line1: billingLine1 } : {}),
+          ...(billingLine2 ? { line2: billingLine2 } : {}),
+        };
+      }
 
       // Log antes de confirmSetup
       if (!isBot()) {
@@ -425,10 +453,13 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       });
     }
     
+    // billingAddressRequired: true → Apple Pay / Google Pay / Link envían el billing address.
+    // Necesario para sales tax USA: con country + ZIP, Stripe mapea ZIP -> estado vía AVS.
+    // UX: cero fricción adicional, los wallets ya tienen guardada esta data.
     resolve({
       emailRequired: true,
       phoneNumberRequired: false,
-      billingAddressRequired: false,
+      billingAddressRequired: true,
       applePay: {
         recurringPaymentRequest: {
           paymentDescription: "Subscription",
@@ -445,7 +476,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
     checkoutConsole("onClick:resolve", {
       emailRequired: true,
-      billingAddressRequired: false,
+      billingAddressRequired: true,
     });
   };
 

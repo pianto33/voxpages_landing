@@ -46,18 +46,29 @@ export default function App({ Component, pageProps }: AppProps) {
           fbq('track', 'PageView');
         `}
       </Script>
-      {/* Microsoft Clarity - heatmaps y grabaciones de sesión */}
-      {process.env.NEXT_PUBLIC_CLARITY_ID && (
-        <Script id="ms-clarity" strategy="afterInteractive">
-          {`
-            (function(c,l,a,r,i,t,y){
-              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-            })(window,document,"clarity","script","${process.env.NEXT_PUBLIC_CLARITY_ID}");
-          `}
-        </Script>
-      )}
+      {/* Microsoft Clarity - heatmaps y grabaciones de sesión.
+          Como el landing se sirve también desde dominios externos vía Lambda@Edge
+          (landing-g.todosgamers.com → ES/CZ/PL/HU, mid.theauravibe.com → US),
+          y Clarity acepta sólo el Site URL configurado en cada proyecto, se
+          inyecta el Project ID correcto según el hostname del browser.
+          IDs fallback hardcodeados; env vars (si están seteadas) tienen prioridad. */}
+      <Script id="ms-clarity" strategy="afterInteractive">
+        {`
+          (function(c,l,a,r){
+            var host = (location.hostname || '').toLowerCase();
+            var id = "${process.env.NEXT_PUBLIC_CLARITY_ID || ''}" || "w84pumcs1f";
+            if (host.indexOf('todosgamers.com') !== -1) {
+              id = "${process.env.NEXT_PUBLIC_CLARITY_ID_TODOSGAMERS || ''}" || "wnz9s5zs2k";
+            } else if (host.indexOf('theauravibe.com') !== -1) {
+              id = "${process.env.NEXT_PUBLIC_CLARITY_ID_THEAURAVIBE || ''}" || "wnz9f4ghjp";
+            }
+            if (!id) return;
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            var t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+id;
+            var y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+          })(window,document,"clarity","script");
+        `}
+      </Script>
       <Elements stripe={stripePromise} options={options}>
         <UserProvider>
           <Layout>

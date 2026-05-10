@@ -17,6 +17,8 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { checkMemoryRateLimit, getMemoryRateLimitStats } from './memoryRateLimiter';
+import { logger } from '@/utils/logger';
+import { getRequestContext, compactContext } from '@/utils/serverContext';
 
 // Tipos de endpoints soportados
 export type RateLimitEndpoint = 
@@ -88,9 +90,15 @@ export function withRateLimit(
     const memoryResult = checkMemoryRateLimit(ip);
     
     if (!memoryResult.allowed) {
-      console.warn(`[RateLimit] Bloqueó IP: ${ip} - ${memoryResult.reason} (endpoint: ${endpoint})`);
-      
-      // Headers de rate limit
+      const ctx = compactContext(getRequestContext(req));
+      logger.warn('rate_limit_hit', {
+        ...ctx,
+        endpoint,
+        rate_limit_ip: ip,
+        rate_limit_reason: memoryResult.reason,
+        rate_limit_retry_after_ms: memoryResult.retryAfterMs || null,
+      });
+
       res.setHeader('Retry-After', Math.ceil((memoryResult.retryAfterMs || 60000) / 1000));
       res.setHeader('X-RateLimit-Layer', 'memory');
       

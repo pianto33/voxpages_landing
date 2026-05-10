@@ -93,9 +93,11 @@ export default function Home() {
                 countryCode,
                 path: router.asPath,
                 locale: router.locale,
+                amount,
+                currency,
             });
         }
-    }, [router.isReady, router.query.countryCode, router.asPath, router.locale]);
+    }, [router.isReady, router.query.countryCode, router.asPath, router.locale, amount, currency]);
 
     const scrollToInfo = () => {
         const container = snapRef.current;

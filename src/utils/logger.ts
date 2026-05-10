@@ -294,12 +294,15 @@ class Logger {
   }
 
   // Método especial para pagos exitosos
-  async paymentSuccess(email: string, amount: number, currency: string, customerId?: string) {
+  async paymentSuccess(email: string, amount: number, currency: string, customerId?: string, extra?: LogMetadata) {
     const metadata = enrichMetadata({
+      funnel_step: 'payment_succeeded',
       email,
       amount,
       currency,
       customerId,
+      customer_id: customerId,
+      ...(extra || {}),
     });
     
     const message = `✅ Pago exitoso: ${email} - ${(amount / 100).toFixed(2)} ${currency.toUpperCase()}`;
@@ -326,6 +329,40 @@ class Logger {
 
     // En servidor, enviar directamente a Better Stack
     await betterStack.info(message, metadata);
+  }
+
+  // Simétrico a paymentSuccess: pagos fallidos (decline, error de
+  // confirmación, error de red, etc.). Mantiene mismo schema para
+  // que las queries de funnel funcionen en ambos lados.
+  async paymentFailed(reason: string, extra?: LogMetadata) {
+    const metadata = enrichMetadata({
+      funnel_step: 'payment_failed',
+      reason,
+      ...(extra || {}),
+    });
+
+    const message = `❌ Pago fallido: ${reason}`;
+
+    if (typeof window !== 'undefined') {
+      try {
+        await fetch('/api/log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            level: 'warn',
+            message,
+            metadata,
+          }),
+        });
+      } catch (fetchError) {
+        console.error('[Logger] Error enviando paymentFailed al servidor:', fetchError);
+      }
+      return;
+    }
+
+    await betterStack.warn(message, metadata);
   }
 }
 

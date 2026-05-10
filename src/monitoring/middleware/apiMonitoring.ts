@@ -1,19 +1,26 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createApiMonitor } from '@/monitoring/services/monitoringService';
+import { getRequestContext, compactContext } from '@/utils/serverContext';
 
 type ApiHandler = (req: NextApiRequest, res: NextApiResponse) => Promise<void> | void;
 
 /**
- * Middleware para monitorear automáticamente todas las peticiones API
+ * Middleware para monitorear automáticamente todas las peticiones API.
+ *
+ * Inyecta contexto de telemetría (anon_id, session_id, funnel_id,
+ * country, ip, etc.) en los logs que produce el monitor (slow
+ * response, server error). Cada handler puede a su vez usar
+ * `getRequestContext(req)` para enriquecer sus propios logs.
+ *
  * Uso:
- * 
- * export default withMonitoring(handler);
+ *   export default withMonitoring(handler);
  */
 export function withMonitoring(handler: ApiHandler): ApiHandler {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     const monitor = createApiMonitor(req.url || 'unknown', req.method || 'GET');
+    const ctx = getRequestContext(req);
+    const compactCtx = compactContext(ctx);
 
-    // Capturar el statusCode original
     const originalJson = res.json.bind(res);
     const originalSend = res.send.bind(res);
     const originalEnd = res.end.bind(res);
@@ -21,42 +28,27 @@ export function withMonitoring(handler: ApiHandler): ApiHandler {
     let statusCode = 200;
     let finished = false;
 
-    // Interceptar res.json
+    const finalize = (code: number, extra?: Record<string, any>) => {
+      if (finished) return;
+      finished = true;
+      monitor.end(code, {
+        ...compactCtx,
+        ...(extra || {}),
+      });
+    };
+
     res.json = function (body: any) {
-      if (!finished) {
-        statusCode = res.statusCode;
-        finished = true;
-        monitor.end(statusCode, {
-          userAgent: req.headers['user-agent'],
-          country: req.headers['x-vercel-ip-country'] as string,
-        });
-      }
+      finalize(res.statusCode);
       return originalJson(body);
     };
 
-    // Interceptar res.send
     res.send = function (body: any) {
-      if (!finished) {
-        statusCode = res.statusCode;
-        finished = true;
-        monitor.end(statusCode, {
-          userAgent: req.headers['user-agent'],
-          country: req.headers['x-vercel-ip-country'] as string,
-        });
-      }
+      finalize(res.statusCode);
       return originalSend(body);
     };
 
-    // Interceptar res.end
     res.end = function (...args: any[]) {
-      if (!finished) {
-        statusCode = res.statusCode;
-        finished = true;
-        monitor.end(statusCode, {
-          userAgent: req.headers['user-agent'],
-          country: req.headers['x-vercel-ip-country'] as string,
-        });
-      }
+      finalize(res.statusCode);
       return originalEnd(...args);
     };
 
@@ -64,18 +56,12 @@ export function withMonitoring(handler: ApiHandler): ApiHandler {
       await handler(req, res);
     } catch (error) {
       statusCode = 500;
-      if (!finished) {
-        finished = true;
-        await monitor.end(statusCode, {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          userAgent: req.headers['user-agent'],
-          country: req.headers['x-vercel-ip-country'] as string,
-        });
-      }
+      finalize(statusCode, {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       throw error;
     }
   };
 }
 
 export default withMonitoring;
-

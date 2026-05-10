@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { betterStack } from '@/monitoring/services/betterStackService';
+import { getRequestContext } from '@/utils/serverContext';
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,24 +10,45 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { level, message, metadata } = req.body;
+  const { level, message, metadata } = req.body || {};
 
   try {
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // Extraer sessionId si existe (ya viene del cliente)
-    const sessionId = metadata?.sessionId || 'unknown';
+    // Contexto que viene en headers de telemetría + datos de la request
+    // (IP real, country detectado por Vercel, host, etc.).
+    const reqCtx = getRequestContext(req);
 
-    // Agregar información de la request al metadata (sin duplicar sessionId)
+    // Cliente puede mandar metadata.sessionId (legacy) o el nuevo
+    // session_id en headers. Priorizamos header, mantenemos compat.
+    const sessionId =
+      reqCtx.session_id ||
+      metadata?.session_id ||
+      metadata?.sessionId ||
+      'unknown';
+
     const enrichedMetadata = {
-      sessionId, // Mantener sessionId al principio
+      // Campos comunes del contexto de telemetría
+      anon_id: reqCtx.anon_id,
+      session_id: sessionId,
+      funnel_id: reqCtx.funnel_id,
+      customer_id: reqCtx.customer_id || metadata?.customer_id || null,
+      ip: reqCtx.ip,
+      country: reqCtx.country,
+      vercel_region: reqCtx.vercel_region,
+      // Mantengo `sessionId` plano para compat con búsquedas viejas
+      sessionId,
+      // Lo que mandó el cliente (incluye funnel_step, email, etc.)
       ...metadata,
+      // Datos de transporte
+      origin: reqCtx.origin,
+      referer: reqCtx.referer,
+      user_agent: reqCtx.user_agent,
       timestamp: new Date().toISOString(),
     };
 
-    // Enviar según el nivel
     const levelEmoji = {
       log: '📝',
       info: 'ℹ️',
@@ -36,11 +58,15 @@ export default async function handler(
       visit: '👁️',
       click: '🖱️',
     };
-    
+
     const emoji = levelEmoji[level as keyof typeof levelEmoji] || '📝';
     const logLevel = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'info';
-    
-    await betterStack.sendLog(logLevel, `${emoji} [${level?.toUpperCase() || 'LOG'}] ${message}`, enrichedMetadata);
+
+    await betterStack.sendLog(
+      logLevel,
+      `${emoji} [${level?.toUpperCase() || 'LOG'}] ${message}`,
+      enrichedMetadata
+    );
 
     return res.status(200).json({ success: true });
   } catch (error: any) {

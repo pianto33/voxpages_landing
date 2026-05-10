@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { logger } from "@/utils/logger";
 import { withRateLimitAndMonitoring } from "@/lib/rate-limit";
 import { validateWarn, createSetupIntentSchema } from "@/lib/validation";
+import { getRequestContext, compactContext } from "@/utils/serverContext";
 
 const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY ?? "");
 
@@ -10,6 +11,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const ctx = compactContext(getRequestContext(req));
+
+  logger.info("create-setup-intent request", {
+    funnel_step: "setup_intent_create_request",
+    ...ctx,
+    email: req.body?.email,
+    price_id: req.body?.priceId,
+    country_code: req.body?.countryCode,
+  });
 
   try {
     const { data: validatedData } = await validateWarn(
@@ -84,12 +95,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
 
     logger.info("SetupIntent creado exitosamente", {
-      setupIntentId: setupIntent.id,
+      funnel_step: "setup_intent_created",
+      ...ctx,
+      setup_intent_id: setupIntent.id,
       email,
-      priceId,
-      hasBillingCountry: !!billing_country,
-      hasBillingPostal: !!billing_postal,
-      hasBillingState: !!billing_state,
+      price_id: priceId,
+      country_code: countryCode,
+      billing_country: billing_country || null,
+      billing_postal: billing_postal || null,
+      billing_state: billing_state || null,
+      geo_country: geo_country || null,
     });
 
     return res.status(200).json({
@@ -97,8 +112,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
   } catch (error: any) {
     logger.error("Error creating setup intent:", error, {
+      ...ctx,
       email: req.body?.email,
-      priceId: req.body?.priceId,
+      price_id: req.body?.priceId,
     });
     return res.status(400).json({ error: error.message });
   }

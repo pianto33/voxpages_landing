@@ -10,6 +10,8 @@ import { extractTrackingParams, saveTrackingParams } from "@/utils/trackingParam
 import Button from "@/components/Button";
 import Header from "@/components/Header";
 import { logger } from "@/utils/logger";
+import { clientLogger } from "@/utils/clientLogger";
+import { setEmail as setIdentityEmail, setCustomerId, endFunnel } from "@/utils/userIdentity";
 import styles from "@/styles/Thanks.module.css";
 
 function ThanksPage() {
@@ -155,10 +157,27 @@ function ThanksPage() {
         (async () => {
             try {
                 setIsLoading(true);
+
+                // Identidad: persistir email + customerId para todos los logs futuros
+                if (email) setIdentityEmail(email);
+                if (customerId) setCustomerId(customerId);
+
+                clientLogger.funnel('magic_link_requested', {
+                    email,
+                    customerId,
+                    lng,
+                });
+
                 const token = await generateAutoLoginToken(email);
                 const link = buildLoginUrl(token, lng);
                 setMagicLink(link);
                 setIsLoading(false);
+
+                clientLogger.funnel('magic_link_received', {
+                    email,
+                    customerId,
+                    lng,
+                });
                 
                 logger.info("Thanks page: magic link generado exitosamente", {
                     email,
@@ -166,8 +185,14 @@ function ThanksPage() {
                 
                 // Notificar pago exitoso - SOLO UNA VEZ
                 if (amount && currency) {
-                    logger.paymentSuccess(email, amount, currency, customerId);
+                    logger.paymentSuccess(email, amount, currency, customerId, {
+                        lng,
+                    });
                 }
+
+                // Cerrar el funnel: el próximo intento de compra (mismo
+                // browser, otra sesión) arrancará uno nuevo.
+                endFunnel();
                 
                 // ✅ AHORA sí marcar como completado en sessionStorage (después de éxito)
                 sessionStorage.setItem(sessionKey, 'true');

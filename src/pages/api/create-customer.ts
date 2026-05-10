@@ -4,6 +4,7 @@ import { fetchIPData } from "@/services/trackingService";
 import { logger } from "@/utils/logger";
 import { withRateLimitAndMonitoring } from "@/lib/rate-limit";
 import { validateWarn, createCustomerSchema } from "@/lib/validation";
+import { getRequestContext, compactContext } from "@/utils/serverContext";
 
 const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY ?? "";
 const stripe = new Stripe(STRIPE_PRIVATE_KEY);
@@ -13,6 +14,14 @@ async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
+    const ctx = compactContext(getRequestContext(req));
+
+    logger.info("create-customer request", {
+      funnel_step: "customer_create_request",
+      ...ctx,
+      email: req.body?.email,
+    });
+
     // 🔒 Validar input (modo warn: alerta pero no bloquea)
     const { data: validatedData } = await validateWarn(
       createCustomerSchema, 
@@ -86,21 +95,44 @@ async function handler(
         if (addressPostal) customerData.address.postal_code = addressPostal;
         if (billing_line1) customerData.address.line1 = billing_line1;
         if (billing_line2) customerData.address.line2 = billing_line2;
+      }
 
-        logger.info("Customer creado con dirección y metadata", {
+      // Detectar country mismatch (útil para auditar Stripe Tax USA y
+      // detectar VPN / fraude). Se loguea como warn sólo si los tres
+      // declaran un valor distinto.
+      const vercelCountry = ctx.country;
+      const ipCountry = country || ipData.country || null;
+      const billingCountryFinal = billing_country || null;
+      const distinct = new Set(
+        [vercelCountry, ipCountry, billingCountryFinal].filter(Boolean) as string[]
+      );
+      if (distinct.size > 1) {
+        logger.warn("country_mismatch", {
+          ...ctx,
           email,
-          addressCountry,
-          addressCity,
-          hasPostal: !!addressPostal,
-          source: billing_country ? "billing" : "geo_ip",
+          vercel_country: vercelCountry,
+          ip_country: ipCountry,
+          billing_country: billingCountryFinal,
         });
       }
 
       const customer = await stripe.customers.create(customerData);
 
+      logger.info("Customer creado con dirección y metadata", {
+        funnel_step: "customer_created",
+        ...ctx,
+        customer_id: customer.id,
+        email,
+        country: addressCountry,
+        billing_country: billingCountryFinal,
+        ip_country: ipCountry,
+        address_source: billing_country ? "billing" : "geo_ip",
+      });
+
       res.status(200).send(customer);
     } catch (error: any) {
       logger.error("Error POST '/create-customer'", error, {
+        ...ctx,
         email: req.body.email,
         name: req.body.name,
       });

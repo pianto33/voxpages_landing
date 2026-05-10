@@ -3,12 +3,22 @@ import Stripe from "stripe";
 import { logger } from "@/utils/logger";
 import { withRateLimitAndMonitoring } from "@/lib/rate-limit";
 import { validateWarn, createSubscriptionSchema } from "@/lib/validation";
+import { getRequestContext, compactContext } from "@/utils/serverContext";
 
 const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY ?? "";
 const stripe = new Stripe(STRIPE_PRIVATE_KEY);
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === "POST") {
+        const ctx = compactContext(getRequestContext(req));
+
+        logger.info("create-subscription request", {
+            funnel_step: "subscription_create_request",
+            ...ctx,
+            customer_id: req.body?.customerId,
+            price_id: req.body?.priceId,
+        });
+
         // 🔒 Validar input (modo warn: alerta pero no bloquea)
         const { data: validatedData } = await validateWarn(
             createSubscriptionSchema, 
@@ -84,19 +94,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             // Agregar metadata solo si hay datos
             if (Object.keys(metadata).length > 0) {
                 subscriptionData.metadata = metadata;
-                
-                logger.info("Suscripción creada con metadata", {
-                    customerId,
-                    hasIP: !!ip_address,
-                    hasCountry: !!geo_country,
-                    hasCity: !!geo_city,
-                    hasFbclid: !!fbclid,
-                });
             }
 
             const subscription = await stripe.subscriptions.create(
                 subscriptionData
             );
+
+            logger.info("Suscripción creada", {
+                funnel_step: "subscription_created",
+                ...ctx,
+                customer_id: customerId,
+                subscription_id: subscription.id,
+                price_id: priceId,
+                billing_country: billing_country || null,
+                billing_postal: billing_postal || null,
+                geo_country: geo_country || null,
+            });
 
             // Actualizar el SetupIntent con metadata incluyendo subscription_id
             // Esto facilita el manejo en webhooks
@@ -107,12 +120,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 const setupIntent = subscription.pending_setup_intent;
                 const setupIntentId = setupIntent.id;
                 
-                // Log para verificar la configuración del SetupIntent
                 logger.info("SetupIntent creado por Stripe", {
-                    setupIntentId,
-                    subscriptionId: subscription.id,
-                    customerId,
-                    usage: setupIntent.usage, // Debería ser 'off_session' para suscripciones
+                    ...ctx,
+                    setup_intent_id: setupIntentId,
+                    subscription_id: subscription.id,
+                    customer_id: customerId,
+                    usage: setupIntent.usage,
                     status: setupIntent.status,
                 });
 
@@ -124,9 +137,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 });
 
                 logger.info("SetupIntent actualizado con subscription_id", {
-                    setupIntentId,
-                    subscriptionId: subscription.id,
-                    customerId,
+                    ...ctx,
+                    setup_intent_id: setupIntentId,
+                    subscription_id: subscription.id,
+                    customer_id: customerId,
                 });
             }
 
@@ -142,12 +156,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             // card_error = problema del usuario (tarjeta rechazada, robada, etc.) -> warn
             // otros tipos = error del sistema -> error
             const logData = {
-                customerId: req.body.customerId,
-                priceId: req.body.priceId,
-                stripeErrorType: error.type,
-                stripeErrorCode: error.code,
-                stripeDeclineCode: error.decline_code,
-                stripeStatusCode: error.statusCode,
+                ...ctx,
+                customer_id: req.body.customerId,
+                price_id: req.body.priceId,
+                stripe_error_type: error.type,
+                stripe_error_code: error.code,
+                stripe_decline_code: error.decline_code,
+                stripe_status_code: error.statusCode,
             };
 
             if (error.type === 'StripeCardError' || error.type === 'card_error') {

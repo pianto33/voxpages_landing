@@ -3,6 +3,9 @@ import { useRouter } from "next/router";
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { logger } from "@/utils/logger";
+import { clientLogger } from "@/utils/clientLogger";
+import { startFunnel, setEmail as setIdentityEmail } from "@/utils/userIdentity";
+import { apiFetch } from "@/utils/apiFetch";
 import { fetchIPData } from "@/services/trackingService";
 import { extractTrackingParams, saveTrackingParams, addTrackingParams, getTrackingParams } from "@/utils/trackingParams";
 import Button from "@/components/Button";
@@ -96,18 +99,39 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       logger.info("Parámetros de tracking capturados", trackingParams);
     }
 
+    // Iniciar funnel: este intento de compra queda identificado
+    startFunnel();
+    clientLogger.funnel('checkout_mounted', {
+      priceId,
+      amount,
+      currency,
+      countryCode: router.query.countryCode,
+      path: router.asPath,
+      surface: 'card_form',
+    });
+
     getIPAddress();
-  }, [router.query]);
+  }, [router.query, priceId, amount, currency]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    clientLogger.funnel('checkout_clicked', {
+      priceId,
+      amount,
+      currency,
+      surface: 'card_form',
+      countryCode: router.query.countryCode,
+    });
+
     if (!stripe || !elements) {
+      clientLogger.paymentFailed('stripe_or_elements_missing', { priceId, surface: 'card_form' });
       setErrorMessage(t("error.stripe"));
       return;
     }
 
     if (!email) {
+      clientLogger.paymentFailed('missing_email', { priceId, surface: 'card_form' });
       setErrorMessage(t("error.email"));
       return;
     }
@@ -118,12 +142,20 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
     try {
       const { error: submitError } = await elements.submit();
       if (submitError) {
+        clientLogger.paymentFailed('elements_submit_error', {
+          priceId,
+          surface: 'card_form',
+          error: submitError.message,
+        });
         setErrorMessage(
           t("error.submit", { error: submitError.message || "Desconocido" })
         );
         setIsProcessing(false);
         return;
       }
+
+      // Identidad: persistir email para logs subsiguientes
+      setIdentityEmail(email);
 
       const name = email.split("@")[0];
       localStorage.setItem("userName", name);
@@ -136,13 +168,24 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
 
       // NUEVO: Solo crear SetupIntent (rápido ~200ms)
       // El webhook se encarga de crear customer y subscription
+      clientLogger.funnel('setup_intent_create_request', {
+        priceId,
+        email,
+        amount,
+        currency,
+        surface: 'card_form',
+        countryCode: router.query.countryCode,
+        billing_country: billingAddress?.country || null,
+        billing_postal: billingAddress?.postal_code || null,
+      });
+
       logger.info('Creando SetupIntent en Stripe', {
         context: 'CardPaymentForm - pre createSetupIntent',
         priceId,
         email,
       });
 
-      const response = await fetch("/api/create-setup-intent", {
+      const response = await apiFetch("/api/create-setup-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -179,6 +222,12 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
           email,
           priceId,
         });
+        clientLogger.paymentFailed('setup_intent_create_error', {
+          priceId,
+          email,
+          surface: 'card_form',
+          error: data.error,
+        });
         setErrorMessage(t("error.general", { error: data.error }));
         setIsProcessing(false);
         return;
@@ -187,6 +236,15 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       // Construir return_url con parámetros de tracking preservados
       const baseReturnUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/${router.query.countryCode}/thanks`;
       const returnUrl = addTrackingParams(baseReturnUrl, trackingParams);
+
+      clientLogger.funnel('payment_confirm_request', {
+        priceId,
+        email,
+        amount,
+        currency,
+        surface: 'card_form',
+        countryCode: router.query.countryCode,
+      });
 
       const { error } = await stripe.confirmSetup({
         elements,
@@ -197,6 +255,18 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       });
 
       if (error) {
+        clientLogger.paymentFailed(
+          error.type === 'card_error' ? 'card_declined' : 'confirm_setup_error',
+          {
+            priceId,
+            email,
+            surface: 'card_form',
+            stripe_error_code: error.code,
+            stripe_error_type: error.type,
+            stripe_decline_code: (error as any).decline_code,
+            stripe_error_message: error.message,
+          }
+        );
         setErrorMessage(
           t("error.confirm_setup", { error: error.message || "Desconocido" })
         );
@@ -220,6 +290,14 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       } else {
         logger.error("ERROR Card Form Submit", error, logData);
       }
+
+      clientLogger.paymentFailed(
+        error.type === 'card_error' ? 'card_declined' : 'unhandled_exception',
+        {
+          ...logData,
+          surface: 'card_form',
+        }
+      );
       
       setErrorMessage(
         t("error.general", { error: error.message || "Error desconocido" })

@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { logger } from "@/utils/logger";
 import { withRateLimitAndMonitoring } from "@/lib/rate-limit";
 import { validateWarn, createIntentSchema } from "@/lib/validation";
+import { getRequestContext, compactContext } from "@/utils/serverContext";
 
 const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY ?? "";
 const stripe = new Stripe(STRIPE_PRIVATE_KEY);
@@ -12,6 +13,15 @@ async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
+    const ctx = compactContext(getRequestContext(req));
+
+    logger.info("create-intent request", {
+      ...ctx,
+      email: req.body?.email,
+      amount: req.body?.amount,
+      currency: req.body?.currency,
+    });
+
     // 🔒 Validar input (modo warn: alerta pero no bloquea)
     const { data: validatedData } = await validateWarn(
       createIntentSchema, 
@@ -23,16 +33,26 @@ async function handler(
     try {
       const { amount, currency, email } = validatedData;
       const intent = await stripe.paymentIntents.create({
-        amount: amount, // Ya validado como entero positivo
-        currency: currency, // Ya normalizado a lowercase
+        amount: amount,
+        currency: currency,
         receipt_email: email,
         setup_future_usage: "off_session",
       });
+
+      logger.info("PaymentIntent creado", {
+        ...ctx,
+        payment_intent_id: intent.id,
+        email,
+        amount,
+        currency,
+      });
+
       res.json({ client_secret: intent.client_secret });
     } catch (error: any) {
       // Solo loguear errores del sistema (no errores de tarjeta del usuario)
       if (error.type !== 'StripeCardError' && error.statusCode !== 400) {
         logger.error("Error POST '/create-intent'", error, {
+          ...ctx,
           email: req.body.email,
           amount: req.body.amount,
           currency: req.body.currency,

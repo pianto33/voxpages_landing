@@ -15,6 +15,8 @@ import { GTM_EVENTS, PRICE_ID } from "@/constants";
 import { fetchIPData } from "@/services/trackingService";
 import { logger } from "@/utils/logger";
 import { clientLogger } from "@/utils/clientLogger";
+import { startFunnel, setEmail as setIdentityEmail } from "@/utils/userIdentity";
+import { apiFetch } from "@/utils/apiFetch";
 import { extractTrackingParams, saveTrackingParams, getTrackingParams, addTrackingParams } from "@/utils/trackingParams";
 import Button from "@/components/Button";
 import CardPaymentForm from "@/components/CardPaymentForm";
@@ -228,6 +230,11 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
             context: "StripeExpressCheckout - onConfirm validación",
             priceId,
           });
+          clientLogger.paymentFailed('missing_email_or_name', {
+            priceId,
+            hasEmail: !!email,
+            hasName: !!name,
+          });
         }
         const errorMsg = t("error.email");
         setErrorMessage(errorMsg);
@@ -235,12 +242,18 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         return;
       }
 
+      // Identidad: persistir email para que aparezca en logs subsiguientes
+      setIdentityEmail(email);
+
       localStorage.setItem("userName", name);
       localStorage.setItem("userEmail", email);
       localStorage.setItem("paymentAmount", amount.toString());
       localStorage.setItem("paymentCurrency", currency);
 
       if (!stripe || !elements) {
+        if (!isBot()) {
+          clientLogger.paymentFailed('stripe_or_elements_missing', { priceId });
+        }
         const errorMsg = t("error.stripe");
         setErrorMessage(errorMsg);
         e.paymentFailed({ reason: "fail" });
@@ -250,6 +263,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       // Submit del elemento
       const { error: submitError } = await elements.submit();
       if (submitError) {
+        if (!isBot()) {
+          clientLogger.paymentFailed('elements_submit_error', {
+            priceId,
+            error: submitError.message,
+          });
+        }
         const errorMsg = t("error.submit", { error: submitError.message || "Desconocido" });
         setErrorMessage(errorMsg);
         e.paymentFailed({ reason: "fail" });
@@ -262,6 +281,15 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       // NUEVO: Solo crear SetupIntent (rápido ~200ms)
       // El endpoint se encarga de buscar/crear customer y verificar suscripciones
       if (!isBot()) {
+        clientLogger.funnel('setup_intent_create_request', {
+          priceId,
+          email,
+          amount,
+          currency,
+          countryCode: router.query.countryCode,
+          billing_country: billingCountry,
+          billing_postal: billingPostal,
+        });
         clientLogger.info('Creando SetupIntent en Stripe', {
           context: 'StripeExpressCheckout - pre createSetupIntent',
           priceId,
@@ -269,7 +297,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         });
       }
 
-      const response = await fetch("/api/create-setup-intent", {
+      const response = await apiFetch("/api/create-setup-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -325,6 +353,11 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
             email,
             priceId,
           });
+          clientLogger.paymentFailed('setup_intent_create_error', {
+            priceId,
+            email,
+            error: data.error,
+          });
         }
         
         setErrorMessage(t("error.general", { error: data.error }));
@@ -352,6 +385,16 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
       // Log antes de confirmSetup
       if (!isBot()) {
+        clientLogger.funnel('payment_confirm_request', {
+          priceId,
+          email,
+          amount,
+          currency,
+          countryCode: router.query.countryCode,
+          billing_country: billingCountry,
+          billing_postal: billingPostal,
+          hasClientSecret: !!data.clientSecret,
+        });
         clientLogger.info('Confirmando setup de pago con Stripe', {
           context: 'StripeExpressCheckout - pre confirmSetup',
           hasClientSecret: !!data.clientSecret,
@@ -390,6 +433,9 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
             stripeErrorType: error.type,
             stripeDeclineCode: (error as any).decline_code,
             email,
+            priceId,
+            amount,
+            currency,
           };
           
           if (error.type === 'card_error') {
@@ -397,6 +443,16 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           } else {
             logger.error('Error en stripe.confirmSetup', error, logData);
           }
+          clientLogger.paymentFailed(
+            error.type === 'card_error' ? 'card_declined' : 'confirm_setup_error',
+            {
+              ...logData,
+              stripe_error_code: error.code,
+              stripe_error_type: error.type,
+              stripe_decline_code: (error as any).decline_code,
+              stripe_error_message: error.message,
+            }
+          );
         }
         setErrorMessage(
           t("error.confirm_setup", { error: error.message || "Desconocido" })
@@ -424,6 +480,13 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           hasStripe: !!stripe,
           hasElements: !!elements,
         });
+        clientLogger.paymentFailed('unhandled_exception', {
+          priceId,
+          email: e.billingDetails?.email || null,
+          error: error?.message || null,
+          errorName: error?.name || null,
+          errorCode: error?.code || null,
+        });
       }
       const errorMsg = t("error.general", { error: error.message || "Error desconocido" });
       setErrorMessage(errorMsg);
@@ -442,6 +505,14 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     
     // Solo logear si no es un bot
     if (!isBot()) {
+      clientLogger.funnel('checkout_clicked', {
+        priceId,
+        amount,
+        currency,
+        wallet: 'apple_or_google_pay',
+        countryCode: router.query.countryCode,
+      });
+
       clientLogger.click('Google Pay / Apple Pay abriendo', {
         context: 'StripeExpressCheckout - onClick disparado',
         priceId,
@@ -639,6 +710,20 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   // Log solo una vez cuando el componente se monta (no en cada render)
   useEffect(() => {
     if (!isBot()) {
+      // Iniciar funnel: este intento de compra queda identificado
+      // hasta payment_succeeded / payment_failed.
+      startFunnel();
+
+      clientLogger.funnel('checkout_mounted', {
+        priceId,
+        amount,
+        currency,
+        countryCode: router.query.countryCode,
+        path: router.asPath,
+        isProduction,
+        isQA,
+      });
+
       clientLogger.info('StripeExpressCheckout renderizado', {
         context: 'StripeExpressCheckout - mount',
         isProduction,

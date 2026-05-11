@@ -37,7 +37,9 @@ interface LogMetadata {
 export type FunnelStep =
   | 'landing_view'
   | 'checkout_mounted'
+  | 'checkout_ready'
   | 'checkout_clicked'
+  | 'wallet_cancelled'
   | 'setup_intent_create_request'
   | 'setup_intent_created'
   | 'payment_confirm_request'

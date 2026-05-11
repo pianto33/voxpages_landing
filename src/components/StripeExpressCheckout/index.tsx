@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NextRouter, useRouter } from "next/router";
 import {
   ExpressCheckoutElement,
@@ -119,7 +119,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     renderTime: Date.now(),
   });
   const priceId = getPriceId(router);
-  
+
+  // Para medir tiempo entre "wallet abierto" y "wallet cancelado/confirmado".
+  // Útil para distinguir cancels rápidos (UX rota) de cancels después de
+  // ver el sheet de pago (rechazo consciente).
+  const walletOpenedAtRef = useRef<number | null>(null);
+
   // Igual que sr_landing-voxpages
   const isProduction =
     process.env.NODE_ENV === "production" &&
@@ -495,10 +500,19 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   };
 
   const onClick = ({ resolve }: StripeExpressCheckoutElementClickEvent) => {
+    // billingAddressRequired solo lo necesitamos para sales tax USA.
+    // Para EU/UK/resto del mundo lo dejamos en false: el wallet sheet de
+    // Apple/Google Pay queda como antes (menor fricción, menos abandonos).
+    const isUsUser = router.query.countryCode?.toString().toLowerCase() === "us";
+
+    walletOpenedAtRef.current = Date.now();
+
     checkoutConsole("onClick", {
       priceId,
       path: router.asPath,
       host: typeof window !== "undefined" ? window.location.host : null,
+      isUsUser,
+      billingAddressRequired: isUsUser,
     });
     console.log("[StripeExpressCheckout] Wallet clickeado (Express Checkout)");
     sendEvent(GTM_EVENTS.STRIPE_CLICK);
@@ -511,6 +525,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         currency,
         wallet: 'apple_or_google_pay',
         countryCode: router.query.countryCode,
+        billing_address_required: isUsUser,
       });
 
       clientLogger.click('Google Pay / Apple Pay abriendo', {
@@ -521,16 +536,14 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         countryCode: router.query.countryCode,
         path: router.asPath,
         userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+        billingAddressRequired: isUsUser,
       });
     }
-    
-    // billingAddressRequired: true → Apple Pay / Google Pay / Link envían el billing address.
-    // Necesario para sales tax USA: con country + ZIP, Stripe mapea ZIP -> estado vía AVS.
-    // UX: cero fricción adicional, los wallets ya tienen guardada esta data.
+
     resolve({
       emailRequired: true,
       phoneNumberRequired: false,
-      billingAddressRequired: true,
+      billingAddressRequired: isUsUser,
       applePay: {
         recurringPaymentRequest: {
           paymentDescription: "Subscription",
@@ -547,7 +560,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
     checkoutConsole("onClick:resolve", {
       emailRequired: true,
-      billingAddressRequired: true,
+      billingAddressRequired: isUsUser,
     });
   };
 
@@ -576,11 +589,22 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     
     // Solo logear si no es un bot
     if (!isBot()) {
+      const loadTimeMs = readyTime - loadingState.renderTime;
+
+      clientLogger.funnel('checkout_ready', {
+        priceId,
+        countryCode: router.query.countryCode,
+        load_time_ms: loadTimeMs,
+        apple_pay_available: wallets.applePay,
+        google_pay_available: wallets.googlePay,
+        link_available: wallets.link,
+      });
+
       clientLogger.info('Express Checkout cargado correctamente', {
         context: 'StripeExpressCheckout - onReady',
         availablePaymentMethods,
         wallets,
-        loadTimeMs: readyTime - loadingState.renderTime,
+        loadTimeMs,
         host: typeof window !== "undefined" ? window.location.host : undefined,
         priceId,
         isProduction,
@@ -594,12 +618,44 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   };
 
   const onCancel = () => {
-    if (!isBot()) {
-      sendEvent(GTM_EVENTS.STRIPE_CANCEL);
-      clientLogger.info('Usuario cancel? el pago', {
-        context: 'StripeExpressCheckout - onCancel',
-      });
-    }
+    if (isBot()) return;
+
+    sendEvent(GTM_EVENTS.STRIPE_CANCEL);
+
+    // Stripe no nos da motivo del cancel (UX privacy). Pero el tiempo que
+    // estuvo el sheet abierto es una señal MUY útil:
+    //   - < 2s: el wallet ni alcanzó a mostrarse (popup blocker, error,
+    //     pasarela rota, AVS pre-check fallido en silencio).
+    //   - 2-5s: el user lo vio y cerró rápido (mal precio, mala UX, etc).
+    //   - > 5s: cancel "consciente" después de revisar el sheet.
+    const openedAt = walletOpenedAtRef.current;
+    const walletOpenMs = openedAt ? Date.now() - openedAt : null;
+    walletOpenedAtRef.current = null;
+
+    const cancelKind =
+      walletOpenMs == null
+        ? 'unknown'
+        : walletOpenMs < 2000
+          ? 'fast_cancel_lt_2s'
+          : walletOpenMs < 5000
+            ? 'medium_cancel_2_5s'
+            : 'slow_cancel_gt_5s';
+
+    clientLogger.funnel('wallet_cancelled', {
+      priceId,
+      amount,
+      currency,
+      countryCode: router.query.countryCode,
+      wallet_open_ms: walletOpenMs,
+      cancel_kind: cancelKind,
+    });
+
+    clientLogger.paymentFailed('wallet_cancelled', {
+      priceId,
+      countryCode: router.query.countryCode,
+      wallet_open_ms: walletOpenMs,
+      cancel_kind: cancelKind,
+    });
   };
 
   const onLoadError = (event: any) => {

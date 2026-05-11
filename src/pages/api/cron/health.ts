@@ -3,17 +3,16 @@ import { runHealthCheck } from '@/monitoring/services/monitoringService';
 import { betterStack } from '@/monitoring/services/betterStackService';
 
 /**
- * Cron de health check (Vercel Cron, ver vercel.json).
+ * Health check endpoint para uptime monitor externo (Better Stack Uptime, etc).
  *
- * Corre periódicamente y emite a Better Stack:
- *   - Métricas del runtime (memoria, CPU, región).
- *   - Un "heartbeat" estructurado con `funnel_step: heartbeat` y un
- *     mensaje legible. Si dejás de ver heartbeats en el live tail
- *     significa que la app está caída (deploy roto, vars rotas, etc.).
+ * Devuelve HTTP 200 + JSON con métricas si todo OK. Solo loguea a
+ * Better Stack cuando hay un error (heartbeat_error). El "estoy vivo"
+ * se observa en Better Stack Uptime, no se emiten logs por cada ping
+ * para no saturar el ingest.
  *
- * Vercel Cron envía un header `Authorization: Bearer <CRON_SECRET>`.
- * Si seteás CRON_SECRET en env vars, validamos. Si no está seteado,
- * permitimos invocación libre (útil para QA / dev).
+ * Si seteás CRON_SECRET en env vars, validamos `Authorization: Bearer`.
+ * Si no, permitimos invocación libre (útil para QA / dev / uptime monitor
+ * público).
  */
 export default async function handler(
   req: NextApiRequest,
@@ -29,15 +28,6 @@ export default async function handler(
 
   try {
     const result = await runHealthCheck();
-    await betterStack.info('heartbeat', {
-      funnel_step: 'heartbeat',
-      healthy: result.healthy,
-      memory: result.metrics?.memory,
-      cpu: result.metrics?.cpu,
-      vercel_region: process.env.VERCEL_REGION || null,
-      vercel_env: process.env.VERCEL_ENV || null,
-      timestamp: new Date().toISOString(),
-    });
     return res.status(200).json({ ok: true, ...result });
   } catch (error: any) {
     await betterStack.error('heartbeat_error', {

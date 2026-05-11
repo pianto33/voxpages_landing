@@ -31,9 +31,17 @@ export function middleware(request: NextRequest) {
   // el browser saldría del path /str-lv12* y la Lambda dejaría de rutearlo
   // a este origin. Por eso usamos REWRITE (sirve /us/... sin cambiar la URL
   // pública), no redirect.
+  //
+  // Cache-Control: private, no-store evita que la Vercel Edge cachee la
+  // respuesta del path original (/str-lv12). Sin esto, la primera request
+  // queda fija en la edge y todas las siguientes saltean el middleware,
+  // dejando router.query.countryCode = "str-lv12" en lugar de "us" (que
+  // hace que el cliente caiga al PRICE_ID.DEFAULT en EUR en vez del US).
   if (isUsCampaignPath(pathname)) {
     newUrl.pathname = `/us${pathname}`;
-    return NextResponse.rewrite(newUrl);
+    const res = NextResponse.rewrite(newUrl);
+    res.headers.set("Cache-Control", "private, no-store");
+    return res;
   }
 
   // Resto: redirect 307 al locale por default (comportamiento histórico).

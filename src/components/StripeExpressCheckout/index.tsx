@@ -503,7 +503,13 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     // billingAddressRequired solo lo necesitamos para sales tax USA.
     // Para EU/UK/resto del mundo lo dejamos en false: el wallet sheet de
     // Apple/Google Pay queda como antes (menor fricción, menos abandonos).
-    const isUsUser = router.query.countryCode?.toString().toLowerCase() === "us";
+    //
+    // Importante: NO miramos el locale (router.query.countryCode). El locale
+    // determina el idioma del HTML, no el país de cobro. El driver real es
+    // la moneda — si vamos a cobrar en USD (?pr=us, vía useStripeData), el
+    // usuario es US y necesitamos billing address para sales tax. Si cobramos
+    // en EUR (ES y resto), no.
+    const isUsUser = currency?.toLowerCase() === "usd";
 
     walletOpenedAtRef.current = Date.now();
 

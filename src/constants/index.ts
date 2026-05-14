@@ -66,7 +66,7 @@ export const STRIPE_DATA: StripeDataMap = {
         currency: "usd",
     },
     DEFAULT: {
-        amount: 1999, // 19.99 EUR
-        currency: "eur",
+        amount: 1999, // 19.99 USD (matchea el priceId DEFAULT cargado en Stripe)
+        currency: "usd",
     },
 };

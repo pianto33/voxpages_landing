@@ -4,7 +4,6 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { defaultLocale } from "@/locales/config";
 import commonES from "./translations/es/common.json";
 import commonPT from "./translations/pt/common.json";
-import commonIT from "./translations/it/common.json";
 import commonPL from "./translations/pl/common.json";
 import commonHU from "./translations/hu/common.json";
 import commonCZ from "./translations/cz/common.json";
@@ -27,9 +26,6 @@ i18n
       },
       pt: {
         common: commonPT,
-      },
-      it: {
-        common: commonIT,
       },
       pl: {
         common: commonPL,

@@ -9,6 +9,7 @@ import { useStripeData } from "@/hooks/useStripeData";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import Footer from "@/components/Footer";
 import { clientLogger } from "@/utils/clientLogger";
+import { readCookie } from "@/utils/cookie";
 import logoText from "../../../public/images/logo-text.png";
 
 const getTermsUrl = (countryCode: string) => `/${countryCode}/terms`;
@@ -85,6 +86,13 @@ export default function Home() {
     const formattedAmount = (amount / 100).toFixed(2);
     const snapRef = useRef<HTMLDivElement>(null);
 
+    // El link a /terms tiene que respetar la misma fuente de verdad que precio/idioma:
+    // cookie `_sv_c` del Lambda@Edge > countryCode del path > "es" como fallback.
+    const resolvedCountry =
+        readCookie("_sv_c")?.toLowerCase() ||
+        router.query.countryCode?.toString() ||
+        "es";
+
     useEffect(() => {
         if (router.isReady) {
             const countryCode =
@@ -157,7 +165,7 @@ export default function Home() {
                     />
                     <p className={styles.trialInfo} dangerouslySetInnerHTML={{ __html: trialText }} />
                     <Link
-                        href={getTermsUrl(router.query.countryCode?.toString() || "es")}
+                        href={getTermsUrl(resolvedCountry)}
                         target="_blank"
                         className={styles.termsLink}
                     >
@@ -203,7 +211,7 @@ export default function Home() {
                     </Button>
                     <p className={styles.trialInfo} dangerouslySetInnerHTML={{ __html: trialText }} />
                     <Link
-                        href={getTermsUrl(router.query.countryCode?.toString() || "es")}
+                        href={getTermsUrl(resolvedCountry)}
                         target="_blank"
                         className={styles.termsLink}
                     >

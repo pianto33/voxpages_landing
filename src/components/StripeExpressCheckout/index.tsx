@@ -125,6 +125,11 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   // ver el sheet de pago (rechazo consciente).
   const walletOpenedAtRef = useRef<number | null>(null);
 
+  // Guardamos qué wallet específico (apple_pay / google_pay / link / ...) abrió
+  // el usuario al clickear. Stripe sólo nos lo dice en el onClick; lo persistimos
+  // acá para poder loguearlo también en onCancel/onConfirm y diagnosticar abandonos.
+  const walletTypeRef = useRef<string | null>(null);
+
   // Igual que sr_landing-voxpages
   const isProduction =
     process.env.NODE_ENV === "production" &&
@@ -292,6 +297,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           amount,
           currency,
           countryCode: router.query.countryCode,
+          wallet: walletTypeRef.current,
           billing_country: billingCountry,
           billing_postal: billingPostal,
         });
@@ -396,6 +402,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           amount,
           currency,
           countryCode: router.query.countryCode,
+          wallet: walletTypeRef.current,
           billing_country: billingCountry,
           billing_postal: billingPostal,
           hasClientSecret: !!data.clientSecret,
@@ -499,7 +506,15 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     }
   };
 
-  const onClick = ({ resolve }: StripeExpressCheckoutElementClickEvent) => {
+  const onClick = (event: StripeExpressCheckoutElementClickEvent) => {
+    const { resolve } = event;
+    // expressPaymentType viene tipado en la Element pero acá lo extraemos via cast
+    // para esquivar mismatches de versiones del SDK; el valor real es
+    // 'apple_pay' | 'google_pay' | 'link' | 'amazon_pay' | 'paypal'.
+    const expressPaymentType =
+      ((event as unknown) as { expressPaymentType?: string }).expressPaymentType || null;
+    walletTypeRef.current = expressPaymentType;
+
     // billingAddressRequired solo lo necesitamos para sales tax USA.
     // Para EU/UK/resto del mundo lo dejamos en false: el wallet sheet de
     // Apple/Google Pay queda como antes (menor fricción, menos abandonos).
@@ -519,6 +534,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       host: typeof window !== "undefined" ? window.location.host : null,
       isUsUser,
       billingAddressRequired: isUsUser,
+      wallet: expressPaymentType,
     });
     console.log("[StripeExpressCheckout] Wallet clickeado (Express Checkout)");
     sendEvent(GTM_EVENTS.STRIPE_CLICK);
@@ -529,7 +545,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         priceId,
         amount,
         currency,
-        wallet: 'apple_or_google_pay',
+        wallet: expressPaymentType,
         countryCode: router.query.countryCode,
         billing_address_required: isUsUser,
       });
@@ -537,6 +553,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       clientLogger.click('Google Pay / Apple Pay abriendo', {
         context: 'StripeExpressCheckout - onClick disparado',
         priceId,
+        wallet: expressPaymentType,
         isProduction,
         isQA,
         countryCode: router.query.countryCode,
@@ -600,6 +617,8 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       clientLogger.funnel('checkout_ready', {
         priceId,
         countryCode: router.query.countryCode,
+        currency,
+        billing_address_required: currency?.toLowerCase() === "usd",
         load_time_ms: loadTimeMs,
         apple_pay_available: wallets.applePay,
         google_pay_available: wallets.googlePay,
@@ -637,6 +656,8 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     const openedAt = walletOpenedAtRef.current;
     const walletOpenMs = openedAt ? Date.now() - openedAt : null;
     walletOpenedAtRef.current = null;
+    const wallet = walletTypeRef.current;
+    walletTypeRef.current = null;
 
     const cancelKind =
       walletOpenMs == null
@@ -652,6 +673,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       amount,
       currency,
       countryCode: router.query.countryCode,
+      wallet,
       wallet_open_ms: walletOpenMs,
       cancel_kind: cancelKind,
     });
@@ -659,6 +681,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     clientLogger.paymentFailed('wallet_cancelled', {
       priceId,
       countryCode: router.query.countryCode,
+      wallet,
       wallet_open_ms: walletOpenMs,
       cancel_kind: cancelKind,
     });

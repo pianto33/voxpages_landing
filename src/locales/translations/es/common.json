@@ -55,31 +55,10 @@
   "": "Necesitarás iniciar sesión manualmente en la plataforma.",
   "loading": "Cargando...",
   "footer": {
-    "company": "summaryvox Team",
-    "terms_and_conditions": "Términos y condiciones"
-  },
-  "terms": {
-    "title": "Términos y Condiciones Generales",
-    "section1_title": "1. Aceptación de los Términos",
-    "section1_text": "Al acceder, navegar o utilizar la plataforma SummaryVox (en adelante, \"el Servicio\" o \"la Plataforma\"), el usuario acepta someterse a los presentes Términos y Condiciones Generales de Uso, así como a toda normativa legal aplicable. La utilización del Servicio le atribuye la condición de usuario e implica la aceptación plena y sin reservas de todas y cada una de las disposiciones incluidas en este documento. Si el usuario no estuviere de acuerdo con cualquiera de las condiciones aquí establecidas, deberá abstenerse de utilizar la Plataforma.",
-    "section2_title": "2. Naturaleza del Servicio",
-    "section2_text": "SummaryVox provee acceso a una biblioteca digital de resúmenes de obras literarias, disponibles en formato de audio y documento de texto portátil (PDF). Dicho contenido es objeto de curaduría y selección exclusiva por parte de nuestro equipo editorial. Nos reservamos el derecho de modificar, actualizar, suspender o discontinuar cualquier aspecto del Servicio, incluyendo la disponibilidad de determinadas obras, en cualquier momento y sin previo aviso.",
-    "section3_title": "3. Planes de Uso y Limitaciones",
-    "section3_intro": "El acceso a la Plataforma se rige bajo dos modalidades de suscripción principales:",
-    "section3_basic": "Suscripción Gratuita (Básica): Concede al usuario un acceso restringido al catálogo de contenidos, limitando las capacidades de reproducción, descarga y funciones extendidas de la plataforma.",
-    "section3_premium": "Suscripción Premium: Concede al usuario acceso irrestricto al catálogo completo de resúmenes en formatos de audio y PDF, habilitando adicionalmente las funciones de reproducción avanzada y descarga para consumo sin conexión (offline).",
-    "section4_title": "4. Política de Contratación, Período de Gracia y Cancelación",
-    "section4_intro": "Al contratar el Plan Premium, el usuario queda sujeto a las siguientes directrices contractuales y comerciales:",
-    "section4_trial": "Período de Prueba Exento de Cargos: Se otorga un plazo de gracia de veinticuatro (24) horas contadas a partir del registro inicial en el Plan Premium. Durante este lapso, no se efectuará liquidación ni débito alguno sobre el medio de pago registrado por el usuario.",
-    "section4_cancel": "Derecho de Revocación y Cancelación Temprana: El usuario se encuentra facultado para cancelar su suscripción, de forma unilateral y sin penalidad, en cualquier momento dentro de las primeras veinticuatro (24) horas de prueba.",
-    "section4_renewal": "Renovación Tácita y Automática: Expirado el plazo de veinticuatro (24) horas sin que medie solicitud de cancelación por parte del usuario, se perfeccionará el alta de la suscripción, dando inicio inmediato al primer ciclo de facturación mensual. La suscripción se renovará de forma automática por períodos contractuales sucesivos e idénticos (mensuales).",
-    "section4_effects": "Efectos Jurídicos de la Cancelación: La solicitud de cancelación cursada con posterioridad al período de prueba surtirá efectos inmediatos sobre los futuros ciclos de facturación, deteniendo la emisión de nuevos cobros. Sin perjuicio de ello, el usuario conservará el derecho de acceso a los servicios Premium hasta la conclusión del ciclo abonado en curso, sin lugar a reintegros retroactivos o prorrateados.",
-    "section4_pricing": "Condiciones Económicas y Modificaciones: La tarifa base de la Suscripción Premium inicia en $39.99 USD mensuales. Sin embargo, podrán aplicar promociones, descuentos u ofertas excepcionales en función de la jurisdicción del usuario o del canal de contratación seleccionado. SummaryVox se reserva el deber de notificar de manera fehaciente, con al menos treinta (30) días corridos de anticipación, cualquier modificación general en la estructura de precios base o tarifas recurrentes, antes de su efectiva aplicación al método de pago registrado.",
-    "section5_title": "5. Derechos de Autor y Propiedad Intelectual",
-    "section5_text": "Todos los materiales, resúmenes, textos, audios, gráficos, logotipos, diseños y demás contenidos dispuestos en la Plataforma constituyen propiedad intelectual exclusiva de SummaryVox o de sus respectivos licenciantes, encontrándose protegidos bajo leyes nacionales e internacionales de derechos de autor y propiedad industrial. Queda terminantemente prohibida la reproducción, duplicación, reventa, distribución, explotación comercial o comunicación pública del contenido sin la correspondiente autorización previa, expresa y por escrito por parte de nuestra entidad.",
-    "section6_title": "6. Exención y Limitación de Responsabilidad",
-    "section6_text": "Los contenidos ofrecidos en SummaryVox (resúmenes) se publican con fines exclusivamente informativos y educativos. La Plataforma y sus administradores no serán civil ni comercialmente responsables ante el usuario o terceros por ningún daño directo, indirecto, incidental, consecuente, o lucro cesante que pudiera derivarse del uso, la dependencia, o la imposibilidad de uso del Servicio y sus materiales.",
-    "section7_title": "7. Jurisdicción y Contacto",
-    "section7_text": "Para el ejercicio de derechos, gestión de suscripciones, resolución de controversias o consultas relacionadas con la interpretación de estos Términos, el usuario dispone de los canales oficiales de atención, accesibles mediante la sección de \"Preguntas Frecuentes\" o comunicándose formalmente a soporte@summaryvox.com."
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "Términos y condiciones",
+    "privacy_policy": "Política de privacidad",
+    "subscription_policy": "Política de suscripción",
+    "contact": "Contacto"
   }
 }

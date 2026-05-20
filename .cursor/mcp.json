@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "stripe": {
+      "url": "https://mcp.stripe.com"
+    },
+    "betterstack": {
+      "type": "http",
+      "url": "https://mcp.betterstack.com"
+    }
+  }
+}

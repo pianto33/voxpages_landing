@@ -54,31 +54,10 @@
   "go_to_platform_manual": "Ir para o site",
   "loading": "A carregar...",
   "footer": {
-    "company": "summaryvox Team",
-    "terms_and_conditions": "Termos e condições"
-  },
-  "terms": {
-    "title": "Termos e Condições Gerais",
-    "section1_title": "1. Aceitação dos Termos",
-    "section1_text": "Ao aceder, navegar ou utilizar a plataforma SummaryVox (doravante, \"o Serviço\" ou \"a Plataforma\"), o utilizador aceita submeter-se aos presentes Termos e Condições Gerais de Utilização, bem como a toda a legislação aplicável. A utilização do Serviço confere-lhe a condição de utilizador e implica a aceitação plena e sem reservas de todas e cada uma das disposições incluídas neste documento. Caso o utilizador não concorde com qualquer das condições aqui estabelecidas, deverá abster-se de utilizar a Plataforma.",
-    "section2_title": "2. Natureza do Serviço",
-    "section2_text": "A SummaryVox disponibiliza o acesso a uma biblioteca digital de resumos de obras literárias, disponíveis em formato áudio e documento de texto portátil (PDF). Referido conteúdo é objeto de curadoria e seleção exclusiva por parte da nossa equipa editorial. Reservamo-nos o direito de modificar, atualizar, suspender ou descontinuar qualquer aspeto do Serviço, incluindo a disponibilidade de determinadas obras, em qualquer momento e sem aviso prévio.",
-    "section3_title": "3. Planos de Utilização e Limitações",
-    "section3_intro": "O acesso à Plataforma rege-se por duas modalidades de subscrição principais:",
-    "section3_basic": "Subscrição Gratuita (Básica): Concede ao utilizador um acesso restrito ao catálogo de conteúdos, limitando as capacidades de reprodução, transferência e funções alargadas da plataforma.",
-    "section3_premium": "Subscrição Premium: Concede ao utilizador acesso irrestricto ao catálogo completo de resumos em formatos áudio e PDF, habilitando adicionalmente as funções de reprodução avançada e transferência para consumo offline.",
-    "section4_title": "4. Política de Contratação, Período de Carência e Cancelamento",
-    "section4_intro": "Ao contratar o Plano Premium, o utilizador fica sujeito às seguintes diretrizes contratuais e comerciais:",
-    "section4_trial": "Período Experimental Isento de Cobranças: É concedido um prazo de carência de vinte e quatro (24) horas contadas a partir do registo inicial no Plano Premium. Durante este período, não será efetuada qualquer liquidação ou débito sobre o meio de pagamento registado pelo utilizador.",
-    "section4_cancel": "Direito de Revogação e Cancelamento Antecipado: O utilizador encontra-se habilitado a cancelar a sua subscrição, de forma unilateral e sem penalização, em qualquer momento no decurso das primeiras vinte e quatro (24) horas de experiência.",
-    "section4_renewal": "Renovação Tácita e Automática: Decorridas as vinte e quatro (24) horas sem que tenha sido apresentado pedido de cancelamento por parte do utilizador, concretizar-se-á a adesão à subscrição, dando início imediato ao primeiro ciclo de faturação mensal. A subscrição renovar-se-á automaticamente por períodos contratuais sucessivos e idênticos (mensais).",
-    "section4_effects": "Efeitos Jurídicos do Cancelamento: O pedido de cancelamento apresentado após o período experimental produzirá efeitos imediatos sobre os futuros ciclos de faturação, cessando a emissão de novas cobranças. Sem prejuízo do exposto, o utilizador conservará o direito de acesso aos serviços Premium até à conclusão do ciclo pago em curso, sem lugar a reembolsos retroativos ou proporcionais.",
-    "section4_pricing": "Condições Económicas e Alterações: A tarifa base da Subscrição Premium inicia em 39,99 USD mensais. Contudo, poderão aplicar-se promoções, descontos ou ofertas excecionais em função da jurisdição do utilizador ou do canal de contratação selecionado. A SummaryVox reserva-se o dever de notificar de forma inequívoca, com pelo menos trinta (30) dias corridos de antecedência, qualquer alteração geral à estrutura de preços base ou tarifas recorrentes, antes da sua efetiva aplicação ao método de pagamento registado.",
-    "section5_title": "5. Direitos de Autor e Propriedade Intelectual",
-    "section5_text": "Todos os materiais, resumos, textos, áudios, gráficos, logótipos, designs e demais conteúdos disponibilizados na Plataforma constituem propriedade intelectual exclusiva da SummaryVox ou dos respetivos licenciantes, encontrando-se protegidos ao abrigo das leis nacionais e internacionais de direitos de autor e propriedade industrial. Fica terminantemente proibida a reprodução, duplicação, revenda, distribuição, exploração comercial ou comunicação pública do conteúdo sem a correspondente autorização prévia, expressa e escrita por parte da nossa entidade.",
-    "section6_title": "6. Isenção e Limitação de Responsabilidade",
-    "section6_text": "Os conteúdos disponibilizados na SummaryVox (resumos) são publicados com fins exclusivamente informativos e educativos. A Plataforma e os seus administradores não serão civil ou comercialmente responsáveis perante o utilizador ou terceiros por qualquer dano direto, indireto, incidental, consequencial ou lucro cessante que possa derivar da utilização, da dependência ou da impossibilidade de utilização do Serviço e dos seus materiais.",
-    "section7_title": "7. Jurisdição e Contacto",
-    "section7_text": "Para o exercício de direitos, gestão de subscrições, resolução de litígios ou questões relacionadas com a interpretação dos presentes Termos, o utilizador dispõe dos canais oficiais de apoio, acessíveis através da secção de \"Perguntas Frequentes\" ou contactando formalmente soporte@summaryvox.com."
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "Termos e condições",
+    "privacy_policy": "Política de privacidade",
+    "subscription_policy": "Política de subscrição",
+    "contact": "Contacto"
   }
 }

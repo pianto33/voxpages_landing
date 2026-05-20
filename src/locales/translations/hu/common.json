@@ -55,31 +55,10 @@
   "": "Manuálisan kell bejelentkeznie a platformon.",
   "loading": "Betöltés...",
   "footer": {
-    "company": "summaryvox Team",
-    "terms_and_conditions": "Általános szerződési feltételek"
-  },
-  "terms": {
-    "title": "Általános szerződési feltételek",
-    "section1_title": "1. A feltételek elfogadása",
-    "section1_text": "A SummaryVox platform (a továbbiakban: 'a Szolgáltatás' vagy 'a Platform') elérésével, böngészésével vagy használatával a felhasználó elfogadja, hogy ezekre az Általános Felhasználási Feltételekre, valamint az összes vonatkozó jogszabályra kötelezett. A Szolgáltatás igénybevétele felhasználói minőséget biztosít, és a jelen dokumentumban foglalt valamennyi rendelkezés teljes körű, feltétel nélküli elfogadását jelenti. Amennyiben a felhasználó nem ért egyet a jelen feltételek bármelyikével, tartózkodjon a Platform használatától.",
-    "section2_title": "2. A Szolgáltatás jellege",
-    "section2_text": "A SummaryVox hozzáférést biztosít irodalmi művek összefoglalóinak digitális könyvtárához, hang- és hordozható szöveges dokumentum (PDF) formátumban. E tartalom kizárólag szerkesztőségünk gondozásából és válogatásából származik. Fenntartjuk a jogot, hogy a Szolgáltatás bármely elemét – beleértve bizonyos művek elérhetőségét is – bármikor, előzetes értesítés nélkül módosítsuk, frissítsük, felfüggesszük vagy megszüntessük.",
-    "section3_title": "3. Használati csomagok és korlátozások",
-    "section3_intro": "A Platform elérése két fő előfizetési mód szerint szabályozott:",
-    "section3_basic": "Ingyenes (Alap) előfizetés: Korlátozott hozzáférést biztosít a tartalomkatalógushoz, korlátozva a lejátszás, letöltés és a platform bővített funkcióinak használatát.",
-    "section3_premium": "Prémium előfizetés: Korlátlan hozzáférést biztosít a teljes összefoglaló-katalógushoz hang- és PDF-formátumban, továbbá engedélyezi a fejlett lejátszást és az offline fogyasztáshoz szükséges letöltést.",
-    "section4_title": "4. Szerződéskötés, türelmi idő és lemondás",
-    "section4_intro": "A Prémium csomag megrendelésekor a felhasználó az alábbi szerződéses és kereskedelmi irányelvek hatálya alá tartozik:",
-    "section4_trial": "Díjmentes próbaidőszak: A Prémium csomagra történő első regisztrációtól számított huszonnégy (24) órás türelmi idő illeti meg a felhasználót. E időszak alatt a regisztrált fizetési eszköz terhére sem elszámolás, sem terhelés nem történik.",
-    "section4_cancel": "Felmondás és korai lemondás joga: A felhasználó jogosult előfizetését egyoldalúan, büntetés nélkül, a próba első huszonnégy (24) órájában bármikor lemondani.",
-    "section4_renewal": "Hallgatólagos és automatikus megújítás: Ha a huszonnégy (24) óra elteltével a felhasználó nem kér lemondást, az előfizetés létrejön, és azonnal megkezdődik az első havi számlázási ciklus. Az előfizetés automatikusan megújul egymást követő, azonos (havi) szerződéses időszakokra.",
-    "section4_effects": "A lemondás joghatásai: A próbaidőszak után benyújtott lemondás a jövőbeli számlázási ciklusokra azonnal hatályos, és leállítja az új terhelések indítását. Ez nem érinti a felhasználó jogát a Prémium szolgáltatásokhoz való hozzáférésre a folyamatban lévő, már kifizetett ciklus végéig; visszatérítés vagy arányosítás nem illeti meg.",
-    "section4_pricing": "Gazdasági feltételek és módosítások: A Prémium előfizetés alapdíja havi 39,99 USD-tól indul. A felhasználó joghatósága vagy a választott szerződéskötési csatorna alapján azonban promóciók, kedvezmények vagy kivételes ajánlatok alkalmazhatók. A SummaryVox köteles egyértelműen, legalább harminc (30) naptári nappal korábban értesíteni a regisztrált fizetési módra vonatkozó alapdíj- vagy ismétlődő díjszerkezet bármely általános módosításáról, még az alkalmazás előtt.",
-    "section5_title": "5. Szerzői jogok és szellemi tulajdon",
-    "section5_text": "A Platformon elérhető valamennyi anyag, összefoglaló, szöveg, hang, grafika, logó, dizájn és egyéb tartalom a SummaryVox vagy licencadóinak kizárólagos szellemi tulajdonát képezi, és nemzeti és nemzetközi szerzői jogi és iparjogvédelmi törvények oltalmazzák. A tartalom engedély nélküli sokszorosítása, másolása, viszonteladása, terjesztése, kereskedelmi kihasználása vagy nyilvánosságra hozatala szigorúan tilos, kivéve, ha szervezetünk előzetes, kifejezett, írásbeli engedélye megvan.",
-    "section6_title": "6. Felelősség kizárása és korlátozása",
-    "section6_text": "A SummaryVoxon közzétett tartalmak (összefoglalók) kizárólag tájékoztató és oktatási célt szolgálnak. A Platform és üzemeltetői nem vállalnak polgári vagy kereskedelmi felelősséget a felhasználóval vagy harmadik személyekkel szemben semmilyen közvetlen, közvetett, járulékos, következményes kárért vagy elmaradt haszonért, amely a Szolgáltatás és anyagai használatából, azoktól való függésből vagy a használat lehetetlenségéből eredhet.",
-    "section7_title": "7. Illetékes bíróság és elérhetőség",
-    "section7_text": "Jogok gyakorlásához, előfizetések kezeléséhez, viták rendezéséhez vagy a jelen Feltételek értelmezésével kapcsolatos kérdésekhez a felhasználó a hivatalos ügyfélszolgálati csatornákat veheti igénybe, a 'Gyakori kérdések' szakaszon keresztül, vagy írásban a soporte@summaryvox.com címen."
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "Általános szerződési feltételek",
+    "privacy_policy": "Adatvédelmi szabályzat",
+    "subscription_policy": "Előfizetési szabályzat",
+    "contact": "Kapcsolat"
   }
 }

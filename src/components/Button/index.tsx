@@ -5,7 +5,7 @@ interface Props
   extends React.ButtonHTMLAttributes<HTMLButtonElement | LinkProps> {
   children: React.ReactNode;
   href?: string;
-  variant?: "contained" | "whatsapp" | "primary";
+  variant?: "contained" | "primary";
   animate?: boolean;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;

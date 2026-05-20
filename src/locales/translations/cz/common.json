@@ -54,31 +54,10 @@
   "go_to_platform_manual": "Jít na stránku",
   "loading": "Načítání...",
   "footer": {
-    "company": "summaryvox Team",
-    "terms_and_conditions": "Obchodní podmínky"
-  },
-  "terms": {
-    "title": "Obecné obchodní podmínky",
-    "section1_title": "1. Přijetí podmínek",
-    "section1_text": "Přístupem k platformě SummaryVox (dále jen 'Služba' nebo 'Platforma'), jejím prohlížením nebo používáním uživatel souhlasí, že se bude řídit těmito Obecnými podmínkami užívání a veškerou platnou právní úpravou. Využíváním Služby nabývá uživatel statusu uživatele a plně a bez výhrad přijímá všechna ustanovení obsažená v tomto dokumentu. Pokud uživatel s jakoukoli zde uvedenou podmínkou nesouhlasí, neměl by Platformu používat.",
-    "section2_title": "2. Povaha Služby",
-    "section2_text": "SummaryVox poskytuje přístup k digitální knihovně shrnutí literárních děl dostupných ve formátu zvuku a přenosného textového dokumentu (PDF). Tento obsah je výhradně kurátorsky vybírán a selektován naším redakčním týmem. Vyhrazujeme si právo kdykoli a bez předchozího upozornění měnit, aktualizovat, pozastavit nebo ukončit jakýkoli aspekt Služby včetně dostupnosti určitých děl.",
-    "section3_title": "3. Tarify a omezení",
-    "section3_intro": "Přístup k Platformě se řídí dvěma hlavními typy předplatného:",
-    "section3_basic": "Bezplatné (základní) předplatné: Poskytuje uživateli omezený přístup ke katalogu obsahu s omezením možností přehrávání, stahování a rozšířených funkcí platformy.",
-    "section3_premium": "Prémiové předplatné: Poskytuje uživateli neomezený přístup k celému katalogu shrnutí ve formátech zvuku a PDF a navíc umožňuje pokročilé přehrávání a stahování pro offline použití.",
-    "section4_title": "4. Smluvní politika, lhůta a zrušení",
-    "section4_intro": "Objednáním Prémiového tarifu se uživatel řídí následujícími smluvními a obchodními pravidly:",
-    "section4_trial": "Zkušební období bez poplatků: Od počáteční registrace k Prémiovému tarifu náleží lhůta dvacet čtyři (24) hodin. Po tuto dobu nebude na registrovaný platební prostředek účtován žádný poplatek ani platba.",
-    "section4_cancel": "Právo odstoupit a zrušit včas: Uživatel může předplatné jednostranně a bez sankce kdykoli zrušit v průběhu prvních dvaceti čtyř (24) hodin zkušebního období.",
-    "section4_renewal": "Tichá a automatická obnova: Po uplynutí dvaceti čtyř (24) hodin bez žádosti o zrušení ze strany uživatele vznikne předplatné a okamžitě začne první měsíční fakturační cyklus. Předplatné se bude automaticky obnovovat na další stejné (měsíční) smluvní období.",
-    "section4_effects": "Právní účinky zrušení: Žádost o zrušení podaná po zkušebním období má okamžitý účinek vůči budoucím fakturačním cyklům a zastaví nové účtování. Uživatel si však zachovává právo na přístup k prémiovým službám do konce již uhrazeného běžícího cyklu; zpětné nebo poměrné vrácení peněz nenáleží.",
-    "section4_pricing": "Ekonomické podmínky a změny: Základní cena Prémiového předplatného začíná na 39,99 USD měsíčně. V závislosti na jurisdikci uživatele nebo zvoleném kanálu uzavření smlouvy však mohou platit akce, slevy nebo mimořádné nabídky. SummaryVox se zavazuje jednoznačně oznámit nejméně třicet (30) kalendářních dnů předem jakoukoli obecnou změnu základní cenové struktury nebo opakovaných poplatků, dříve než se uplatní na registrovanou platební metodu.",
-    "section5_title": "5. Autorská práva a duševní vlastnictví",
-    "section5_text": "Veškeré materiály, shrnutí, texty, zvuky, grafika, loga, design a další obsah na Platformě představují výhradní duševní vlastnictví společnosti SummaryVox nebo příslušných licencodavatelů a jsou chráněny národními a mezinárodními zákony o autorském právu a průmyslovém vlastnictví. Je přísně zakázáno obsah reprodukovat, duplikovat, dále prodávat, šířit, komerčně využívat nebo veřejně šířit bez předchozího výslovného písemného souhlasu naší organizace.",
-    "section6_title": "6. Vyloučení a omezení odpovědnosti",
-    "section6_text": "Obsah nabízený na SummaryVox (shrnutí) je zveřejňován výhradně pro informační a vzdělávací účely. Platforma a její správci neodpovídají uživateli ani třetím stranám občansky ani obchodně za žádnou přímou, nepřímou, vedlejší, následnou škodu ani ušlý zisk vyplývající z používání, závislosti na Službě nebo nemožnosti Službu a její materiály používat.",
-    "section7_title": "7. Příslušnost a kontakt",
-    "section7_text": "Pro uplatnění práv, správu předplatného, řešení sporů nebo dotazy k výkladu těchto Podmínek má uživatel k dispozici oficiální kontaktní kanály v sekci 'Často kladené otázky' nebo písemně na adrese soporte@summaryvox.com."
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "Obchodní podmínky",
+    "privacy_policy": "Zásady ochrany osobních údajů",
+    "subscription_policy": "Zásady předplatného",
+    "contact": "Kontakt"
   }
 }

@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
-import { GENERAL, GTM_EVENTS } from "@/constants";
+import { GTM_EVENTS, LEGAL } from "@/constants";
 import { generateAutoLoginToken, buildLoginUrl } from "@/api/summaryvox";
 import { sendEvent } from "@/utils/gtm";
 import { useStripeData } from "@/hooks/useStripeData";
@@ -113,7 +113,7 @@ function ErrorPage() {
             </h2>
 
             <Button
-              href={GENERAL.WHATSAPP_URL}
+              href={`mailto:${LEGAL.SUPPORT_EMAIL}`}
               variant="primary"
             >
               {t("contact")}

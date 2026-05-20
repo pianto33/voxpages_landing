@@ -54,31 +54,10 @@
   "go_to_platform_manual": "Go to site",
   "loading": "Loading...",
   "footer": {
-    "company": "summaryvox Team",
-    "terms_and_conditions": "Terms and conditions"
-  },
-  "terms": {
-    "title": "General Terms and Conditions",
-    "section1_title": "1. Acceptance of Terms",
-    "section1_text": "By accessing, browsing or using the SummaryVox platform (hereinafter, \"the Service\" or \"the Platform\"), the user agrees to be bound by these General Terms and Conditions of Use, as well as all applicable laws. Use of the Service grants you the status of user and implies the full and unreserved acceptance of each and every one of the provisions included in this document. If the user does not agree with any of the conditions established herein, they must refrain from using the Platform.",
-    "section2_title": "2. Nature of the Service",
-    "section2_text": "SummaryVox provides access to a digital library of summaries of literary works, available in audio and portable text document (PDF) format. This content is curated and selected exclusively by our editorial team. We reserve the right to modify, update, suspend or discontinue any aspect of the Service, including the availability of certain works, at any time and without prior notice.",
-    "section3_title": "3. Plans and Limitations",
-    "section3_intro": "Access to the Platform is governed under two main subscription modalities:",
-    "section3_basic": "Free Subscription (Basic): Grants the user restricted access to the content catalog, limiting playback, download and extended platform features.",
-    "section3_premium": "Premium Subscription: Grants the user unrestricted access to the full catalog of summaries in audio and PDF formats, additionally enabling advanced playback features and downloads for offline consumption.",
-    "section4_title": "4. Contracting Policy, Grace Period and Cancellation",
-    "section4_intro": "By contracting the Premium Plan, the user is subject to the following contractual and commercial guidelines:",
-    "section4_trial": "Free Trial Period: A grace period of twenty-four (24) hours is granted from the initial registration to the Premium Plan. During this period, no charge will be debited to the payment method registered by the user.",
-    "section4_cancel": "Right of Revocation and Early Cancellation: The user may cancel their subscription, unilaterally and without penalty, at any time within the first twenty-four (24) hours of the trial.",
-    "section4_renewal": "Tacit and Automatic Renewal: Once the twenty-four (24) hour period has expired without a cancellation request from the user, the subscription will be activated, immediately starting the first monthly billing cycle. The subscription will automatically renew for successive identical contractual periods (monthly).",
-    "section4_effects": "Legal Effects of Cancellation: A cancellation request submitted after the trial period will take effect immediately on future billing cycles, stopping the issuance of new charges. However, the user will retain access to Premium services until the end of the current paid cycle, with no retroactive or prorated refunds.",
-    "section4_pricing": "Economic Conditions and Modifications: The base rate for the Premium Subscription starts at $39.99 USD per month. However, promotions, discounts or exceptional offers may apply depending on the user's jurisdiction or the chosen contracting channel. SummaryVox reserves the duty to provide reliable notice, with at least thirty (30) calendar days in advance, of any general modification to the base price structure or recurring rates, before its effective application to the registered payment method.",
-    "section5_title": "5. Copyright and Intellectual Property",
-    "section5_text": "All materials, summaries, texts, audios, graphics, logos, designs and other contents available on the Platform are the exclusive intellectual property of SummaryVox or its respective licensors, and are protected by national and international copyright and industrial property laws. Reproduction, duplication, resale, distribution, commercial exploitation or public communication of the content without prior, express, written authorization from our entity is strictly prohibited.",
-    "section6_title": "6. Disclaimer and Limitation of Liability",
-    "section6_text": "The contents offered on SummaryVox (summaries) are published for informational and educational purposes only. The Platform and its administrators will not be civilly or commercially liable to the user or third parties for any direct, indirect, incidental, consequential damages, or loss of profits that may arise from the use of, reliance upon, or inability to use the Service and its materials.",
-    "section7_title": "7. Jurisdiction and Contact",
-    "section7_text": "For exercising rights, managing subscriptions, resolving disputes or for any inquiries related to the interpretation of these Terms, the user has access to the official support channels, accessible through the \"Frequently Asked Questions\" section or by formally contacting support@summaryvox.com."
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "Terms and conditions",
+    "privacy_policy": "Privacy policy",
+    "subscription_policy": "Subscription policy",
+    "contact": "Contact"
   }
 }

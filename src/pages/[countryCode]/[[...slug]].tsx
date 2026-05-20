@@ -10,9 +10,8 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import Footer from "@/components/Footer";
 import { clientLogger } from "@/utils/clientLogger";
 import { readCookie } from "@/utils/cookie";
+import { LEGAL } from "@/constants";
 import logoText from "../../../public/images/logo-text.png";
-
-const getTermsUrl = (countryCode: string) => `/${countryCode}/terms`;
 
 const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -86,8 +85,10 @@ export default function Home() {
     const formattedAmount = (amount / 100).toFixed(2);
     const snapRef = useRef<HTMLDivElement>(null);
 
-    // El link a /terms tiene que respetar la misma fuente de verdad que precio/idioma:
+    // El link a /terms vive en summaryvox.com (sitio principal), no en este landing.
+    // La fuente de verdad para el locale es la misma que precio/idioma:
     // cookie `_sv_c` del Lambda@Edge > countryCode del path > "es" como fallback.
+    // `LEGAL.termsUrl` se encarga del mapeo us→en hacia el sitio principal.
     const resolvedCountry =
         readCookie("_sv_c")?.toLowerCase() ||
         router.query.countryCode?.toString() ||
@@ -165,8 +166,9 @@ export default function Home() {
                     />
                     <p className={styles.trialInfo} dangerouslySetInnerHTML={{ __html: trialText }} />
                     <Link
-                        href={getTermsUrl(resolvedCountry)}
+                        href={LEGAL.termsUrl(resolvedCountry)}
                         target="_blank"
+                        rel="noopener noreferrer"
                         className={styles.termsLink}
                     >
                         {t("footer.terms_and_conditions")}
@@ -211,8 +213,9 @@ export default function Home() {
                     </Button>
                     <p className={styles.trialInfo} dangerouslySetInnerHTML={{ __html: trialText }} />
                     <Link
-                        href={getTermsUrl(resolvedCountry)}
+                        href={LEGAL.termsUrl(resolvedCountry)}
                         target="_blank"
+                        rel="noopener noreferrer"
                         className={styles.termsLink}
                     >
                         {t("footer.terms_and_conditions")}

@@ -55,31 +55,10 @@
   "": "Będziesz musiał zalogować się ręcznie na platformie.",
   "loading": "Ładowanie...",
   "footer": {
-    "company": "summaryvox Team",
-    "terms_and_conditions": "Regulamin i warunki"
-  },
-  "terms": {
-    "title": "Ogólne warunki korzystania",
-    "section1_title": "1. Akceptacja warunków",
-    "section1_text": "Uzyskując dostęp, przeglądając lub korzystając z platformy SummaryVox (zwanej dalej 'Usługą' lub 'Platformą'), Użytkownik akceptuje niniejsze Ogólne Warunki Korzystania oraz wszystkie mające zastosowanie przepisy prawa. Korzystanie z Usługi nadaje status użytkownika i oznacza pełną i bezwarunkową akceptację wszystkich postanowień zawartych w niniejszym dokumencie. W przypadku braku zgody na którąkolwiek z tutaj określonych warunków, Użytkownik powinien powstrzymać się od korzystania z Platformy.",
-    "section2_title": "2. Charakter Usługi",
-    "section2_text": "SummaryVox zapewnia dostęp do cyfrowej biblioteki streszczeń utworów literackich, dostępnych w formacie audio oraz przenośnego dokumentu tekstowego (PDF). Treści te są przedmiotem wyłącznej kurateli i selekcji przez nasz zespół redakcyjny. Zastrzegamy sobie prawo do modyfikacji, aktualizacji, zawieszenia lub zaprzestania dowolnego aspektu Usługi, w tym dostępności określonych utworów, w dowolnym momencie i bez uprzedzenia.",
-    "section3_title": "3. Plany korzystania i ograniczenia",
-    "section3_intro": "Dostęp do Platformy regulowany jest na podstawie dwóch głównych modeli subskrypcji:",
-    "section3_basic": "Subskrypcja bezpłatna (podstawowa): Zapewnia ograniczony dostęp do katalogu treści, ograniczając możliwości odtwarzania, pobierania i rozszerzonych funkcji platformy.",
-    "section3_premium": "Subskrypcja Premium: Zapewnia nieograniczony dostęp do pełnego katalogu streszczeń w formatach audio i PDF, umożliwiając ponadto zaawansowane odtwarzanie i pobieranie do użytku offline.",
-    "section4_title": "4. Zasady zawierania umowy, okres karencji i rezygnacja",
-    "section4_intro": "Wybierając Plan Premium, Użytkownik podlega następującym zasadom umownym i handlowym:",
-    "section4_trial": "Okres próbny bez obciążeń: Przysługuje okres karencji dwadzieścia cztery (24) godziny od pierwszej rejestracji w Planie Premium. W tym czasie nie nastąpi rozliczenie ani obciążenie zarejestrowanego środka płatności.",
-    "section4_cancel": "Prawo do odstąpienia i wczesnej rezygnacji: Użytkownik może jednostronnie i bez kar anulować subskrypcję w dowolnym momencie w ciągu pierwszych dwudziestu czterech (24) godzin okresu próbnego.",
-    "section4_renewal": "Domniemana i automatyczna odnowa: Po upływie dwudziestu czterech (24) godzin bez wniosku o anulowanie ze strony Użytkownika dojdzie do zawarcia subskrypcji i natychmiast rozpocznie się pierwszy miesięczny cykl rozliczeniowy. Subskrypcja będzie odnawiana automatycznie na kolejne, identyczne (miesięczne) okresy umowne.",
-    "section4_effects": "Skutki prawne rezygnacji: Wniosek o anulowanie złożony po okresie próbnym wywołuje natychmiastowy skutek wobec przyszłych cykli rozliczeniowych, wstrzymując nowe obciążenia. Nie wpływa to na prawo Użytkownika do korzystania z usług Premium do końca bieżącego opłaconego cyklu; zwroty wsteczne lub proporcjonalne nie przysługują.",
-    "section4_pricing": "Warunki ekonomiczne i zmiany: Podstawowa opłata za Subskrypcję Premium wynosi od 39,99 USD miesięcznie. Mogą jednak obowiązywać promocje, rabaty lub oferty wyjątkowe w zależności od jurysdykcji Użytkownika lub wybranego kanału zawierania umowy. SummaryVox zobowiązuje się jednoznacznie powiadomić, z co najmniej trzydziestoma (30) dniami kalendarzowymi wyprzedzenia, o każdej ogólnej zmianie struktury cen podstawowych lub opłat cyklicznych, zanim zostaną one zastosowane do zarejestrowanej metody płatności.",
-    "section5_title": "5. Prawa autorskie i własność intelektualna",
-    "section5_text": "Wszystkie materiały, streszczenia, teksty, nagrania audio, grafika, logotypy, projekty i inne treści udostępnione na Platformie stanowią wyłączną własność intelektualną SummaryVox lub odpowiednich licencjodawców i są chronione krajowymi i międzynarodowymi przepisami o prawie autorskim i własności przemysłowej. Zabronione jest pod karą prawa powielanie, duplikowanie, odsprzedaż, dystrybucja, komercyjne wykorzystanie lub udostępnianie publiczne treści bez uprzedniej, wyraźnej i pisemnej zgody naszej organizacji.",
-    "section6_title": "6. Wyłączenie i ograniczenie odpowiedzialności",
-    "section6_text": "Treści oferowane w SummaryVox (streszczenia) są publikowane wyłącznie w celach informacyjnych i edukacyjnych. Platforma i jej administratorzy nie ponoszą odpowiedzialności cywilnej ani handlowej wobec Użytkownika lub osób trzecich za jakiekolwiek szkody bezpośrednie, pośrednie, uboczne, następcze lub utracone korzyści mogące wyniknąć z korzystania, uzależnienia lub niemożności korzystania z Usługi i jej materiałów.",
-    "section7_title": "7. Właściwość sądu i kontakt",
-    "section7_text": "W celu realizacji praw, zarządzania subskrypcjami, rozstrzygania sporów lub pytań dotyczących interpretacji niniejszych Warunków Użytkownik może skorzystać z oficjalnych kanałów obsługi, dostępnych w sekcji 'Często zadawane pytania' lub kontaktując się formalnie pod adresem soporte@summaryvox.com."
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "Regulamin i warunki",
+    "privacy_policy": "Polityka prywatności",
+    "subscription_policy": "Polityka subskrypcji",
+    "contact": "Kontakt"
   }
 }

@@ -27,12 +27,6 @@
     color: var(--clr-white);
   }
 
-  &.whatsapp {
-    background: var(--clr-whatsapp);
-    border-color: var(--clr-whatsapp);
-    color: var(--clr-white);
-  }
-
   &:disabled {
     cursor: not-allowed;
     background: var(--clr-gray);

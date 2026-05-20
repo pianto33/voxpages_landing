@@ -89,7 +89,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (billing_line2) metadata.billing_line2 = billing_line2;
 
     const setupIntent = await stripe.setupIntents.create({
-      payment_method_types: ["card"],
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: "never",
+      },
       usage: "off_session",
       metadata,
     });

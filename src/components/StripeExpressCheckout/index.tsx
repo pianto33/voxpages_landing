@@ -570,7 +570,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       applePay: {
         recurringPaymentRequest: {
           paymentDescription: "Subscription",
-          managementURL: "https://summaryvox.com/subscription",
+          managementURL: "https://www.summaryvox.com/cancel",
           regularBilling: {
             amount: 0,
             label: "Free trial",

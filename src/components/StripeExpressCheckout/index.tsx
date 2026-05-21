@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { NextRouter, useRouter } from "next/router";
+import { useRouter } from "next/router";
 import {
   ExpressCheckoutElement,
   useElements,
@@ -10,8 +10,9 @@ import {
   StripeExpressCheckoutElementConfirmEvent,
 } from "@stripe/stripe-js";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { usePriceId } from "@/hooks/useStripeData";
 import { sendEvent } from "@/utils/gtm";
-import { GTM_EVENTS, PRICE_ID } from "@/constants";
+import { GTM_EVENTS } from "@/constants";
 import { fetchIPData } from "@/services/trackingService";
 import { logger } from "@/utils/logger";
 import { clientLogger } from "@/utils/clientLogger";
@@ -73,24 +74,6 @@ function checkoutConsole(label: string, payload: Record<string, unknown>) {
   console.info(`[SummaryVox][Checkout] ${label}`, payload);
 }
 
-const getPriceId = (router: NextRouter) => {
-  // Primero verificar si hay un query param ?pr=test
-  const priceParam = router.query.pr?.toString().toUpperCase();
-  if (priceParam && PRICE_ID[priceParam]) {
-    return PRICE_ID[priceParam];
-  }
-
-  const countryCode =
-    router.query.countryCode?.toString().toUpperCase() || "DEFAULT";
-
-  // Manejar rutas especiales como /pt-meo
-  if (router.asPath === "/pt-meo" || router.asPath.includes("/pt-meo")) {
-    return PRICE_ID.PT_MEO;
-  }
-
-  return PRICE_ID[countryCode] || PRICE_ID.DEFAULT;
-};
-
 function StripeExpressCheckout({ label, animateButton, amount, currency }: Props) {
   const { t } = useAppTranslation();
   const router = useRouter();
@@ -118,7 +101,11 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     readyTime: null,
     renderTime: Date.now(),
   });
-  const priceId = getPriceId(router);
+  // priceId resuelto con la misma lógica de cookie/?pr/countryCode que usa el
+  // resto de la landing — antes había una función local que ignoraba la cookie
+  // y eso causaba mismatches (UI mostraba US $39.99 pero el SetupIntent iba al
+  // priceId DEFAULT de USD 19.99).
+  const priceId = usePriceId();
 
   // Para medir tiempo entre "wallet abierto" y "wallet cancelado/confirmado".
   // Útil para distinguir cancels rápidos (UX rota) de cancels después de
@@ -563,19 +550,32 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       });
     }
 
+    // Apple Pay valida estrictamente el recurringPaymentRequest:
+    //  - regularBilling.amount tiene que ser el monto del cobro recurrente
+    //    (NO 0). Ponerlo en 0 hace que Apple Pay rechace silenciosamente la
+    //    sesión y el sheet quede vacío → user mira 5-10s y cancela.
+    //  - El período gratuito va en trialBilling, no en regularBilling.
+    //  - billingAgreement aparece como texto legal en el sheet.
+    const amountStr = (amount / 100).toFixed(2);
+    const currencyUpper = currency.toUpperCase();
     resolve({
       emailRequired: true,
       phoneNumberRequired: false,
       billingAddressRequired: isUsUser,
       applePay: {
         recurringPaymentRequest: {
-          paymentDescription: "Subscription",
+          paymentDescription: "SummaryVox monthly subscription",
           managementURL: "https://www.summaryvox.com/cancel",
+          billingAgreement: `After your free trial you will be charged ${amountStr} ${currencyUpper} per month. Cancel anytime at summaryvox.com/cancel.`,
           regularBilling: {
-            amount: 0,
-            label: "Free trial",
+            amount,
+            label: "Monthly subscription",
             recurringPaymentIntervalUnit: "month",
             recurringPaymentIntervalCount: 1,
+          },
+          trialBilling: {
+            amount: 0,
+            label: "Free trial",
           },
         },
       },
@@ -822,8 +822,8 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         nodeEnv: process.env.NODE_ENV,
         checkoutDebugEnabled: checkoutDebug,
         paymentMethodsConfig: {
-          applePay: isProduction ? "always" : "never",
-          googlePay: isProduction ? "always" : "never",
+          applePay: isProduction ? "auto" : "never",
+          googlePay: isProduction ? "auto" : "never",
           link: isProduction ? "never" : "auto",
         },
       });
@@ -879,8 +879,14 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
               onLoadError={onLoadError}
               options={{
                 paymentMethods: {
-                  applePay: isProduction ? "always" : "never",
-                  googlePay: isProduction ? "always" : "never",
+                  // "auto": Stripe sólo muestra el wallet si verificó que va a poder
+                  // completar el pago (tarjeta cargada, dominio registrado, merchant
+                  // capability OK). Con "always" mostrábamos el botón aunque después
+                  // fallara silenciosamente → el user veía sheet vacío y cancelaba.
+                  // Igual seguimos sabiendo qué se ofreció vía apple_pay_available
+                  // /google_pay_available en el log checkout_ready.
+                  applePay: isProduction ? "auto" : "never",
+                  googlePay: isProduction ? "auto" : "never",
                   link: isProduction ? "never" : "auto",
                   amazonPay: "never",
                   paypal: "never",

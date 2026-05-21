@@ -550,12 +550,21 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       });
     }
 
-    // Apple Pay valida estrictamente el recurringPaymentRequest:
-    //  - regularBilling.amount tiene que ser el monto del cobro recurrente
-    //    (NO 0). Ponerlo en 0 hace que Apple Pay rechace silenciosamente la
-    //    sesión y el sheet quede vacío → user mira 5-10s y cancela.
-    //  - El período gratuito va en trialBilling, no en regularBilling.
-    //  - billingAgreement aparece como texto legal en el sheet.
+    // Apple Pay recurringPaymentRequest:
+    //  - trialBilling: ventana de trial (1 día, alineado con
+    //    trial_period_days=1 que usamos al crear la subscription en
+    //    /api/create-subscription). Declararlo permite que la red de tarjetas
+    //    pre-autorice el método sabiendo el monto recurrente, reduciendo
+    //    failures en el cobro del día siguiente.
+    //  - regularBilling: cobro recurrente real, empieza al terminar el trial.
+    //  - billingAgreement: texto legal mostrado en el sheet.
+    //  - Apple valida ESTRICTO: trialBilling requiere amount + label +
+    //    recurringPaymentIntervalUnit + recurringPaymentIntervalCount. Si
+    //    falta alguno, el resolve() rompe y NINGÚN wallet abre (ni Apple ni
+    //    Google). Vimos esto en producción 2026-05-21.
+    const TRIAL_DAYS = 1;
+    const trialStart = new Date();
+    const trialEnd = new Date(trialStart.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
     const amountStr = (amount / 100).toFixed(2);
     const currencyUpper = currency.toUpperCase();
     resolve({
@@ -566,16 +575,21 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         recurringPaymentRequest: {
           paymentDescription: "SummaryVox monthly subscription",
           managementURL: "https://www.summaryvox.com/cancel",
-          billingAgreement: `After your free trial you will be charged ${amountStr} ${currencyUpper} per month. Cancel anytime at summaryvox.com/cancel.`,
+          billingAgreement: `Free 1-day trial, then ${amountStr} ${currencyUpper}/month. Cancel anytime at summaryvox.com/cancel.`,
           regularBilling: {
             amount,
             label: "Monthly subscription",
             recurringPaymentIntervalUnit: "month",
             recurringPaymentIntervalCount: 1,
+            recurringPaymentStartDate: trialEnd,
           },
           trialBilling: {
             amount: 0,
             label: "Free trial",
+            recurringPaymentIntervalUnit: "day",
+            recurringPaymentIntervalCount: TRIAL_DAYS,
+            recurringPaymentStartDate: trialStart,
+            recurringPaymentEndDate: trialEnd,
           },
         },
       },

@@ -40,3 +40,7 @@ next-env.d.ts
 *.log
 .well-known/*
 send-conversion-manually.html
+
+# Cursor: contiene tokens de MCP (BetterStack, etc.), no commitear.
+# Usar .cursor/mcp.json.example como plantilla.
+.cursor/mcp.json

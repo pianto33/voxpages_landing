@@ -823,7 +823,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         checkoutDebugEnabled: checkoutDebug,
         paymentMethodsConfig: {
           applePay: isProduction ? "auto" : "never",
-          googlePay: isProduction ? "auto" : "never",
+          googlePay: isProduction ? "always" : "never",
           link: isProduction ? "never" : "auto",
         },
       });
@@ -879,14 +879,19 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
               onLoadError={onLoadError}
               options={{
                 paymentMethods: {
-                  // "auto": Stripe sólo muestra el wallet si verificó que va a poder
-                  // completar el pago (tarjeta cargada, dominio registrado, merchant
-                  // capability OK). Con "always" mostrábamos el botón aunque después
-                  // fallara silenciosamente → el user veía sheet vacío y cancelaba.
-                  // Igual seguimos sabiendo qué se ofreció vía apple_pay_available
-                  // /google_pay_available en el log checkout_ready.
+                  // Apple Pay "auto": Stripe sólo muestra el botón si verificó
+                  // que va a poder completar el pago. Con "always" mostrábamos
+                  // el botón aunque después fallara silenciosamente (el user
+                  // veía sheet vacío y cancelaba — 100% cancel rate en 12h).
+                  //
+                  // Google Pay "always": tiene mucho mejor coverage en todos
+                  // los browsers (Chrome/Firefox/Brave) y rara vez falla al
+                  // abrir. Lo mantenemos forzado para que el botón siempre
+                  // exista y el user pueda pagar incluso si Apple Pay queda
+                  // oculto. (Próximo paso: fallback a CardPaymentForm cuando
+                  // ambos vengan false.)
                   applePay: isProduction ? "auto" : "never",
-                  googlePay: isProduction ? "auto" : "never",
+                  googlePay: isProduction ? "always" : "never",
                   link: isProduction ? "never" : "auto",
                   amazonPay: "never",
                   paypal: "never",

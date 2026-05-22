@@ -55,6 +55,7 @@ export const PRICE_ID: Record<string, string> = {
     PL: "price_1Sz2R2IiQJtaidhOeJn7ObxV",
     HU: "price_1Sz2RTIiQJtaidhOx0ACsVYK",
     CZ: "price_1T05MtIiQJtaidhOA6FWLCOA",
+    CA: "price_1TZxHpIiQJtaidhO9AcDCeOe",
     US: "price_1TTpEdIiQJtaidhOGImimPye",
     TEST: "price_1St9gPIiQJtaidhOwIQPuQkA",
     DEFAULT: "price_1St8jpIiQJtaidhOGVFFc7dt",
@@ -70,6 +71,10 @@ export const STRIPE_DATA: StripeDataMap = {
     ES: {
         amount: 1999, // 19.99 EUR
         currency: "eur",
+    },
+    CA: {
+        amount: 2800, // 28.00 CAD
+        currency: "cad",
     },
     PT: {
         amount: 1999, // 19.99 EUR

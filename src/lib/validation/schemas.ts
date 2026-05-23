@@ -125,7 +125,7 @@ export const utmParamSchema = z
 /**
  * Locales soportados
  */
-export const localeSchema = z.enum(['es', 'pt', 'pl', 'hu', 'cz', 'us']);
+export const localeSchema = z.enum(['es', 'pt', 'pl', 'hu', 'cz', 'us', 'ca']);
 
 // ============================================================================
 // Schemas por Endpoint

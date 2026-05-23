@@ -10,6 +10,7 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import Footer from "@/components/Footer";
 import { clientLogger } from "@/utils/clientLogger";
 import { readCookie } from "@/utils/cookie";
+import { detectLocaleMismatch } from "@/utils/locale";
 import { LEGAL } from "@/constants";
 import logoText from "../../../public/images/logo-text.png";
 
@@ -79,34 +80,43 @@ const BoltIcon = () => (
 
 export default function Home() {
     const router = useRouter();
-    const { t } = useAppTranslation();
+    const { t, lng } = useAppTranslation();
     const { amount, currency } = useStripeData();
     const benefits = t("benefits_list", { returnObjects: true }) as string[];
     const formattedAmount = (amount / 100).toFixed(2);
     const snapRef = useRef<HTMLDivElement>(null);
 
-    // El link a /terms vive en summaryvox.com (sitio principal), no en este landing.
-    // La fuente de verdad para el locale es la misma que precio/idioma:
-    // cookie `_sv_c` del Lambda@Edge > countryCode del path > "es" como fallback.
-    // `LEGAL.termsUrl` se encarga del mapeo us→en hacia el sitio principal.
-    const resolvedCountry =
-        readCookie("_sv_c")?.toLowerCase() ||
-        router.query.countryCode?.toString() ||
-        "es";
+    // Locale resuelto (cookie `_sv_c` > path > default). LEGAL mapea us/ca → en.
+    const resolvedCountry = lng;
 
     useEffect(() => {
-        if (router.isReady) {
-            const countryCode =
-                router.query.countryCode?.toString() || "unknown";
-            clientLogger.visit("Landing Page", {
-                countryCode,
-                path: router.asPath,
-                locale: router.locale,
-                amount,
-                currency,
+        if (!router.isReady) return;
+
+        const countryCode = router.query.countryCode?.toString() || "unknown";
+        const cookieCountry = readCookie("_sv_c");
+
+        clientLogger.visit("Landing Page", {
+            countryCode,
+            path: router.asPath,
+            locale: lng,
+            cookie_country: cookieCountry,
+            amount,
+            currency,
+        });
+
+        const mismatch = detectLocaleMismatch({
+            cookieCountry,
+            pathCountry: router.query.countryCode?.toString(),
+            lng,
+            currency,
+        });
+        if (mismatch) {
+            clientLogger.warn("locale_price_mismatch", {
+                context: "Landing - locale/price alignment",
+                ...mismatch,
             });
         }
-    }, [router.isReady, router.query.countryCode, router.asPath, router.locale, amount, currency]);
+    }, [router.isReady, router.query.countryCode, router.asPath, lng, amount, currency]);
 
     const scrollToInfo = () => {
         const container = snapRef.current;

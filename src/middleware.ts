@@ -1,19 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { defaultLocale, locales } from "@/locales/config";
+import { isUsCampaignPath } from "@/utils/locale";
 
-// Paths de campañas que llegan SIN locale prefix y deben mapearse a 'us'.
-// Estos paths los enruta el Lambda@Edge desde mid.theauravibe.com cuando
-// el visitante es de USA (por ejemplo: '/str-lv12*'). Otros orígenes
-// (todosgamers para ES/CZ/PL/HU) ya envían el locale en la URL, así que
-// caen en la rama "ya tiene locale" y no pasan por este matcher.
-const US_PATH_PREFIXES = ["/str-lv12"];
-
-function isUsCampaignPath(pathname: string): boolean {
-  return US_PATH_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
-}
+// Paths de campañas US que llegan SIN locale prefix (mid.theauravibe.com).
+// Se reescriben a /us/... para que path y locale coincidan con USD.
+// Otros orígenes (todosgamers ES/CZ/PL/HU) ya traen /es/, /cz/, etc.
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

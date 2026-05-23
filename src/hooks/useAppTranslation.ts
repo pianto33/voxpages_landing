@@ -1,7 +1,8 @@
 import { useRouter } from "next/router";
 import { useTranslation, UseTranslationOptions } from "react-i18next";
-import { defaultLocale, Locale, locales } from "@/locales/config";
+import { Locale } from "@/locales/config";
 import { readCookie } from "@/utils/cookie";
+import { resolveAppLocale } from "@/utils/locale";
 
 interface UseAppTranslationOptions<T = string>
   extends UseTranslationOptions<T> {
@@ -14,14 +15,12 @@ export function useAppTranslation(
 ) {
   const router = useRouter();
 
-  // Misma jerarquía que precio: cookie `_sv_c` (seteada por Lambda@Edge) >
-  // countryCode del path > defaultLocale. En SSR la cookie es null y se
-  // usa el fallback; el JS del cliente re-resuelve con la cookie.
-  const cookieCountry = readCookie("_sv_c")?.toLowerCase() as Locale | null;
-  const lng: Locale =
-    cookieCountry && (locales as readonly string[]).includes(cookieCountry)
-      ? cookieCountry
-      : (router.query.countryCode as Locale) || defaultLocale;
+  // Cookie `_sv_c` > path > defaultLocale. CA/US mapeados vía LOCALE_FROM_COUNTRY.
+  // En SSR la cookie es null; el cliente re-resuelve post-hidratación.
+  const lng: Locale = resolveAppLocale(
+    readCookie("_sv_c"),
+    router.query.countryCode?.toString()
+  );
 
   const translation = useTranslation(namespace, { lng, ...options });
 

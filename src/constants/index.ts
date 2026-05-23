@@ -3,6 +3,7 @@
 // sitio principal usa "en" como locale inglés. El resto coincide.
 const SITE_LOCALE_MAP: Record<string, string> = {
     us: "en",
+    ca: "en",
     es: "es",
     pt: "pt",
     pl: "pl",

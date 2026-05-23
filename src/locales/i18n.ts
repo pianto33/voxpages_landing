@@ -39,6 +39,9 @@ i18n
       us: {
         common: commonUS,
       },
+      ca: {
+        common: commonUS,
+      },
     },
     detection: {
       order: ["navigator", "htmlTag", "path", "subdomain"],

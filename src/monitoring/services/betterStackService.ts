@@ -52,7 +52,7 @@ export class BetterStackService {
         level,
         // Metadata adicional
         environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'development',
-        app: 'sr_landing-summaryvox',
+        app: 'voxpages_landing',
         ...metadata,
       };
 

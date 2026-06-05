@@ -1,11 +1,11 @@
 import { logger } from "@/utils/logger";
 
 const platformUrl =
-  process.env.NEXT_PUBLIC_PLATFORM_URL || "https://summaryvox.com";
+  process.env.NEXT_PUBLIC_PLATFORM_URL || "https://voxpages.com";
 
 /**
  * Genera un token de auto-login llamando al API route server-side.
- * La llamada real al endpoint de SummaryVox se hace desde /api/generate-token
+ * La llamada real al endpoint de VoxPages se hace desde /api/generate-token
  * para mantener el secreto JWT_LANDING_SECRET fuera del browser.
  */
 export const generateAutoLoginToken = async (
@@ -35,7 +35,7 @@ export const generateAutoLoginToken = async (
 
 /**
  * Construye la URL de redirección con el token JWT.
- * Formato: https://summaryvox.com/{locale}/login/jwt/{token}
+ * Formato: https://voxpages.com/{locale}/login/jwt/{token}
  */
 export const buildLoginUrl = (token: string, locale: string = "es"): string => {
   return `${platformUrl}/${locale}/login/jwt/${token}`;

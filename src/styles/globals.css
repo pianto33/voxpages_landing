@@ -132,28 +132,28 @@ table {
 
 /* variables */
 :root {
-  /* brand colors — from logo */
-  --clr-teal: #1B6B64;
-  --clr-teal-dark: #0F3D38;
-  --clr-teal-light: #E8F5F3;
-  --clr-orange: #F26522;
-  --clr-orange-light: #FFF0E8;
+  /* VoxPages brand colors */
+  --clr-teal: #5CAC5D;
+  --clr-teal-dark: #388E3C;
+  --clr-teal-light: #E8F5E9;
+  --clr-orange: #FFC100;
+  --clr-orange-light: #FFF9E6;
 
   /* semantic */
-  --clr-primary: #1B6B64;
-  --clr-accent: #F26522;
+  --clr-primary: #5CAC5D;
+  --clr-accent: #FFC100;
   --clr-bg: #ffffff;
-  --clr-text: #1A3C3A;
-  --clr-text-light: #5A7A77;
-  --clr-text-muted: #8FA8A5;
-  --clr-border: #D0E0DD;
+  --clr-text: #3A3A3A;
+  --clr-text-light: #666666;
+  --clr-text-muted: #8FA3B0;
+  --clr-border: #E5E7EB;
 
   /* legacy compat */
   --clr-secondary: #1A1A1A;
-  --clr-black: #03031c;
+  --clr-black: #000000;
   --clr-gray: #9CA3AF;
   --clr-white: #fff;
-  --clr-yellow: #F7C948;
+  --clr-yellow: #FFC100;
   --clr-error: #ff2424;
   /* font-size */
   --text-4xl: 2.25rem;

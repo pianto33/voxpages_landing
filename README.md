@@ -1,6 +1,6 @@
-# summaryvox - Landing de Suscripción
+# voxpages - Landing de Suscripción
 
-Landing page para suscripciones de summaryvox - Tu destino definitivo para resúmenes de libros en formato de audio.
+Landing page para suscripciones de voxpages - Tu destino definitivo para resúmenes de libros en formato de audio.
 
 ## 🚀 Stack Tecnológico
 
@@ -47,8 +47,8 @@ STRIPE_PRIVATE_KEY=sk_...
 NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_...
 
 # URLs
-NEXT_PUBLIC_PLATFORM_URL=https://summaryvox.com
-NEXT_PUBLIC_BASE_URL=https://landing.summaryvox.com
+NEXT_PUBLIC_PLATFORM_URL=https://voxpages.com
+NEXT_PUBLIC_BASE_URL=https://landing.voxpages.com
 
 # Google Tag Manager
 NEXT_PUBLIC_GTM_CODE=GTM-...
@@ -76,11 +76,11 @@ src/
 2. Completa el formulario de Stripe
 3. Redirige a `/pending` para procesar el pago
 4. Redirige a `/thanks` con auto-login
-5. Usuario es redirigido a summaryvox con sesión iniciada
+5. Usuario es redirigido a voxpages con sesión iniciada
 
 ## 📧 Sistema de Emails
 
-Usa Resend para enviar emails desde `@summaryvox.com`:
+Usa Resend para enviar emails desde `@voxpages.com`:
 - Email de bienvenida con link de auto-login
 - Información del trial gratuito
 - Links de cancelación y soporte
@@ -92,10 +92,10 @@ Usa Resend para enviar emails desde `@summaryvox.com`:
 - `/[countryCode]/thanks` - Confirmación y redirección
 - `/[countryCode]/error` - Página de errores
 
-## 🔗 Integración con summaryvox
+## 🔗 Integración con voxpages
 
 El sistema usa auto-login tokens para crear/loguear usuarios automáticamente:
-- Genera token JWT desde la API de summaryvox
+- Genera token JWT desde la API de voxpages
 - Token sin expiración
 - Usuario se crea automáticamente si no existe
 

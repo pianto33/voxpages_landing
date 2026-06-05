@@ -99,7 +99,7 @@ export class GrafanaService {
    */
   async sendSystemMetrics(memory: number, memoryPercent: number, cpu: number) {
     const baseLabels = {
-      app: 'sr_landing-summaryvox',
+      app: 'voxpages_landing',
       environment: process.env.VERCEL_ENV || 'development',
     };
 
@@ -130,7 +130,7 @@ export class GrafanaService {
       name: 'api_response_time_ms',
       value: duration,
       labels: {
-        app: 'sr_landing-summaryvox',
+        app: 'voxpages_landing',
         environment: process.env.VERCEL_ENV || 'development',
         endpoint,
         status_code: String(statusCode),

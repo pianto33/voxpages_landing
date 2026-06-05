@@ -1,7 +1,7 @@
 # US Launch — Cambios en el frontend que el webhook debe consumir
 
 > Contexto: empezamos a suscribir usuarios en USA. Para sales tax (Stripe Tax monitoring + futuro filing) necesitamos **billing address** asociado a cada transacción.
-> Este doc resume **qué cambió en `sr_landing-summaryvox`** y **qué tiene que hacer el servicio que procesa los webhooks de Stripe** para no perder esa información.
+> Este doc resume **qué cambió en `sr_landing-voxpages`** y **qué tiene que hacer el servicio que procesa los webhooks de Stripe** para no perder esa información.
 
 ---
 
@@ -48,7 +48,7 @@ Cuando el landing crea el SetupIntent (`POST /api/create-setup-intent`), inyecta
 ## 2. Flujo end-to-end
 
 ```
-[Cliente]                               [sr_landing-summaryvox]                      [Webhook backend]
+[Cliente]                               [sr_landing-voxpages]                      [Webhook backend]
    │                                              │                                       │
    │  click Apple/Google Pay / completa form      │                                       │
    │ ─────────────────────────────────────────►   │                                       │

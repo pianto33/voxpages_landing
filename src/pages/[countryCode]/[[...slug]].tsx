@@ -148,7 +148,7 @@ export default function Home() {
                     <div className={styles.logoTextOnly}>
                         <Image
                             src={logoText}
-                            alt="SummaryVox"
+                            alt="VoxPages"
                             fill
                             sizes="220px"
                             style={{ objectFit: "contain" }}

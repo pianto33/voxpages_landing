@@ -4,7 +4,7 @@ import { withRateLimitAndMonitoring } from "@/lib/rate-limit";
 import { getRequestContext, compactContext } from "@/utils/serverContext";
 
 const PLATFORM_URL =
-  process.env.NEXT_PUBLIC_PLATFORM_URL || "https://summaryvox.com";
+  process.env.NEXT_PUBLIC_PLATFORM_URL || "https://voxpages.com";
 const JWT_LANDING_SECRET = process.env.JWT_LANDING_SECRET || "";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -43,7 +43,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
-      logger.error("Error from SummaryVox landing-token endpoint", null, {
+      logger.error("Error from VoxPages landing-token endpoint", null, {
         ...ctx,
         status: response.status,
         email,

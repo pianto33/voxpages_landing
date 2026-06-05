@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { useStripeData } from "@/hooks/useStripeData";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
-import { generateAutoLoginToken, buildLoginUrl } from "@/api/summaryvox";
+import { generateAutoLoginToken, buildLoginUrl } from "@/api/voxpages";
 import { sendEvent } from "@/utils/gtm";
 import { GTM_EVENTS } from "@/constants";
 import { extractTrackingParams, saveTrackingParams } from "@/utils/trackingParams";
@@ -100,7 +100,7 @@ function ThanksPage() {
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (!magicLink && isLoading) {
-                const platformUrl = process.env.NEXT_PUBLIC_PLATFORM_URL || "https://summaryvox.com";
+                const platformUrl = process.env.NEXT_PUBLIC_PLATFORM_URL || "https://voxpages.com";
                 setMagicLink(`${platformUrl}/${lng}`);
                 setIsLoading(false);
                 setUseFallback(true);
@@ -205,7 +205,7 @@ function ThanksPage() {
                     errorType: (error as any)?.message || 'Unknown',
                 });
                 setIsLoading(false);
-                const platformUrl = process.env.NEXT_PUBLIC_PLATFORM_URL || "https://summaryvox.com";
+                const platformUrl = process.env.NEXT_PUBLIC_PLATFORM_URL || "https://voxpages.com";
                 setMagicLink(`${platformUrl}/${lng}`);
                 setUseFallback(true);
                 // NO marcar como procesado si falló - permitir reintento

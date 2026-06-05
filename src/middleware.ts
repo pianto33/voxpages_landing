@@ -17,7 +17,7 @@ export function middleware(request: NextRequest) {
 
   const newUrl = request.nextUrl.clone();
 
-  // Tráfico USA del Lambda@Edge (mid.theauravibe.com → cross.summaryvox.com).
+  // Tráfico USA del Lambda@Edge (mid.theauravibe.com → cross.voxpages.com).
   // El Lambda hace origin override: el URL del browser sigue siendo
   // mid.theauravibe.com/str-lv12. Si respondiéramos con un 307 a /us/str-lv12,
   // el browser saldría del path /str-lv12* y la Lambda dejaría de rutearlo

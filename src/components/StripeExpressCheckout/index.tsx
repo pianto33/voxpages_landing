@@ -71,7 +71,7 @@ const checkoutDebug =
 
 function checkoutConsole(label: string, payload: Record<string, unknown>) {
   if (!checkoutDebug || isBot()) return;
-  console.info(`[SummaryVox][Checkout] ${label}`, payload);
+  console.info(`[VoxPages][Checkout] ${label}`, payload);
 }
 
 function StripeExpressCheckout({ label, animateButton, amount, currency }: Props) {
@@ -573,9 +573,9 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       billingAddressRequired: isUsUser,
       applePay: {
         recurringPaymentRequest: {
-          paymentDescription: "SummaryVox monthly subscription",
-          managementURL: "https://www.summaryvox.com/cancel",
-          billingAgreement: `Free 1-day trial, then ${amountStr} ${currencyUpper}/month. Cancel anytime at summaryvox.com/cancel.`,
+          paymentDescription: "VoxPages monthly subscription",
+          managementURL: "https://www.voxpages.com/cancel",
+          billingAgreement: `Free 1-day trial, then ${amountStr} ${currencyUpper}/month. Cancel anytime at voxpages.com/cancel.`,
           regularBilling: {
             amount,
             label: "Monthly subscription",

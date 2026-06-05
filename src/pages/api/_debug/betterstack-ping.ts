@@ -59,7 +59,7 @@ export default async function handler(
         dt: new Date().toISOString(),
         level: "info",
         message: "BetterStack ping from /api/_debug/betterstack-ping",
-        app: "sr_landing-summaryvox",
+        app: "voxpages_landing",
         environment:
           process.env.VERCEL_ENV || process.env.NODE_ENV || "unknown",
         vercel_region: process.env.VERCEL_REGION || null,

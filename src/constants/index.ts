@@ -1,5 +1,5 @@
 // Mapeo del countryCode del landing (us/es/pt/pl/hu/cz) al locale del sitio
-// principal (summaryvox.com). El landing usa "us" para tráfico USA pero el
+// principal (voxpages.com). El landing usa "us" para tráfico USA pero el
 // sitio principal usa "en" como locale inglés. El resto coincide.
 const SITE_LOCALE_MAP: Record<string, string> = {
     us: "en",
@@ -15,18 +15,18 @@ function toSiteLocale(lng: string): string {
     return SITE_LOCALE_MAP[lng.toLowerCase()] ?? "es";
 }
 
-// Páginas legales/soporte viven en summaryvox.com, no en el landing.
+// Páginas legales/soporte viven en voxpages.com, no en el landing.
 // El landing solo linkea afuera para evitar duplicación y mismatches.
 export const LEGAL = {
-    SUPPORT_EMAIL: "info@summaryvox.com",
+    SUPPORT_EMAIL: "help@support.voxpages.com",
     COMPANY_NAME: "Pianto33 LLC",
     COMPANY_ADDRESS: "1007 N Orange St, 4th Floor STE 4527, Wilmington, DE 19801, US",
     termsUrl: (lng: string) =>
-        `https://www.summaryvox.com/${toSiteLocale(lng)}/terms`,
+        `https://www.voxpages.com/${toSiteLocale(lng)}/terms`,
     privacyUrl: (lng: string) =>
-        `https://www.summaryvox.com/${toSiteLocale(lng)}/privacy`,
+        `https://www.voxpages.com/${toSiteLocale(lng)}/privacy`,
     subscriptionPolicyUrl: (lng: string) =>
-        `https://www.summaryvox.com/${toSiteLocale(lng)}/subscription-policy`,
+        `https://www.voxpages.com/${toSiteLocale(lng)}/subscription-policy`,
 };
 
 export const GTM_EVENTS = {

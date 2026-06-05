@@ -3,7 +3,7 @@
   box-sizing: border-box;
   cursor: pointer;
   border-radius: 16px;
-  background: linear-gradient(135deg, #FFA06A 0%, #FF8A50 100%);
+  background: linear-gradient(135deg, #FFC100 0%, #FFD35C 100%);
   color: var(--clr-white);
   font-size: var(--text-lg);
   font-weight: 600;
@@ -66,10 +66,10 @@
   border-radius: 18px;
   background: linear-gradient(
     45deg,
-    #FFA06A,
-    #FFC4A0,
-    #FFA06A,
-    #FFC4A0
+    #FFC100,
+    #FFE08A,
+    #FFC100,
+    #FFE08A
   );
   background-size: 300% 300%;
   animation: gradientShift 3s ease infinite;

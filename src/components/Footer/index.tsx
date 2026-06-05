@@ -10,7 +10,7 @@ function Footer() {
 
     return (
         <footer className={styles.footer}>
-            <Image width={28} height={28} src={logo} alt="SummaryVox" />
+            <Image width={28} height={28} src={logo} alt="VoxPages" />
 
             <nav className={styles.footerLinks} aria-label="Legal">
                 <Link

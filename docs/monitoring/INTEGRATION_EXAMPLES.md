@@ -83,7 +83,7 @@ Notify: Slack #red-alert
 
 1. Ve a [grafana.com](https://grafana.com/auth/sign-up/create-user)
 2. Selecciona "Free" plan
-3. Crea tu stack (ej: `summaryvox.grafana.net`)
+3. Crea tu stack (ej: `voxpages.grafana.net`)
 
 ### 2. Configurar Prometheus como Data Source
 
@@ -222,8 +222,8 @@ Message:
 2. Agrega tus monitores
 3. Personaliza:
    ```
-   Title: summaryvox Status
-   URL: summaryvox.betteruptime.com (gratis)
+   Title: voxpages Status
+   URL: voxpages.betteruptime.com (gratis)
    Theme: Light/Dark
    ```
 

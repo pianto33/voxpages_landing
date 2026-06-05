@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { GTM_EVENTS, LEGAL } from "@/constants";
-import { generateAutoLoginToken, buildLoginUrl } from "@/api/summaryvox";
+import { generateAutoLoginToken, buildLoginUrl } from "@/api/voxpages";
 import { sendEvent } from "@/utils/gtm";
 import { useStripeData } from "@/hooks/useStripeData";
 import { logger } from "@/utils/logger";
@@ -18,7 +18,7 @@ function ErrorPage() {
   const router = useRouter();
   const { error } = router.query;
   const stripeData = useStripeData();
-  const [magicLink, setMagicLink] = useState("https://summaryvox.com");
+  const [magicLink, setMagicLink] = useState("https://voxpages.com");
   const isCreateUserError = error === "create_user";
   const isExistingSubscriptionError = error === "existing_subscription";
   

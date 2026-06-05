@@ -389,4 +389,4 @@ describe('🔒 Security Tests', () => {
 
 ## 📞 Contacto
 
-Para reportar vulnerabilidades: help@support.voxpages.com
+Para reportar vulnerabilidades: help@voxpages.com

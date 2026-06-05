@@ -18,7 +18,7 @@ function toSiteLocale(lng: string): string {
 // Páginas legales/soporte viven en voxpages.com, no en el landing.
 // El landing solo linkea afuera para evitar duplicación y mismatches.
 export const LEGAL = {
-    SUPPORT_EMAIL: "help@support.voxpages.com",
+    SUPPORT_EMAIL: "help@voxpages.com",
     COMPANY_NAME: "Pianto33 LLC",
     COMPANY_ADDRESS: "1007 N Orange St, 4th Floor STE 4527, Wilmington, DE 19801, US",
     termsUrl: (lng: string) =>

@@ -3,8 +3,8 @@
 Este documento describe cómo se loguea, qué campos lleva cada log, y
 cómo filtrar y correlacionar en Better Stack.
 
-> **Origen de los logs:** Better Stack source `voxpages`, host
-> `s2426827.eu-fsn-3.betterstackdata.com`. Las env vars relevantes son
+> **Origen de los logs:** Better Stack source `voxpages-landing`, host
+> `s2498376.eu-fsn-3.betterstackdata.com`. Las env vars relevantes son
 > `BETTERSTACK_SOURCE_TOKEN` y `BETTERSTACK_INGESTING_HOST`.
 
 ---

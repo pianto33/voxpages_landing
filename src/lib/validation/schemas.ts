@@ -48,6 +48,13 @@ export const stripePriceIdSchema = z
   .regex(/^price_[a-zA-Z0-9]+$/, 'Price ID inválido');
 
 /**
+ * Stripe SetupIntent ID (formato: si_*)
+ */
+export const stripeSetupIntentIdSchema = z
+  .string()
+  .regex(/^si_[a-zA-Z0-9]+$/, 'SetupIntent ID inválido');
+
+/**
  * Código de país ISO 3166-1 alpha-2 (2 letras)
  */
 export const countryCodeSchema = z
@@ -243,6 +250,15 @@ export type CheckCustomerInput = z.infer<typeof checkCustomerSchema>;
 export const checkSubscriptionsSchema = z.object({
   customerId: stripeCustomerIdSchema,
 });
+
+/**
+ * POST /api/check-setup-intent
+ */
+export const checkSetupIntentSchema = z.object({
+  setupIntentId: stripeSetupIntentIdSchema,
+});
+
+export type CheckSetupIntentInput = z.infer<typeof checkSetupIntentSchema>;
 
 export type CheckSubscriptionsInput = z.infer<typeof checkSubscriptionsSchema>;
 

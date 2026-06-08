@@ -36,6 +36,7 @@ export {
   createIntentSchema,
   checkCustomerSchema,
   checkSubscriptionsSchema,
+  checkSetupIntentSchema,
   
   // Tipos
   type CreateCustomerInput,
@@ -44,6 +45,7 @@ export {
   type CreateIntentInput,
   type CheckCustomerInput,
   type CheckSubscriptionsInput,
+  type CheckSetupIntentInput,
   type ValidationResult,
   
   // Utilidades

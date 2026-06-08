@@ -102,3 +102,13 @@ export const STRIPE_DATA: StripeDataMap = {
         currency: "usd",
     },
 };
+
+/** Resuelve amount/currency a partir de un Stripe price_id (metadata del SetupIntent). */
+export function getStripeDataByPriceId(priceId: string): StripeData | null {
+    for (const [key, id] of Object.entries(PRICE_ID)) {
+        if (id === priceId) {
+            return STRIPE_DATA[key] ?? null;
+        }
+    }
+    return null;
+}

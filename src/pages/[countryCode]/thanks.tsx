@@ -12,6 +12,7 @@ import Header from "@/components/Header";
 import { logger } from "@/utils/logger";
 import { clientLogger } from "@/utils/clientLogger";
 import { setEmail as setIdentityEmail, setCustomerId, endFunnel } from "@/utils/userIdentity";
+import { resolveThanksCheckoutIdentity } from "@/utils/resolveThanksIdentity";
 import styles from "@/styles/Thanks.module.css";
 
 function ThanksPage() {
@@ -115,57 +116,88 @@ function ThanksPage() {
     }, [magicLink, isLoading, lng]);
 
     useEffect(() => {
-        const email = localStorage.getItem("userEmail") || "";
-        const name = localStorage.getItem("userName") || "";
-        const customerId = localStorage.getItem("customerId") || "";
-        
-        // Validar que tengamos los datos necesarios ANTES de verificar si ya se procesó
-        if (!email) {
-            logger.info("Thanks page: esperando email del usuario");
+        if (!router.isReady || !lng) {
+            if (!lng) {
+                logger.info("Thanks page: esperando idioma");
+            }
             return;
         }
-        if (!lng) {
-            logger.info("Thanks page: esperando idioma");
-            return;
-        }
-        
-        // Verificar si ya se procesó previamente (incluso si el componente se desmontó)
-        const sessionKey = `payment_processed_${customerId || email}`;
-        const alreadyProcessed = sessionStorage.getItem(sessionKey);
-        
-        if (alreadyProcessed || paymentProcessedRef.current || processingComplete) {
-            logger.info("Thanks page: pago ya procesado, evitando duplicados", {
-                email,
-                sessionKey,
-                alreadyProcessed: !!alreadyProcessed,
-                refCurrent: paymentProcessedRef.current,
-                stateComplete: processingComplete,
+
+        const setupIntentId =
+            typeof router.query.setup_intent === "string"
+                ? router.query.setup_intent
+                : undefined;
+        const redirectStatus =
+            typeof router.query.redirect_status === "string"
+                ? router.query.redirect_status
+                : undefined;
+
+        if (redirectStatus && redirectStatus !== "succeeded") {
+            logger.info("Thanks page: redirect de Stripe sin éxito", {
+                redirectStatus,
+                setupIntentId,
             });
             return;
         }
-        
-        logger.info("Thanks page: iniciando procesamiento de pago exitoso", {
-            email,
-            customerId,
-            lng,
-        });
-        
-        // Marcar como procesado en ref inmediatamente para prevenir doble ejecución dentro del mismo render
-        // PERO no guardar en sessionStorage hasta que todo esté OK
-        paymentProcessedRef.current = true;
-        
+
+        let cancelled = false;
+
         (async () => {
             try {
-                setIsLoading(true);
+                const identity = await resolveThanksCheckoutIdentity({
+                    setupIntentId,
+                    redirectStatus,
+                    fallbackAmount: stripeData.amount,
+                    fallbackCurrency: stripeData.currency,
+                });
 
-                // Identidad: persistir email + customerId para todos los logs futuros
-                if (email) setIdentityEmail(email);
-                if (customerId) setCustomerId(customerId);
+                if (cancelled) return;
 
-                clientLogger.funnel('magic_link_requested', {
+                if (!identity?.email) {
+                    logger.info("Thanks page: esperando identidad del checkout", {
+                        hasSetupIntent: !!setupIntentId,
+                        redirectStatus: redirectStatus || null,
+                    });
+                    return;
+                }
+
+                const { email, customerId } = identity;
+                const resolvedAmount = identity.amount ?? amount;
+                const resolvedCurrency = identity.currency ?? currency;
+
+                const sessionKey = `payment_processed_${customerId || email}`;
+                const alreadyProcessed = sessionStorage.getItem(sessionKey);
+
+                if (alreadyProcessed || paymentProcessedRef.current || processingComplete) {
+                    logger.info("Thanks page: pago ya procesado, evitando duplicados", {
+                        email,
+                        sessionKey,
+                        alreadyProcessed: !!alreadyProcessed,
+                        refCurrent: paymentProcessedRef.current,
+                        stateComplete: processingComplete,
+                    });
+                    return;
+                }
+
+                logger.info("Thanks page: iniciando procesamiento de pago exitoso", {
                     email,
                     customerId,
                     lng,
+                    identitySource: identity.source,
+                    setupIntentId: setupIntentId || null,
+                });
+
+                paymentProcessedRef.current = true;
+                setIsLoading(true);
+
+                setIdentityEmail(email);
+                if (customerId) setCustomerId(customerId);
+
+                clientLogger.funnel("magic_link_requested", {
+                    email,
+                    customerId,
+                    lng,
+                    identitySource: identity.source,
                 });
 
                 const token = await generateAutoLoginToken(email);
@@ -173,47 +205,70 @@ function ThanksPage() {
                 setMagicLink(link);
                 setIsLoading(false);
 
-                clientLogger.funnel('magic_link_received', {
+                clientLogger.funnel("magic_link_received", {
                     email,
                     customerId,
                     lng,
+                    identitySource: identity.source,
                 });
-                
+
                 logger.info("Thanks page: magic link generado exitosamente", {
                     email,
                 });
-                
-                // Notificar pago exitoso - SOLO UNA VEZ
-                if (amount && currency) {
-                    logger.paymentSuccess(email, amount, currency, customerId, {
-                        lng,
+
+                if (resolvedAmount && resolvedCurrency) {
+                    logger.paymentSuccess(
+                        email,
+                        resolvedAmount,
+                        resolvedCurrency,
+                        customerId,
+                        {
+                            lng,
+                            identitySource: identity.source,
+                            setupIntentId: setupIntentId || null,
+                        }
+                    );
+                } else {
+                    logger.warn("Thanks page: payment_succeeded omitido por falta de amount/currency", {
+                        email,
+                        resolvedAmount,
+                        resolvedCurrency,
+                        identitySource: identity.source,
                     });
                 }
 
-                // Cerrar el funnel: el próximo intento de compra (mismo
-                // browser, otra sesión) arrancará uno nuevo.
                 endFunnel();
-                
-                // ✅ AHORA sí marcar como completado en sessionStorage (después de éxito)
-                sessionStorage.setItem(sessionKey, 'true');
+
+                sessionStorage.setItem(sessionKey, "true");
                 setProcessingComplete(true);
             } catch (error) {
+                if (cancelled) return;
+
                 logger.error("Error en procesamiento de thanks page", error, {
-                    email,
-                    customerId,
-                    page: 'thanks',
-                    errorType: (error as any)?.message || 'Unknown',
+                    setupIntentId: setupIntentId || null,
+                    page: "thanks",
+                    errorType: (error as any)?.message || "Unknown",
                 });
                 setIsLoading(false);
                 const platformUrl = process.env.NEXT_PUBLIC_PLATFORM_URL || "https://voxpages.com";
                 setMagicLink(`${platformUrl}/${lng}`);
                 setUseFallback(true);
-                // NO marcar como procesado si falló - permitir reintento
                 paymentProcessedRef.current = false;
             }
         })();
+
+        return () => {
+            cancelled = true;
+        };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [lng, amount, currency]); // processingComplete no debe estar en deps para evitar loops
+    }, [
+        router.isReady,
+        router.query.setup_intent,
+        router.query.redirect_status,
+        lng,
+        amount,
+        currency,
+    ]);
 
     return (
         <>

@@ -27,6 +27,7 @@ export type RateLimitEndpoint =
   | 'create-setup-intent'
   | 'create-intent'
   | 'check-customer'
+  | 'check-setup-intent'
   | 'send-email'
   | 'default';
 

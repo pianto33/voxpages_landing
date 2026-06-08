@@ -46,6 +46,35 @@ export const createPaymentIntent = async (payload: CreateIntentPayload) => {
   return data as CreatePaymentIntentResponse;
 };
 
+export interface SetupIntentCheckoutResponse {
+  email: string;
+  name: string;
+  priceId: string | null;
+  countryCode: string;
+  customerId: string | null;
+  amount: number | null;
+  currency: string | null;
+  status: string;
+}
+
+export const fetchSetupIntentCheckout = async (
+  setupIntentId: string
+): Promise<SetupIntentCheckoutResponse> => {
+  const response = await fetch("/api/check-setup-intent", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ setupIntentId }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Error al resolver SetupIntent");
+  }
+
+  return data as SetupIntentCheckoutResponse;
+};
+
 // NOTA: Las siguientes funciones fueron eliminadas ya que el nuevo flujo
 // simplificado usa el endpoint /api/create-setup-intent que maneja todo:
 // - checkCustomer (ahora lo hace el endpoint)

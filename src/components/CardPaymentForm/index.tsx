@@ -130,7 +130,9 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       return;
     }
 
-    if (!email) {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    if (!normalizedEmail) {
       clientLogger.paymentFailed('missing_email', { priceId, surface: 'card_form' });
       setErrorMessage(t("error.email"));
       return;
@@ -155,11 +157,11 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       }
 
       // Identidad: persistir email para logs subsiguientes
-      setIdentityEmail(email);
+      setIdentityEmail(normalizedEmail);
 
-      const name = email.split("@")[0];
+      const name = normalizedEmail.split("@")[0];
       localStorage.setItem("userName", name);
-      localStorage.setItem("userEmail", email);
+      localStorage.setItem("userEmail", normalizedEmail);
       localStorage.setItem("paymentAmount", amount.toString());
       localStorage.setItem("paymentCurrency", currency);
 
@@ -170,7 +172,7 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       // El webhook se encarga de crear customer y subscription
       clientLogger.funnel('setup_intent_create_request', {
         priceId,
-        email,
+        email: normalizedEmail,
         amount,
         currency,
         surface: 'card_form',
@@ -182,14 +184,14 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       logger.info('Creando SetupIntent en Stripe', {
         context: 'CardPaymentForm - pre createSetupIntent',
         priceId,
-        email,
+        email: normalizedEmail,
       });
 
       const response = await apiFetch("/api/create-setup-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          email: normalizedEmail,
           name,
           priceId,
           countryCode: router.query.countryCode,
@@ -219,12 +221,12 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       if (data.error) {
         logger.warn("Error al crear SetupIntent", {
           error: data.error,
-          email,
+          email: normalizedEmail,
           priceId,
         });
         clientLogger.paymentFailed('setup_intent_create_error', {
           priceId,
-          email,
+          email: normalizedEmail,
           surface: 'card_form',
           error: data.error,
         });
@@ -239,7 +241,7 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
 
       clientLogger.funnel('payment_confirm_request', {
         priceId,
-        email,
+        email: normalizedEmail,
         amount,
         currency,
         surface: 'card_form',
@@ -259,7 +261,7 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
           error.type === 'card_error' ? 'card_declined' : 'confirm_setup_error',
           {
             priceId,
-            email,
+            email: normalizedEmail,
             surface: 'card_form',
             stripe_error_code: error.code,
             stripe_error_type: error.type,
@@ -277,7 +279,7 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       // otros tipos = error del sistema -> error
       const logData = {
         context: "CardPaymentForm",
-        email,
+        email: normalizedEmail,
         priceId,
         errorMessage: error.message,
         stripeErrorType: error.type,

@@ -1,0 +1,3633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suscripciones y cobros - VoxPages</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 2rem; }
+    .container { max-width: 1180px; margin: 0 auto; }
+    h1 { font-size: 1.85rem; font-weight: 750; margin-bottom: 0.3rem; }
+    h2 { font-size: 1.05rem; color: #cbd5e1; margin-bottom: 1rem; }
+    .section-title { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #334155; font-size: 1.45rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 0.95rem; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+    .card, .chart-box, .price-card { background: #1e293b; border-radius: 14px; padding: 1.25rem; border: 1px solid #334155; box-shadow: 0 16px 50px rgba(0,0,0,.15); }
+    .card-label { font-size: 0.78rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card-value { font-size: 2rem; font-weight: 750; margin-top: 0.25rem; color: #38bdf8; }
+    .card-value.green { color: #4ade80; }
+    .card-value.red { color: #fb7185; }
+    .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .8rem; margin: 1rem 0 2rem; }
+    .price-name { color: #e2e8f0; font-weight: 650; min-height: 2.4em; }
+    .price-count { color: #38bdf8; font-size: 1.8rem; font-weight: 750; margin-top: .5rem; }
+    .price-id { color: #64748b; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .72rem; margin-top: .25rem; }
+    .charts { display: grid; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+    @media (min-width: 900px) { .charts.two { grid-template-columns: 1fr 1fr; } }
+    .chart-box canvas { width: 100%; max-height: 360px; }
+    .status-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+    .pill { background: #334155; padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.85rem; }
+    .pill strong { color: #38bdf8; }
+    .tables-section h2 { margin-top: 1.5rem; }
+    .table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid #334155; background: #1e293b; margin-bottom: 2rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 880px; }
+    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #334155; font-size: 0.875rem; vertical-align: middle; }
+    th { background: #334155; color: #94a3b8; font-weight: 650; text-transform: uppercase; font-size: 0.73rem; letter-spacing: 0.05em; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #263548; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 650; }
+    .badge-active { background: #14532d; color: #4ade80; }
+    .badge-trialing { background: #1e3a5f; color: #38bdf8; }
+    .badge-canceled { background: #450a0a; color: #f87171; }
+    .badge-past_due { background: #422006; color: #fbbf24; }
+    .badge-incomplete, .badge-unpaid { background: #3f1d2d; color: #f472b6; }
+    .badge-other { background: #334155; color: #cbd5e1; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.75rem; color: #64748b; }
+    .note, .updated { color: #64748b; font-size: .82rem; }
+    .note { margin-top: -.7rem; margin-bottom: 1.4rem; }
+    .updated { margin-top: 2rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>VoxPages</h1>
+    <p class="subtitle">Suscripciones nuevas por producto y precio - últimos 30 días - 4/5/2026 a 3/6/2026</p>
+
+    <div class="cards">
+      <div class="card"><div class="card-label">Total nuevas</div><div class="card-value">216</div></div>
+      <div class="card"><div class="card-label">Promedio / día</div><div class="card-value">7.0</div></div>
+      <div class="card"><div class="card-label">Mejor día</div><div class="card-value green">16</div></div>
+      <div class="card"><div class="card-label">Activas ahora</div><div class="card-value green">84</div></div>
+      <div class="card"><div class="card-label">Últimos 7 días completos</div><div class="card-value">55</div></div>
+      <div class="card"><div class="card-label">Vs 7 días previos</div><div class="card-value red">-17.9%</div></div>
+      <div class="card"><div class="card-label">Valor inicial bruto</div><div class="card-value">212.054,62 US$</div></div>
+    </div>
+
+    <div class="status-pills">
+      <span class="pill"><strong>106</strong> past_due</span><span class="pill"><strong>84</strong> active</span><span class="pill"><strong>16</strong> canceled</span><span class="pill"><strong>10</strong> trialing</span>
+    </div>
+
+    <h2>Distribución por precio</h2>
+    <p class="note">Cada tarjeta muestra cuántas suscripciones nuevas entraron por ese precio en el periodo.</p>
+    <div class="price-grid">
+        <div class="price-card">
+          <div class="price-name">Cross España · 19,99 €/month</div>
+          <div class="price-count">98</div>
+          <div class="price-id">price_1Su25dIiQJtaidhOGQkittUc</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Cross Portugal · 19,99 €/month</div>
+          <div class="price-count">0</div>
+          <div class="price-id">price_1T05OHIiQJtaidhOEyBKlduA</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Default · 19,99 US$/month</div>
+          <div class="price-count">19</div>
+          <div class="price-id">price_1St8jpIiQJtaidhOGVFFc7dt</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">España · 19,99 €/month</div>
+          <div class="price-count">12</div>
+          <div class="price-id">price_1St9gFIiQJtaidhOIrc57oIQ</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Cross Canada · 28,00 CAD/month</div>
+          <div class="price-count">5</div>
+          <div class="price-id">price_1TZxHpIiQJtaidhO9AcDCeOe</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Cross USA · 39,99 US$/month</div>
+          <div class="price-count">9</div>
+          <div class="price-id">price_1TTpEdIiQJtaidhOGImimPye</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Cross Polonia · 49,00 PLN/month</div>
+          <div class="price-count">18</div>
+          <div class="price-id">price_1Sz2R2IiQJtaidhOeJn7ObxV</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Cross Rep. Checa · 419,00 CZK/month</div>
+          <div class="price-count">26</div>
+          <div class="price-id">price_1T05MtIiQJtaidhOA6FWLCOA</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Cross Hungria · 6800 HUF/month</div>
+          <div class="price-count">29</div>
+          <div class="price-id">price_1Sz2RTIiQJtaidhOx0ACsVYK</div>
+        </div></div>
+
+    <div class="charts two">
+      <div class="chart-box"><h2>Nuevas por día</h2><canvas id="dailyChart"></canvas></div>
+      <div class="chart-box"><h2>Acumulado total</h2><canvas id="cumChart"></canvas></div>
+    </div>
+
+    <div class="charts">
+      <div class="chart-box"><h2>Nuevas por día y precio</h2><canvas id="dailyPriceChart"></canvas></div>
+    </div>
+
+    <div class="charts two">
+      <div class="chart-box"><h2>Acumulado por precio</h2><canvas id="cumPriceChart"></canvas></div>
+      <div class="chart-box"><h2>Mix de precios</h2><canvas id="priceMixChart"></canvas></div>
+    </div>
+
+    <div class="charts">
+      <div class="chart-box"><h2>Valor inicial por día y precio</h2><canvas id="revenuePriceChart"></canvas></div>
+    </div>
+
+    <h2 class="section-title">Cobros</h2>
+    <p class="subtitle">Invoices pagadas con importe mayor a cero para este producto. Como hay 1 día de free trial, el 1er cobro suele ocurrir al día siguiente del alta.</p>
+
+    <div class="cards">
+      <div class="card"><div class="card-label">Cobros pagados</div><div class="card-value green">143</div></div>
+      <div class="card"><div class="card-label">Primeros cobros</div><div class="card-value">93</div></div>
+      <div class="card"><div class="card-label">Cobros recurrentes</div><div class="card-value">50</div></div>
+      <div class="card"><div class="card-label">Importe cobrado</div><div class="card-value green">86.695,20 €</div></div>
+    </div>
+
+    <h2>Cobros por número de ciclo</h2>
+    <p class="note">El número de ciclo se calcula ordenando las invoices pagadas de cada suscripción para este producto: 1er cobro, 2º cobro, etc.</p>
+    <div class="price-grid">
+        <div class="price-card">
+          <div class="price-name">1er cobro</div>
+          <div class="price-count">93</div>
+          <div class="price-id">Invoices pagadas</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">3er cobro</div>
+          <div class="price-count">19</div>
+          <div class="price-id">Invoices pagadas</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">4º cobro</div>
+          <div class="price-count">28</div>
+          <div class="price-id">Invoices pagadas</div>
+        </div>
+        <div class="price-card">
+          <div class="price-name">5º cobro</div>
+          <div class="price-count">3</div>
+          <div class="price-id">Invoices pagadas</div>
+        </div></div>
+
+    <div class="charts">
+      <div class="chart-box"><h2>Cobros por día de pago y número de cobro</h2><canvas id="chargeOrdinalChart"></canvas></div>
+    </div>
+
+    <div class="charts">
+      <div class="chart-box"><h2>Cobros por fecha de suscripción</h2><p class="note">Agrupa los cobros por la fecha original de alta de la suscripción. Ejemplo: todos los que se suscribieron un día, cuántos 1ros, 2dos, 3ros cobros ya tuvieron.</p><canvas id="cohortChargeChart"></canvas></div>
+    </div>
+
+    <div class="charts two">
+      <div class="chart-box"><h2>Cobros por día de pago y precio</h2><canvas id="chargePriceChart"></canvas></div>
+      <div class="chart-box"><h2>Importe cobrado por día de pago y precio</h2><canvas id="chargeAmountPriceChart"></canvas></div>
+    </div>
+
+    <div class="tables-section">
+      <h2 class="section-title">Tablas de detalle</h2>
+      <p class="subtitle">Todas las tablas están agrupadas al final: cohortes, resumen de cobros, detalle de suscripciones y detalle de invoices.</p>
+
+      <h2>Cobros por fecha de suscripción</h2>
+      <div class="table-wrap"><table><thead><tr><th>Fecha suscripción</th><th>Suscripciones</th><th>1er cobro</th><th>3er cobro</th><th>4º cobro</th><th>5º cobro</th><th>Total cobros</th></tr></thead><tbody>
+          <tr><td>2026-05-10</td><td>4</td><td>3</td><td>0</td><td>0</td><td>0</td><td>3</td></tr>
+          <tr><td>2026-05-11</td><td>4</td><td>2</td><td>0</td><td>0</td><td>0</td><td>2</td></tr>
+          <tr><td>2026-05-12</td><td>13</td><td>6</td><td>0</td><td>0</td><td>0</td><td>6</td></tr>
+          <tr><td>2026-05-13</td><td>9</td><td>5</td><td>0</td><td>0</td><td>0</td><td>5</td></tr>
+          <tr><td>2026-05-14</td><td>13</td><td>4</td><td>0</td><td>0</td><td>0</td><td>4</td></tr>
+          <tr><td>2026-05-15</td><td>12</td><td>9</td><td>0</td><td>0</td><td>0</td><td>9</td></tr>
+          <tr><td>2026-05-16</td><td>7</td><td>2</td><td>0</td><td>0</td><td>0</td><td>2</td></tr>
+          <tr><td>2026-05-17</td><td>9</td><td>7</td><td>0</td><td>0</td><td>0</td><td>7</td></tr>
+          <tr><td>2026-05-18</td><td>7</td><td>4</td><td>0</td><td>0</td><td>0</td><td>4</td></tr>
+          <tr><td>2026-05-19</td><td>7</td><td>2</td><td>0</td><td>0</td><td>0</td><td>2</td></tr>
+          <tr><td>2026-05-20</td><td>7</td><td>6</td><td>0</td><td>0</td><td>0</td><td>6</td></tr>
+          <tr><td>2026-05-21</td><td>9</td><td>5</td><td>0</td><td>0</td><td>0</td><td>5</td></tr>
+          <tr><td>2026-05-22</td><td>5</td><td>3</td><td>0</td><td>0</td><td>0</td><td>3</td></tr>
+          <tr><td>2026-05-23</td><td>16</td><td>6</td><td>0</td><td>0</td><td>0</td><td>6</td></tr>
+          <tr><td>2026-05-24</td><td>12</td><td>5</td><td>0</td><td>0</td><td>0</td><td>5</td></tr>
+          <tr><td>2026-05-25</td><td>8</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+          <tr><td>2026-05-26</td><td>10</td><td>4</td><td>0</td><td>0</td><td>0</td><td>4</td></tr>
+          <tr><td>2026-05-27</td><td>12</td><td>6</td><td>0</td><td>0</td><td>0</td><td>6</td></tr>
+          <tr><td>2026-05-28</td><td>4</td><td>2</td><td>0</td><td>0</td><td>0</td><td>2</td></tr>
+          <tr><td>2026-05-29</td><td>12</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+          <tr><td>2026-05-30</td><td>6</td><td>3</td><td>0</td><td>0</td><td>0</td><td>3</td></tr>
+          <tr><td>2026-05-31</td><td>4</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>2026-06-01</td><td>5</td><td>2</td><td>0</td><td>0</td><td>0</td><td>2</td></tr>
+          <tr><td>2026-06-02</td><td>12</td><td>5</td><td>0</td><td>0</td><td>0</td><td>5</td></tr>
+          <tr><td>2026-06-03</td><td>9</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div>
+
+      <h2>Cobros por precio y número</h2>
+      <div class="table-wrap"><table><thead><tr><th>Precio</th><th>Número de cobro</th><th>Cantidad</th></tr></thead><tbody>
+          <tr><td>Cross España · 19,99 €/month</td><td>1er cobro</td><td>34</td></tr>
+          <tr><td>Cross España · 19,99 €/month</td><td>4º cobro</td><td>16</td></tr>
+          <tr><td>Cross Rep. Checa · 419,00 CZK/month</td><td>1er cobro</td><td>16</td></tr>
+          <tr><td>Cross Polonia · 49,00 PLN/month</td><td>1er cobro</td><td>13</td></tr>
+          <tr><td>Cross Hungria · 6800 HUF/month</td><td>1er cobro</td><td>11</td></tr>
+          <tr><td>Cross Polonia · 49,00 PLN/month</td><td>3er cobro</td><td>10</td></tr>
+          <tr><td>Default · 19,99 US$/month</td><td>1er cobro</td><td>10</td></tr>
+          <tr><td>Cross España · 19,99 €/month</td><td>3er cobro</td><td>6</td></tr>
+          <tr><td>Cross Polonia · 49,00 PLN/month</td><td>4º cobro</td><td>6</td></tr>
+          <tr><td>España · 19,99 €/month</td><td>1er cobro</td><td>6</td></tr>
+          <tr><td>Cross Rep. Checa · 419,00 CZK/month</td><td>4º cobro</td><td>4</td></tr>
+          <tr><td>España · 19,99 €/month</td><td>5º cobro</td><td>3</td></tr>
+          <tr><td>Cross Canada · 28,00 CAD/month</td><td>1er cobro</td><td>2</td></tr>
+          <tr><td>Cross Portugal · 19,99 €/month</td><td>3er cobro</td><td>2</td></tr>
+          <tr><td>Cross Portugal · 19,99 €/month</td><td>4º cobro</td><td>1</td></tr>
+          <tr><td>Cross Rep. Checa · 419,00 CZK/month</td><td>3er cobro</td><td>1</td></tr>
+          <tr><td>Cross USA · 39,99 US$/month</td><td>1er cobro</td><td>1</td></tr>
+          <tr><td>España · 19,99 €/month</td><td>4º cobro</td><td>1</td></tr></tbody></table></div>
+
+      <h2>Detalle de suscripciones (216)</h2>
+      <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Email / customer</th><th>Estado</th><th>Precio</th><th>Plan</th><th>ID</th></tr></thead><tbody>
+          <tr>
+            <td>3/6/26, 12:11</td>
+            <td>pedrolofernan@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TeGRcIiQJtaidhOjpL9L4zn</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 10:19</td>
+            <td>forte.logisztika@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TeEhZIiQJtaidhOUdRxCXRD</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 9:48</td>
+            <td>irenavitova@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TeEDqIiQJtaidhOhZUa5oVf</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 9:27</td>
+            <td>seibinm1@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TeDtPIiQJtaidhOJyEMSpFj</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 7:59</td>
+            <td>jsobrinomunoz@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TeCWaIiQJtaidhOPW3bfya8</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 6:15</td>
+            <td>villataratoni@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TeAtHIiQJtaidhOCteuEwz7</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 6:06</td>
+            <td>chemapalomino@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TeAlDIiQJtaidhOLXSJpTG1</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 4:56</td>
+            <td>remediosnietobalmon@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Te9etIiQJtaidhOIIrU2fUk</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 23:35</td>
+            <td>baboo042059@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$/month</td>
+            <td class="mono">sub_1Te4elIiQJtaidhOXEal1vAP</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 14:42</td>
+            <td>serrarof@gmail.com</td>
+            <td><span class="badge badge-trialing">trialing</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TdwKNIiQJtaidhOsN8Y1A58</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 14:25</td>
+            <td>mikelrazquin@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tdw4UIiQJtaidhO1amkQyYQ</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 13:17</td>
+            <td>feliiglesiaslopez@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tdv0kIiQJtaidhOnJaAzOAZ</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 12:52</td>
+            <td>arleneblack083@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Canada · 28,00 CAD/month</td>
+            <td>28,00 CAD/month</td>
+            <td class="mono">sub_1TdubsIiQJtaidhOjepFbU8b</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 12:43</td>
+            <td>salgadomontero1944@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TduTkIiQJtaidhOgnBdZsZn</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 12:27</td>
+            <td>leahzeins@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TduEPIiQJtaidhOLqq8U09l</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 12:24</td>
+            <td>margaritalopezparera@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TduBYIiQJtaidhOx2keIqAi</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 11:54</td>
+            <td>vlastakoutova77@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TdthsIiQJtaidhOq5XXPsfl</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 6:09</td>
+            <td>attilahorvath6911@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TdoK8IiQJtaidhOfpFZDC0N</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 3:04</td>
+            <td>jferbr@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TdlQxIiQJtaidhO78MttpGW</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 1:58</td>
+            <td>zoltanraj6@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TdkOyIiQJtaidhOaGEIdwmB</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 1:06</td>
+            <td>zdenekk48@seznam.cz</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TdjakIiQJtaidhOam2uDfnR</td>
+          </tr>
+          <tr>
+            <td>1/6/26, 11:51</td>
+            <td>verdaguersayos@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TdXBvIiQJtaidhOPhCyAAtd</td>
+          </tr>
+          <tr>
+            <td>1/6/26, 11:19</td>
+            <td>venturafuerte01@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TdWgIIiQJtaidhOEoNL92Ze</td>
+          </tr>
+          <tr>
+            <td>1/6/26, 10:03</td>
+            <td>jasonemeusy@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$/month</td>
+            <td class="mono">sub_1TdVVYIiQJtaidhOMUAFBBAw</td>
+          </tr>
+          <tr>
+            <td>1/6/26, 9:51</td>
+            <td>mikuseara@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TdVJFIiQJtaidhO5CRYnrbZ</td>
+          </tr>
+          <tr>
+            <td>1/6/26, 9:28</td>
+            <td>josemarialigero1975@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TdUxKIiQJtaidhO8gvlvfil</td>
+          </tr>
+          <tr>
+            <td>31/5/26, 8:12</td>
+            <td>markozisi70@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1Td7INIiQJtaidhOfQPWO6vC</td>
+          </tr>
+          <tr>
+            <td>31/5/26, 7:38</td>
+            <td>karelkurka1944@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1Td6kqIiQJtaidhO3b3XOKIh</td>
+          </tr>
+          <tr>
+            <td>31/5/26, 4:56</td>
+            <td>rubenelvira63@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Td4EVIiQJtaidhOk6yHnUVt</td>
+          </tr>
+          <tr>
+            <td>31/5/26, 2:38</td>
+            <td>randyspizza69@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Canada · 28,00 CAD/month</td>
+            <td>28,00 CAD/month</td>
+            <td class="mono">sub_1Td25DIiQJtaidhOMmJvklqv</td>
+          </tr>
+          <tr>
+            <td>30/5/26, 13:12</td>
+            <td>mwinters96@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcpUTIiQJtaidhOjPWBJslw</td>
+          </tr>
+          <tr>
+            <td>30/5/26, 6:47</td>
+            <td>kohoutova.martina@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TcjTtIiQJtaidhOy6956Tmi</td>
+          </tr>
+          <tr>
+            <td>30/5/26, 6:04</td>
+            <td>novakmaria.a@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TciodIiQJtaidhOwl0EfFk5</td>
+          </tr>
+          <tr>
+            <td>30/5/26, 6:00</td>
+            <td>frangoca51@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcilJIiQJtaidhOXjJouv3g</td>
+          </tr>
+          <tr>
+            <td>30/5/26, 4:15</td>
+            <td>tomtomala79@wp.pl</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1Tch6sIiQJtaidhOBHV6FwpQ</td>
+          </tr>
+          <tr>
+            <td>30/5/26, 1:02</td>
+            <td>giliana0204@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tce6KIiQJtaidhO8gDCr8th</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 13:00</td>
+            <td>kilmergestio@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcSpVIiQJtaidhObkzvpAA8</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 12:55</td>
+            <td>joseangelmaganverdu@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcSl1IiQJtaidhO5oRgRWdO</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 11:59</td>
+            <td>pazcandelas2020@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcRsWIiQJtaidhOlwuIQqFb</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 11:10</td>
+            <td>josejuec@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcR6rIiQJtaidhOGCoB9NKh</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 10:55</td>
+            <td>gabrieljurado1957@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcQstIiQJtaidhObUyXQPVR</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 10:20</td>
+            <td>mjgarciaanton9@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcQLMIiQJtaidhORJGporOI</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 9:26</td>
+            <td>virginiaangos@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcPUXIiQJtaidhOLhirDzpR</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 8:21</td>
+            <td>segundamartin15@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcOTnIiQJtaidhOFZG7zvQh</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 8:00</td>
+            <td>zuzka.smid@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TcO8yIiQJtaidhOl2HpDJH4</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 7:57</td>
+            <td>granadatoni@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TcO6NIiQJtaidhOeXw9Y3mD</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 4:11</td>
+            <td>pattersonantwaan009@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$/month</td>
+            <td class="mono">sub_1TcKZNIiQJtaidhOOXn01cpS</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 3:23</td>
+            <td>vajdacsi55@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TcJp8IiQJtaidhO4oLUOeif</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 11:10</td>
+            <td>malvhig@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tc4dkIiQJtaidhOO3ZFK9li</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 6:44</td>
+            <td>juandearmas03@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tc0UnIiQJtaidhOetunxTWC</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 5:20</td>
+            <td>jaskiewicza881@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TbzAbIiQJtaidhOXEXWSS9g</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 4:18</td>
+            <td>stevenssevenfive@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$/month</td>
+            <td class="mono">sub_1TbyDOIiQJtaidhOg8pfeT2t</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 13:18</td>
+            <td>hansmeran@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tbk9rIiQJtaidhOPc6jWRvM</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 12:35</td>
+            <td>mcanteroabogado@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbjUCIiQJtaidhOPdPIYbu3</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 11:02</td>
+            <td>jumarfont@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tbi2eIiQJtaidhOVK8xkfaO</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 10:57</td>
+            <td>temarluc59@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbhxBIiQJtaidhOZUuhetlV</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 10:56</td>
+            <td>candidosanchez99sl@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbhwhIiQJtaidhODEOUTuAX</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 9:05</td>
+            <td>micinski44@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TbgDKIiQJtaidhOuDIrrua6</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 7:21</td>
+            <td>asancha@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbeaqIiQJtaidhOucOYU1oN</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 7:09</td>
+            <td>rafael.ortizvazquez@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbeOoIiQJtaidhONXlwXOec</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 7:08</td>
+            <td>soidemer61@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbeNtIiQJtaidhO2BpJif9m</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 3:36</td>
+            <td>kollath.sandor77@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1Tbb5AIiQJtaidhOz5h5uZrq</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 2:03</td>
+            <td>slawekkielin100@o2.pl</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TbZcTIiQJtaidhO19ZEkRXo</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 1:49</td>
+            <td>shawndreher08@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Canada · 28,00 CAD/month</td>
+            <td>28,00 CAD/month</td>
+            <td class="mono">sub_1TbZPBIiQJtaidhOInG7FtUf</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 13:29</td>
+            <td>mariajosecuevasdiaz70@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbNrUIiQJtaidhOB7JcsSXC</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 12:19</td>
+            <td>abraguerra5@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbMlYIiQJtaidhOwJAWNuVk</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 12:09</td>
+            <td>russelgirard1947@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Canada · 28,00 CAD/month</td>
+            <td>28,00 CAD/month</td>
+            <td class="mono">sub_1TbMbgIiQJtaidhOZXlKHqJP</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 12:02</td>
+            <td>adaguerraromero30@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbMVHIiQJtaidhOtc720Qrz</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 8:59</td>
+            <td>j.mellado.1703@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbJdjIiQJtaidhObJqQVQiU</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 8:22</td>
+            <td>corredurucho2@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbJ4XIiQJtaidhOddu5W1Zd</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 6:49</td>
+            <td>s.urbaniak@o2.pl</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TbHc3IiQJtaidhOnTpvtG9D</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 4:18</td>
+            <td>realablakkft@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TbFGPIiQJtaidhOojsMKtZ0</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 4:08</td>
+            <td>pepidiaz265@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TbF6VIiQJtaidhOOcNJXKs3</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 0:29</td>
+            <td>armyacollins684@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$/month</td>
+            <td class="mono">sub_1TbBgoIiQJtaidhOP5PzCfWH</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 12:36</td>
+            <td>silviabaezparedes1963@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tb0YmIiQJtaidhOKGsKkFqw</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 12:32</td>
+            <td>zlataru533@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tb0UBIiQJtaidhO3zcF1eUS</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 10:22</td>
+            <td>juliancantosantillan@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaySnIiQJtaidhO3nyEl3s9</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 10:22</td>
+            <td>joanet1947@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaySkIiQJtaidhOV9WpTjSa</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 9:36</td>
+            <td>joga36@op.pl</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1Taxk1IiQJtaidhOUwHN2rfh</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 8:14</td>
+            <td>anicetoniza@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TawSeIiQJtaidhOE2fMOi3A</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 4:03</td>
+            <td>sandornetuef12@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TasYMIiQJtaidhOGfIyvEBu</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 2:52</td>
+            <td>d1lanfranco@yahoo.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$/month</td>
+            <td class="mono">sub_1TarRaIiQJtaidhOSmxw4kuH</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 12:51</td>
+            <td>grgarbar@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaeJcIiQJtaidhOiTxEFZNM</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 12:13</td>
+            <td>transmacuso@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TadiwIiQJtaidhOtB8mAkUS</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 11:56</td>
+            <td>odalisantoniocruzmatias@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TadSDIiQJtaidhO9RE7pQD6</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 11:24</td>
+            <td>tasawarhussaint702@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TacxWIiQJtaidhOY1okM1pN</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 11:09</td>
+            <td>mbenitezrico@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1Tacj4IiQJtaidhOvSW92Zn5</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 10:53</td>
+            <td>spolankiewiczwojtek@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TacT5IiQJtaidhOUnmmAnsO</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 10:02</td>
+            <td>gyarfasmarta@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TabfhIiQJtaidhODsxKegQt</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 9:50</td>
+            <td>restascsaba8@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TabThIiQJtaidhO5b0Ve5dT</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 9:43</td>
+            <td>duquecontrerasjoseantonio@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TabNFIiQJtaidhOYUhEIzEa</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 9:02</td>
+            <td>milan.reindl1@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TaajkIiQJtaidhOzqY4HgjP</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 0:58</td>
+            <td>alexander6699catalan@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$/month</td>
+            <td class="mono">sub_1TaTBgIiQJtaidhOC8cTz3sq</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 0:33</td>
+            <td>cafulisha55@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Canada · 28,00 CAD/month</td>
+            <td>28,00 CAD/month</td>
+            <td class="mono">sub_1TaSnCIiQJtaidhOjyMcNfKY</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 17:46</td>
+            <td>gayl.hinshaw@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$/month</td>
+            <td class="mono">sub_1TaMRLIiQJtaidhOAXOViyCt</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 16:13</td>
+            <td>rodrigotonsodev@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaKz9IiQJtaidhOunuGDpsU</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 14:04</td>
+            <td>milenanejdlova00@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TaIyrIiQJtaidhOEcrgOJdy</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 12:34</td>
+            <td>vlastimilhelebrant@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TaHZiIiQJtaidhOSk9VKoKj</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 12:06</td>
+            <td>santi.astorgano.alonso@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaH7xIiQJtaidhOCEDfONt0</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 11:59</td>
+            <td>hadariistvan@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TaH14IiQJtaidhOTehgtsWN</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 11:45</td>
+            <td>stasruszala@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TaGnSIiQJtaidhOBh0BkM5B</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 11:34</td>
+            <td>saratxagajulio242@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaGdOIiQJtaidhO0G63csuM</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 11:19</td>
+            <td>piotrosieja1@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TaGOkIiQJtaidhOk0yTl3RD</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 11:14</td>
+            <td>ronaldsedano15@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaGJzIiQJtaidhOLBx2ykuI</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 11:04</td>
+            <td>arek750121@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TaGAcIiQJtaidhO34XhMRo6</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 11:04</td>
+            <td>mauelmanuela1999@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaGAUIiQJtaidhO14Hpkb10</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 11:03</td>
+            <td>juliopardof49@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaG9FIiQJtaidhONSw1bFtm</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 8:50</td>
+            <td>ggmonrroy.94@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaE4LIiQJtaidhOdjoFXFiI</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 7:32</td>
+            <td>abadiasalastrue@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TaCqeIiQJtaidhOcsCzNQqT</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 0:06</td>
+            <td>marnickap@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$/month</td>
+            <td class="mono">sub_1Ta5tTIiQJtaidhO0wzJ4tht</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 15:53</td>
+            <td>prokupekjosef@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TZyBzIiQJtaidhO4rkBl9ZA</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 14:30</td>
+            <td>jeep5537@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TZwuKIiQJtaidhOUKcYoGlV</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 9:20</td>
+            <td>vfarsky@seznam.cz</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TZs4JIiQJtaidhOjpWhCZeb</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 8:35</td>
+            <td>jesusdelpasos6e@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TZrMMIiQJtaidhOmA7vhM0L</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 5:35</td>
+            <td>damariah6402@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TZoYfIiQJtaidhOEhwl2zCg</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 12:01</td>
+            <td>ramon.moliner.compta@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TZY6bIiQJtaidhOYm9dQxSC</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 11:50</td>
+            <td>agfsm3@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TZXvfIiQJtaidhObgwQ9K0V</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 11:33</td>
+            <td>sarkozikrisztina785@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TZXfeIiQJtaidhOw9C1FE0j</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 9:13</td>
+            <td>karel.mentel@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TZVTgIiQJtaidhODRNnpjwK</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 8:30</td>
+            <td>jroura13@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TZUoYIiQJtaidhOJGRqqODY</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 8:20</td>
+            <td>mvig8428@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TZUeVIiQJtaidhO48Mk8QkU</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 7:09</td>
+            <td>opanczyszyn@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TZTXOIiQJtaidhO9wi67Brf</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 6:16</td>
+            <td>aserdecznypl@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TZSiIIiQJtaidhOVBjWVxyn</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 5:46</td>
+            <td>basiabywalec@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TZSFlIiQJtaidhOpsTIGpSO</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 15:34</td>
+            <td>mjssm965@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TZEwrIiQJtaidhO28FUcdvo</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 12:52</td>
+            <td>eduardo.gonzalezmartinez53@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TZCQ3IiQJtaidhOo6Os6u2L</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 12:46</td>
+            <td>rosyruperez@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TZCKUIiQJtaidhOF0ztHHIM</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 9:09</td>
+            <td>szmiki59@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TZ8w0IiQJtaidhOtbS9wwlT</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 6:19</td>
+            <td>jana.ciba49@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TZ6HpIiQJtaidhOKvkvL1jf</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 5:01</td>
+            <td>subipages@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TZ54EIiQJtaidhOr74uwqRK</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 3:43</td>
+            <td>gosibela@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TZ3qPIiQJtaidhO0Oq85t1J</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 16:03</td>
+            <td>mariacodbig@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYsvkIiQJtaidhOaEyUW60s</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 14:08</td>
+            <td>danielstanicaemanoil@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYr8QIiQJtaidhOnZbtA51d</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 11:29</td>
+            <td>wlapo43@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TYoeDIiQJtaidhO4lMI7mus</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 10:20</td>
+            <td>cipofuzos@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TYnZ4IiQJtaidhO6oMfpZMj</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 8:50</td>
+            <td>anarosajuan85@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYm9uIiQJtaidhOpLQEaFmk</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 8:33</td>
+            <td>fcserviciosinmobiliarios0@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYltdIiQJtaidhOHUgf6IUY</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 3:58</td>
+            <td>hrosik92@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TYhbkIiQJtaidhOjHDZ7t47</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 14:49</td>
+            <td>santiagoseco1@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYVIcIiQJtaidhOPkfH06gI</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 14:23</td>
+            <td>raquelmenfon@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYUtUIiQJtaidhOvtqoiz9U</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 13:54</td>
+            <td>mgrgg53035@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYURSIiQJtaidhOQbDKlLWK</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 12:02</td>
+            <td>mariasofiahernandezortega@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYSgVIiQJtaidhOuaEeajjd</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 8:22</td>
+            <td>enriquetaferrer.a@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYPG3IiQJtaidhOQancmoT5</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 7:11</td>
+            <td>manuel-reyes52@hotmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYO8wIiQJtaidhOMm4HeGih</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 4:23</td>
+            <td>juancondedelafuente@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TYLWLIiQJtaidhOJm60C1Gl</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 15:23</td>
+            <td>sikorskim157@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TY9LqIiQJtaidhO3fA53LZB</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 15:15</td>
+            <td>eliaortuno2011@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TY9DzIiQJtaidhOTAKjpj5x</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 14:46</td>
+            <td>diazhernandezpaco34@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TY8m9IiQJtaidhOxwj3Hsw6</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 11:33</td>
+            <td>jandufka1949@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TY5kYIiQJtaidhOhyL05pSx</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 8:49</td>
+            <td>tadbednarski@wp.pl</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TY3CYIiQJtaidhOFg3H6vlM</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 8:43</td>
+            <td>tomasviktora541@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TY36XIiQJtaidhObSIOGMlR</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 8:36</td>
+            <td>p.jan.n77@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TY2zXIiQJtaidhODFWY9Mfh</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 6:54</td>
+            <td>farotes50@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TY1OoIiQJtaidhOxqXHytAi</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 6:52</td>
+            <td>tete.arm@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TY1MzIiQJtaidhOrchjgikk</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 16:36</td>
+            <td>mjgarciabarcelona@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TXo0fIiQJtaidhOotK8dsRK</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 12:03</td>
+            <td>bodaemese9@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TXjk5IiQJtaidhOlaMuraLX</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 12:00</td>
+            <td>rodolforiveroberiain@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TXjhjIiQJtaidhOPUwEWaOD</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 8:09</td>
+            <td>torija47@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TXg6KIiQJtaidhO5YbBaCAl</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 7:34</td>
+            <td>adrearacz367@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TXfY5IiQJtaidhOJSz7kNgO</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 4:13</td>
+            <td>j.jkohoutovi@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TXcPkIiQJtaidhOUJ61rdoU</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 3:44</td>
+            <td>ladanyikne@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TXbxBIiQJtaidhOu8EtTGgj</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 16:55</td>
+            <td>dakszewiczandrzej5@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TXRpVIiQJtaidhOoCmsQH4W</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 12:38</td>
+            <td>rottenborova@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TXNovIiQJtaidhOQlCWbpQl</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 11:44</td>
+            <td>robertoalvarez1000@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TXMz0IiQJtaidhOeYNh6gmp</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 8:42</td>
+            <td>mariajosedesse@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TXK8aIiQJtaidhOPXZz6mDd</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 6:37</td>
+            <td>lintnerenator@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TXIBYIiQJtaidhOaWehg2G6</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 6:22</td>
+            <td>vidaimre06@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TXHwtIiQJtaidhOV0exKivt</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 6:20</td>
+            <td>llofadi@hotmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TXHueIiQJtaidhOGGDDjmtA</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 6:17</td>
+            <td>rosamaria.salgueiro@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TXHsUIiQJtaidhOAeZ3WuAJ</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 6:03</td>
+            <td>lahcenbougafer2@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TXHeoIiQJtaidhOeQ2y67JE</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 5:33</td>
+            <td>takacslajos.399@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TXHBCIiQJtaidhOe4S6rvUI</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 2:43</td>
+            <td>eva.machova56@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TXEXOIiQJtaidhO1AjA1PSv</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 1:44</td>
+            <td>miroslav.besorna@seznam.cz</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TXDc1IiQJtaidhOkb6LpchU</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 17:21</td>
+            <td>jm.rbarci@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TX5lCIiQJtaidhOZvm1fC02</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 16:21</td>
+            <td>sokaleba2018@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TX4p4IiQJtaidhOsrjMiwkc</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 16:18</td>
+            <td>houdaabdelhadi1988@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TX4mWIiQJtaidhOSYKj0J4Y</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 15:54</td>
+            <td>kristo6383@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TX4OlIiQJtaidhOPlnyOkeP</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 15:51</td>
+            <td>hugobejudy@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TX4M4IiQJtaidhOua3U01Tg</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 13:44</td>
+            <td>alesbohac90@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK/month</td>
+            <td class="mono">sub_1TX2NVIiQJtaidhOLqY0lpQg</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 11:27</td>
+            <td>renehidalgoperez58@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TX0E9IiQJtaidhO4aHcI6FR</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 11:17</td>
+            <td>sanci50@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TX04ZIiQJtaidhOPmTYtSgG</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 10:53</td>
+            <td>andrzejmotuk@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN/month</td>
+            <td class="mono">sub_1TWzhYIiQJtaidhO5JBXAtty</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 9:05</td>
+            <td>visloczkinemariann@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TWy1CIiQJtaidhOm1HZXTkM</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 6:37</td>
+            <td>ilona.reider@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TWvi3IiQJtaidhO6rUtn7ML</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 4:13</td>
+            <td>cipofuzos@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF/month</td>
+            <td class="mono">sub_1TWtS6IiQJtaidhO2asmaszj</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 22:01</td>
+            <td>janawalker56@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWneXIiQJtaidhOQYfpcX5t</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 18:14</td>
+            <td>javierborderaslucea@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWk6lIiQJtaidhOfBMWYjMA</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 18:13</td>
+            <td>miguelezlorenzo@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWk6KIiQJtaidhO2M5myMM8</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 16:00</td>
+            <td>pavelcicalek@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWi0vIiQJtaidhO4d2BuHtr</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 14:48</td>
+            <td>belengonz16@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWgtKIiQJtaidhOGmF6Zs65</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 14:34</td>
+            <td>studnicka2604@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWgftIiQJtaidhOMJtThyf3</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 12:03</td>
+            <td>doncsacsa60@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWeK7IiQJtaidhOTlvFrljj</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 6:25</td>
+            <td>jedebaja@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWZ2vIiQJtaidhODpjx5gYE</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 6:18</td>
+            <td>jltorrente60@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWYvnIiQJtaidhOWe7rGMCY</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 4:49</td>
+            <td>starportuense@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWXXNIiQJtaidhOQRbw4rJ3</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 11:41</td>
+            <td>angmartin99@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWHV9IiQJtaidhOWFkQFrWq</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 10:29</td>
+            <td>lgrassotc@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWGNKIiQJtaidhO9YcO46RB</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 9:39</td>
+            <td>szendreizsuzsa1@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWFavIiQJtaidhOCoxuGKzz</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 9:13</td>
+            <td>jenniferslimp54@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWFC8IiQJtaidhOywi1zUJZ</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 9:11</td>
+            <td>lotzy68@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWFA8IiQJtaidhOXZKKAKlF</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 9:04</td>
+            <td>enricolivast@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWF2lIiQJtaidhOXpeTnuO9</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 7:19</td>
+            <td>wtaukeiaho3323@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWDPOIiQJtaidhOUGawYb23</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 6:22</td>
+            <td>jsghernando1946@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWCWNIiQJtaidhO8vlx8Vew</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 5:48</td>
+            <td>rosanaconda@gmail.com</td>
+            <td><span class="badge badge-canceled">canceled</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWBzrIiQJtaidhOIOu0eAql</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 5:35</td>
+            <td>munozjohana491@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TWBmSIiQJtaidhOaq9HPPu8</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 3:46</td>
+            <td>vargapassatb@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TWA5PIiQJtaidhOKGn4diDv</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 2:58</td>
+            <td>borzoltan88@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TW9LEIiQJtaidhOAcLCBfQG</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 2:42</td>
+            <td>aldo.calva@icloud.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TW95XIiQJtaidhOfwdaUzEd</td>
+          </tr>
+          <tr>
+            <td>11/5/26, 13:32</td>
+            <td>kadubmirek@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TVwkZIiQJtaidhOgpuIGd6y</td>
+          </tr>
+          <tr>
+            <td>11/5/26, 12:20</td>
+            <td>mihokl54@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TVvdZIiQJtaidhODeINA2sR</td>
+          </tr>
+          <tr>
+            <td>11/5/26, 11:46</td>
+            <td>cserigabor4@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TVv5sIiQJtaidhOHg5zwbo7</td>
+          </tr>
+          <tr>
+            <td>11/5/26, 2:49</td>
+            <td>szegedijo54@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TVmiEIiQJtaidhOh3e8R7Mf</td>
+          </tr>
+          <tr>
+            <td>10/5/26, 14:31</td>
+            <td>erikabathoryne@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TVbBxIiQJtaidhOIPgStb7n</td>
+          </tr>
+          <tr>
+            <td>10/5/26, 9:42</td>
+            <td>babe.estades@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €/month</td>
+            <td class="mono">sub_1TVWgfIiQJtaidhOZfLz7zZA</td>
+          </tr>
+          <tr>
+            <td>10/5/26, 6:37</td>
+            <td>burisx.154@gmail.com</td>
+            <td><span class="badge badge-active">active</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TVTnqIiQJtaidhOWN9i8ldZ</td>
+          </tr>
+          <tr>
+            <td>10/5/26, 4:30</td>
+            <td>vacek737939387@gmail.com</td>
+            <td><span class="badge badge-past_due">past_due</span></td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$/month</td>
+            <td class="mono">sub_1TVRpFIiQJtaidhO1GNiBphI</td>
+          </tr></tbody></table></div>
+
+      <h2>Detalle de cobros (143)</h2>
+      <div class="table-wrap"><table><thead><tr><th>Fecha pago</th><th>Fecha suscripción</th><th>Número</th><th>Precio</th><th>Importe</th><th>Email / customer</th><th>Billing reason</th><th>Subscription</th><th>Invoice</th></tr></thead><tbody>
+          <tr>
+            <td>3/6/26, 14:20</td>
+            <td>2026-06-02</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>feliiglesiaslopez@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1Tdv0kIiQJtaidhOnJaAzOAZ</td>
+            <td class="mono">in_1TeHVoIiQJtaidhOAaC6Opj5</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 13:53</td>
+            <td>2026-06-02</td>
+            <td>1er cobro</td>
+            <td>Cross Canada · 28,00 CAD/month</td>
+            <td>28,00 CAD</td>
+            <td>arleneblack083@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TdubsIiQJtaidhOjepFbU8b</td>
+            <td class="mono">in_1TeH6aIiQJtaidhOeVTaSG0B</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 12:57</td>
+            <td>2026-06-02</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>vlastakoutova77@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TdthsIiQJtaidhOq5XXPsfl</td>
+            <td class="mono">in_1TeGE2IiQJtaidhOwBHyM8uw</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 4:43</td>
+            <td>2026-05-12</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>aldo.calva@icloud.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TW95XIiQJtaidhOfwdaUzEd</td>
+            <td class="mono">in_1TWVZ8IiQJtaidhOHbC6nXV9</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 4:09</td>
+            <td>2026-06-02</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>jferbr@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TdlQxIiQJtaidhO78MttpGW</td>
+            <td class="mono">in_1Te7vRIiQJtaidhOWvZbpWEY</td>
+          </tr>
+          <tr>
+            <td>3/6/26, 2:09</td>
+            <td>2026-06-02</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>zdenekk48@seznam.cz</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TdjakIiQJtaidhOam2uDfnR</td>
+            <td class="mono">in_1Te65AIiQJtaidhOWiOqXmKT</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 13:45</td>
+            <td>2026-05-21</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>sarkozikrisztina785@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZXfeIiQJtaidhOw9C1FE0j</td>
+            <td class="mono">in_1TZuBhIiQJtaidhO1yIA90Nv</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 12:55</td>
+            <td>2026-06-01</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>verdaguersayos@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TdXBvIiQJtaidhOPhCyAAtd</td>
+            <td class="mono">in_1TdtgEIiQJtaidhO08mERnY2</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 11:38</td>
+            <td>2026-03-01</td>
+            <td>4º cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>marianstolarski17@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T6A8aIiQJtaidhOgbEvyvJh</td>
+            <td class="mono">in_1TdsUdIiQJtaidhOOB0Qa0n5</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 10:33</td>
+            <td>2026-06-01</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>josemarialigero1975@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TdUxKIiQJtaidhO8gvlvfil</td>
+            <td class="mono">in_1TdrTIIiQJtaidhOGSmLNcOY</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 8:37</td>
+            <td>2026-03-01</td>
+            <td>4º cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>u5437187487@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T67IsIiQJtaidhOCRRuXW0I</td>
+            <td class="mono">in_1TdpdGIiQJtaidhOH5QSftoo</td>
+          </tr>
+          <tr>
+            <td>2/6/26, 3:21</td>
+            <td>2026-05-27</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>hansmeran@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1Tbk9rIiQJtaidhOPc6jWRvM</td>
+            <td class="mono">in_1Tc6feIiQJtaidhOdDyxqcBd</td>
+          </tr>
+          <tr>
+            <td>1/6/26, 3:13</td>
+            <td>2026-02-28</td>
+            <td>4º cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>marcin.sochaa@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T5eK4IiQJtaidhO7wixBY7X</td>
+            <td class="mono">in_1TdNmiIiQJtaidhOEmqE6sg3</td>
+          </tr>
+          <tr>
+            <td>31/5/26, 20:30</td>
+            <td>2026-05-26</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>corredurucho2@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TbJ4XIiQJtaidhOddu5W1Zd</td>
+            <td class="mono">in_1Tbfa0IiQJtaidhOILRHcIgJ</td>
+          </tr>
+          <tr>
+            <td>31/5/26, 14:14</td>
+            <td>2026-05-30</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>mwinters96@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TcpUTIiQJtaidhOjPWBJslw</td>
+            <td class="mono">in_1TdC0AIiQJtaidhO7pYaiB2W</td>
+          </tr>
+          <tr>
+            <td>31/5/26, 12:47</td>
+            <td>2026-02-25</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>piliv66@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T4efoIiQJtaidhOrvz0xlKd</td>
+            <td class="mono">in_1TbHZNIiQJtaidhOEkpnQAtL</td>
+          </tr>
+          <tr>
+            <td>31/5/26, 7:47</td>
+            <td>2026-05-30</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>kohoutova.martina@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TcjTtIiQJtaidhOy6956Tmi</td>
+            <td class="mono">in_1Td5xhIiQJtaidhO8ti1Vs16</td>
+          </tr>
+          <tr>
+            <td>31/5/26, 7:05</td>
+            <td>2026-05-30</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>novakmaria.a@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TciodIiQJtaidhOwl0EfFk5</td>
+            <td class="mono">in_1Td5IQIiQJtaidhOd2TIn3M4</td>
+          </tr>
+          <tr>
+            <td>30/5/26, 9:04</td>
+            <td>2026-05-29</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>zuzka.smid@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TcO8yIiQJtaidhOl2HpDJH4</td>
+            <td class="mono">in_1Tckf5IiQJtaidhOyGwkcebV</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 23:37</td>
+            <td>2026-02-23</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>matute.1946@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T44twIiQJtaidhObbPxvmnp</td>
+            <td class="mono">in_1TahoQIiQJtaidhOyTxqR0sM</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 12:12</td>
+            <td>2026-05-28</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>malvhig@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1Tc4dkIiQJtaidhOO3ZFK9li</td>
+            <td class="mono">in_1TcR8cIiQJtaidhOEnG4YQzI</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 6:22</td>
+            <td>2026-05-28</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>jaskiewicza881@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TbzAbIiQJtaidhOXEXWSS9g</td>
+            <td class="mono">in_1TcLg4IiQJtaidhOEeGBeOq0</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 3:34</td>
+            <td>2026-05-23</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>abadiasalastrue@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TaCqeIiQJtaidhOcsCzNQqT</td>
+            <td class="mono">in_1TaZLkIiQJtaidhOYuZTRW3M</td>
+          </tr>
+          <tr>
+            <td>29/5/26, 2:13</td>
+            <td>2026-05-12</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>lotzy68@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWFA8IiQJtaidhOXZKKAKlF</td>
+            <td class="mono">in_1TWbe3IiQJtaidhOwE42aymt</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 16:02</td>
+            <td>2026-02-27</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>jesusurkia54@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T5VL4IiQJtaidhOZ5k6HRPR</td>
+            <td class="mono">in_1Tc8FaIiQJtaidhORHs9NcMQ</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 15:28</td>
+            <td>2026-02-27</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>jurkiewiiczz@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T5UnCIiQJtaidhOS7YgwZBR</td>
+            <td class="mono">in_1Tc7ifIiQJtaidhOBNy4wyxA</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 10:06</td>
+            <td>2026-05-27</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>micinski44@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TbgDKIiQJtaidhOuDIrrua6</td>
+            <td class="mono">in_1Tc2h9IiQJtaidhOa5fCXD3v</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 9:30</td>
+            <td>2026-01-27</td>
+            <td>5º cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>maroweentieties96@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1SuAQvIiQJtaidhOtyL3ihpn</td>
+            <td class="mono">in_1Tc27qIiQJtaidhO3lErGcJU</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 8:12</td>
+            <td>2026-05-27</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>rafael.ortizvazquez@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TbeOoIiQJtaidhONXlwXOec</td>
+            <td class="mono">in_1Tc0u3IiQJtaidhOv79L1a8u</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 8:09</td>
+            <td>2026-05-27</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>soidemer61@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TbeNtIiQJtaidhO2BpJif9m</td>
+            <td class="mono">in_1Tc0rdIiQJtaidhOa6kv7dxA</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 4:39</td>
+            <td>2026-05-27</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>kollath.sandor77@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1Tbb5AIiQJtaidhOz5h5uZrq</td>
+            <td class="mono">in_1Tbxa5IiQJtaidhOdMAOOJyJ</td>
+          </tr>
+          <tr>
+            <td>28/5/26, 3:04</td>
+            <td>2026-05-27</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>slawekkielin100@o2.pl</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TbZcTIiQJtaidhO19ZEkRXo</td>
+            <td class="mono">in_1Tbw6aIiQJtaidhOwMDpp3jT</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 13:23</td>
+            <td>2026-05-26</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>abraguerra5@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TbMlYIiQJtaidhOwJAWNuVk</td>
+            <td class="mono">in_1TbjHuIiQJtaidhO1UsO4rvk</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 13:14</td>
+            <td>2026-05-26</td>
+            <td>1er cobro</td>
+            <td>Cross Canada · 28,00 CAD/month</td>
+            <td>28,00 CAD</td>
+            <td>russelgirard1947@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TbMbgIiQJtaidhOZXlKHqJP</td>
+            <td class="mono">in_1Tbj7yIiQJtaidhOh7z4RrBe</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 7:56</td>
+            <td>2026-05-26</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>s.urbaniak@o2.pl</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TbHc3IiQJtaidhOnTpvtG9D</td>
+            <td class="mono">in_1Tbe6pIiQJtaidhOJ12F5BBL</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 6:23</td>
+            <td>2026-01-26</td>
+            <td>5º cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>j.bullichc@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1StkwiIiQJtaidhO9NEibpTD</td>
+            <td class="mono">in_1TbceXIiQJtaidhOhuayQ7MN</td>
+          </tr>
+          <tr>
+            <td>27/5/26, 4:28</td>
+            <td>2026-01-26</td>
+            <td>5º cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>montseborrastomas49@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1StjDZIiQJtaidhOs2RlAh53</td>
+            <td class="mono">in_1TbaunIiQJtaidhO8rXlNqEz</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 9:17</td>
+            <td>2026-05-25</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>anicetoniza@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TawSeIiQJtaidhOE2fMOi3A</td>
+            <td class="mono">in_1TbIxSIiQJtaidhOQCXbKXWg</td>
+          </tr>
+          <tr>
+            <td>26/5/26, 3:50</td>
+            <td>2026-02-25</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>olgamartos27@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T4auoIiQJtaidhOmePc4VKW</td>
+            <td class="mono">in_1TbDopIiQJtaidhObJbJqX9K</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 17:13</td>
+            <td>2026-05-24</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>grgarbar@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TaeJcIiQJtaidhOiTxEFZNM</td>
+            <td class="mono">in_1Tb0nkIiQJtaidhO5yHFfwFv</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 17:12</td>
+            <td>2026-02-24</td>
+            <td>4º cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>ptmoch@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T4NxkIiQJtaidhOC9awpMq4</td>
+            <td class="mono">in_1Tb0s5IiQJtaidhOvnIOd18g</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 17:12</td>
+            <td>2026-02-24</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>mariaencarnacionrodriguez0@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T4NwqIiQJtaidhOjM2ugXl8</td>
+            <td class="mono">in_1Tb0qNIiQJtaidhOAAisorVe</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 13:08</td>
+            <td>2026-05-24</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>odalisantoniocruzmatias@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TadSDIiQJtaidhO9RE7pQD6</td>
+            <td class="mono">in_1TazwjIiQJtaidhOfCxqnFhU</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 13:07</td>
+            <td>2026-02-24</td>
+            <td>4º cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>havasneagi61@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T4MAgIiQJtaidhO9uzGrMvP</td>
+            <td class="mono">in_1Taz74IiQJtaidhOobWtGsUc</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 13:07</td>
+            <td>2026-05-24</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>mbenitezrico@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1Tacj4IiQJtaidhOvSW92Zn5</td>
+            <td class="mono">in_1TazDNIiQJtaidhObbI6Y89N</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 13:07</td>
+            <td>2026-05-24</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>gyarfasmarta@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TabfhIiQJtaidhODsxKegQt</td>
+            <td class="mono">in_1TayB6IiQJtaidhOcIbxzHiY</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 10:06</td>
+            <td>2026-05-24</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>milan.reindl1@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TaajkIiQJtaidhOzqY4HgjP</td>
+            <td class="mono">in_1TaxG6IiQJtaidhOCObtd57u</td>
+          </tr>
+          <tr>
+            <td>25/5/26, 6:57</td>
+            <td>2026-02-24</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>NCascales44@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T4HQZIiQJtaidhOwyVJe7Pf</td>
+            <td class="mono">in_1TauJzIiQJtaidhO8Z02vQZB</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 18:48</td>
+            <td>2026-05-23</td>
+            <td>1er cobro</td>
+            <td>Cross USA · 39,99 US$/month</td>
+            <td>39,99 US$</td>
+            <td>gayl.hinshaw@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TaMRLIiQJtaidhOAXOViyCt</td>
+            <td class="mono">in_1TaivQIiQJtaidhOcnJdorrZ</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 18:28</td>
+            <td>2026-02-23</td>
+            <td>4º cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>gyuri.bedjacs@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T45jyIiQJtaidhOjLHrPjCn</td>
+            <td class="mono">in_1TaidTIiQJtaidhOxI9tqdU5</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 13:08</td>
+            <td>2026-05-23</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>santi.astorgano.alonso@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TaH7xIiQJtaidhOCEDfONt0</td>
+            <td class="mono">in_1TadcSIiQJtaidhO2w3fw18c</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 12:35</td>
+            <td>2026-05-23</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>saratxagajulio242@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TaGdOIiQJtaidhO0G63csuM</td>
+            <td class="mono">in_1Tad74IiQJtaidhOBWu1Oaw4</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 12:20</td>
+            <td>2026-05-23</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>piotrosieja1@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TaGOkIiQJtaidhOk0yTl3RD</td>
+            <td class="mono">in_1TacsmIiQJtaidhOlA9m78vX</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 12:09</td>
+            <td>2026-05-23</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>arek750121@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TaGAcIiQJtaidhO34XhMRo6</td>
+            <td class="mono">in_1TacgyIiQJtaidhO2esa1UE8</td>
+          </tr>
+          <tr>
+            <td>24/5/26, 6:42</td>
+            <td>2026-02-23</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>pepegutiojan@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T3uhZIiQJtaidhOfg6RM1xB</td>
+            <td class="mono">in_1TaXbNIiQJtaidhOcekwLmIJ</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 16:56</td>
+            <td>2026-05-22</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>prokupekjosef@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZyBzIiQJtaidhO4rkBl9ZA</td>
+            <td class="mono">in_1TaKiEIiQJtaidhOl08xv5bs</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 16:43</td>
+            <td>2026-02-22</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>tdelacruz438@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T3haHIiQJtaidhOUOFbe9UM</td>
+            <td class="mono">in_1TaKVgIiQJtaidhOF9WAqvx2</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 15:33</td>
+            <td>2026-05-22</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>jeep5537@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZwuKIiQJtaidhOUKcYoGlV</td>
+            <td class="mono">in_1TaJQRIiQJtaidhOBZWb96Qe</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 10:23</td>
+            <td>2026-05-22</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>vfarsky@seznam.cz</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZs4JIiQJtaidhOjpWhCZeb</td>
+            <td class="mono">in_1TaEZXIiQJtaidhOAZMkDPnP</td>
+          </tr>
+          <tr>
+            <td>23/5/26, 9:17</td>
+            <td>2026-02-22</td>
+            <td>4º cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>KvTichy@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T3aenIiQJtaidhO0vH6FKld</td>
+            <td class="mono">in_1TaDYSIiQJtaidhOAwtl6uh2</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 17:44</td>
+            <td>2026-02-21</td>
+            <td>4º cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>juhaszludmila@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T3M52IiQJtaidhOU8Wp3bfI</td>
+            <td class="mono">in_1TZyzGIiQJtaidhO0Zx3VbgL</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 15:45</td>
+            <td>2026-05-21</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>agfsm3@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZXvfIiQJtaidhObgwQ9K0V</td>
+            <td class="mono">in_1TZuR8IiQJtaidhO07zQUYhl</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 9:21</td>
+            <td>2026-05-21</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>mvig8428@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZUeVIiQJtaidhO48Mk8QkU</td>
+            <td class="mono">in_1TZr8fIiQJtaidhOq9NEc3Jd</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 8:10</td>
+            <td>2026-05-21</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>opanczyszyn@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZTXOIiQJtaidhO9wi67Brf</td>
+            <td class="mono">in_1TZq1RIiQJtaidhOf3bdFeuV</td>
+          </tr>
+          <tr>
+            <td>22/5/26, 7:19</td>
+            <td>2026-05-21</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>aserdecznypl@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZSiIIiQJtaidhOVBjWVxyn</td>
+            <td class="mono">in_1TZpDwIiQJtaidhOqDhxrgLx</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 16:37</td>
+            <td>2026-05-20</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>mjssm965@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZEwrIiQJtaidhO28FUcdvo</td>
+            <td class="mono">in_1TZbS5IiQJtaidhOYe6ziCp0</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 13:55</td>
+            <td>2026-05-20</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>eduardo.gonzalezmartinez53@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZCQ3IiQJtaidhOo6Os6u2L</td>
+            <td class="mono">in_1TZYwFIiQJtaidhO7A1gRa8m</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 13:48</td>
+            <td>2026-05-20</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>rosyruperez@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZCKUIiQJtaidhOF0ztHHIM</td>
+            <td class="mono">in_1TZYooIiQJtaidhOkxyrBe2q</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 10:12</td>
+            <td>2026-05-20</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>szmiki59@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZ8w0IiQJtaidhOtbS9wwlT</td>
+            <td class="mono">in_1TZVQDIiQJtaidhOdm9fYEjU</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 8:46</td>
+            <td>2026-05-15</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>miroslav.besorna@seznam.cz</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXDc1IiQJtaidhOkb6LpchU</td>
+            <td class="mono">in_1TXa6oIiQJtaidhOPjbelJoy</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 6:03</td>
+            <td>2026-05-20</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>subipages@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZ54EIiQJtaidhOr74uwqRK</td>
+            <td class="mono">in_1TZRZEIiQJtaidhO3mmmHKEQ</td>
+          </tr>
+          <tr>
+            <td>21/5/26, 4:45</td>
+            <td>2026-05-20</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>gosibela@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TZ3qPIiQJtaidhO0Oq85t1J</td>
+            <td class="mono">in_1TZQLWIiQJtaidhOTZ6CpzhG</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 15:46</td>
+            <td>2026-05-19</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>wlapo43@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TYoeDIiQJtaidhO4lMI7mus</td>
+            <td class="mono">in_1TZB89IiQJtaidhOEAI1USfH</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 5:15</td>
+            <td>2026-02-19</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>alvaropajueloc56@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T2RQLIiQJtaidhOSiHFSL8r</td>
+            <td class="mono">in_1TZ4LNIiQJtaidhOPPsZdYAo</td>
+          </tr>
+          <tr>
+            <td>20/5/26, 5:01</td>
+            <td>2026-05-19</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>hrosik92@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TYhbkIiQJtaidhOjHDZ7t47</td>
+            <td class="mono">in_1TZ472IiQJtaidhO447tcN00</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 15:45</td>
+            <td>2026-05-18</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>mgrgg53035@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TYURSIiQJtaidhOQbDKlLWK</td>
+            <td class="mono">in_1TYqyRIiQJtaidhORLrWN362</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 15:44</td>
+            <td>2026-05-18</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>raquelmenfon@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TYUtUIiQJtaidhOvtqoiz9U</td>
+            <td class="mono">in_1TYrNbIiQJtaidhOUq4687m4</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 15:44</td>
+            <td>2026-02-18</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>osornillo55@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T2DS8IiQJtaidhORadw6ODl</td>
+            <td class="mono">in_1TYqOYIiQJtaidhOUmmyuGic</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 11:49</td>
+            <td>2026-05-13</td>
+            <td>1er cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>miguelezlorenzo@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWk6KIiQJtaidhO2M5myMM8</td>
+            <td class="mono">in_1TX6bsIiQJtaidhOJtPdvCl5</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 9:23</td>
+            <td>2026-05-18</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>enriquetaferrer.a@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TYPG3IiQJtaidhOQancmoT5</td>
+            <td class="mono">in_1TYlkAIiQJtaidhOhYgqI8gf</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 8:24</td>
+            <td>2026-02-18</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>leivamonzonyoel@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T27tBIiQJtaidhOtJvKUeI4</td>
+            <td class="mono">in_1TYkoZIiQJtaidhO9TIRmS76</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 8:13</td>
+            <td>2026-05-18</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>manuel-reyes52@hotmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TYO8wIiQJtaidhOMm4HeGih</td>
+            <td class="mono">in_1TYkdqIiQJtaidhOtbjrTZmf</td>
+          </tr>
+          <tr>
+            <td>19/5/26, 3:35</td>
+            <td>2026-02-18</td>
+            <td>4º cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>kribikjaromir@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T23Q4IiQJtaidhOKtIOjbHa</td>
+            <td class="mono">in_1TYgJXIiQJtaidhOFsJRNCiy</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 18:26</td>
+            <td>2026-05-17</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>sikorskim157@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TY9LqIiQJtaidhO3fA53LZB</td>
+            <td class="mono">in_1TYVpfIiQJtaidhORoz9CgG2</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 18:26</td>
+            <td>2026-05-17</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>eliaortuno2011@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TY9DzIiQJtaidhOTAKjpj5x</td>
+            <td class="mono">in_1TYVhrIiQJtaidhOMYKoYoRQ</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 15:53</td>
+            <td>2026-05-17</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>diazhernandezpaco34@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TY8m9IiQJtaidhOxwj3Hsw6</td>
+            <td class="mono">in_1TYVGRIiQJtaidhOLnDVdWxA</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 15:46</td>
+            <td>2026-02-17</td>
+            <td>4º cobro</td>
+            <td>Cross Portugal · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>helenasantosmarques10@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T1rmUIiQJtaidhOXCW34G4n</td>
+            <td class="mono">in_1TYUgkIiQJtaidhOnly6U6rV</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 15:41</td>
+            <td>2026-05-17</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>jandufka1949@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TY5kYIiQJtaidhOhyL05pSx</td>
+            <td class="mono">in_1TYSETIiQJtaidhOPHlnAcGe</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 11:06</td>
+            <td>2026-02-17</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>daoudatamboura99@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T1mtQIiQJtaidhOt0kW3a0B</td>
+            <td class="mono">in_1TYPoYIiQJtaidhOQyQHhG6j</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 9:52</td>
+            <td>2026-05-17</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>tadbednarski@wp.pl</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TY3CYIiQJtaidhOFg3H6vlM</td>
+            <td class="mono">in_1TYPhkIiQJtaidhOwLvc1AJt</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 9:39</td>
+            <td>2026-05-17</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>p.jan.n77@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TY2zXIiQJtaidhODFWY9Mfh</td>
+            <td class="mono">in_1TYPVFIiQJtaidhO3NfdGoXx</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 9:04</td>
+            <td>2026-02-17</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>talent.accio@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T1m1vIiQJtaidhOuOzlWr0v</td>
+            <td class="mono">in_1TYOvvIiQJtaidhO2D7WRrVN</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 7:59</td>
+            <td>2026-05-17</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>farotes50@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TY1OoIiQJtaidhOxqXHytAi</td>
+            <td class="mono">in_1TYNtpIiQJtaidhOCDrz5qfd</td>
+          </tr>
+          <tr>
+            <td>18/5/26, 7:44</td>
+            <td>2026-02-17</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>raquelvalor@yahoo.es</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T1kJhIiQJtaidhOLqXeuq98</td>
+            <td class="mono">in_1TYNDkIiQJtaidhOHsd0kncB</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 13:03</td>
+            <td>2026-05-16</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>rodolforiveroberiain@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXjhjIiQJtaidhOPUwEWaOD</td>
+            <td class="mono">in_1TY6DBIiQJtaidhOAYF7Wwh3</td>
+          </tr>
+          <tr>
+            <td>17/5/26, 5:14</td>
+            <td>2026-05-16</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>j.jkohoutovi@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXcPkIiQJtaidhOUJ61rdoU</td>
+            <td class="mono">in_1TXytMIiQJtaidhOU3Uvalea</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 17:57</td>
+            <td>2026-05-15</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>dakszewiczandrzej5@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXRpVIiQJtaidhOoCmsQH4W</td>
+            <td class="mono">in_1TXoKJIiQJtaidhOna94NQT0</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 13:40</td>
+            <td>2026-05-15</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>rottenborova@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXNovIiQJtaidhOQlCWbpQl</td>
+            <td class="mono">in_1TXkIzIiQJtaidhOG9oBc39E</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 12:45</td>
+            <td>2026-05-15</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>robertoalvarez1000@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXMz0IiQJtaidhOeYNh6gmp</td>
+            <td class="mono">in_1TXjSjIiQJtaidhOK6K1UQdB</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 7:39</td>
+            <td>2026-05-15</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>lintnerenator@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXIBYIiQJtaidhOaWehg2G6</td>
+            <td class="mono">in_1TXeh4IiQJtaidhOaly3UTtH</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 7:38</td>
+            <td>2026-02-15</td>
+            <td>4º cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>carmenarnaldovalle58@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T11jyIiQJtaidhOcFTFpwWA</td>
+            <td class="mono">in_1TXefAIiQJtaidhOAbEBKnD4</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 7:23</td>
+            <td>2026-05-15</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>llofadi@hotmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXHueIiQJtaidhOGGDDjmtA</td>
+            <td class="mono">in_1TXeQpIiQJtaidhO3Vo0hGSn</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 7:17</td>
+            <td>2026-02-15</td>
+            <td>4º cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>szymulabeata@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T11R8IiQJtaidhOhJkqAvcr</td>
+            <td class="mono">in_1TXeKtIiQJtaidhOPSCsGTjg</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 7:04</td>
+            <td>2026-05-15</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>lahcenbougafer2@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXHeoIiQJtaidhOeQ2y67JE</td>
+            <td class="mono">in_1TXe8iIiQJtaidhOwWKEnIoE</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 6:34</td>
+            <td>2026-05-15</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>takacslajos.399@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXHBCIiQJtaidhOe4S6rvUI</td>
+            <td class="mono">in_1TXdfWIiQJtaidhOpc4faBKn</td>
+          </tr>
+          <tr>
+            <td>16/5/26, 3:45</td>
+            <td>2026-05-15</td>
+            <td>1er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>eva.machova56@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TXEXOIiQJtaidhO1AjA1PSv</td>
+            <td class="mono">in_1TXb1tIiQJtaidhO0mWcQiUl</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 23:16</td>
+            <td>2026-05-10</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>burisx.154@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TVTnqIiQJtaidhOWN9i8ldZ</td>
+            <td class="mono">in_1TVqIyIiQJtaidhOrErF7FYI</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 12:52</td>
+            <td>2026-05-14</td>
+            <td>1er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>renehidalgoperez58@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TX0E9IiQJtaidhO4aHcI6FR</td>
+            <td class="mono">in_1TXMiBIiQJtaidhOt6BTDjsj</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 12:52</td>
+            <td>2026-05-14</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>sanci50@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TX04ZIiQJtaidhOPmTYtSgG</td>
+            <td class="mono">in_1TXMZFIiQJtaidhOLKYoPcDR</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 11:59</td>
+            <td>2026-05-14</td>
+            <td>1er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>andrzejmotuk@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWzhYIiQJtaidhO5JBXAtty</td>
+            <td class="mono">in_1TXMDrIiQJtaidhOu47hiNsO</td>
+          </tr>
+          <tr>
+            <td>15/5/26, 7:38</td>
+            <td>2026-05-14</td>
+            <td>1er cobro</td>
+            <td>Cross Hungria · 6800 HUF/month</td>
+            <td>6800 HUF</td>
+            <td>ilona.reider@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWvi3IiQJtaidhO6rUtn7ML</td>
+            <td class="mono">in_1TXICUIiQJtaidhOr3PVQsrK</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 17:56</td>
+            <td>2026-05-13</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>pavelcicalek@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWi0vIiQJtaidhO4d2BuHtr</td>
+            <td class="mono">in_1TX4VAIiQJtaidhOlcXxJ7LH</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 15:44</td>
+            <td>2026-05-13</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>studnicka2604@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWgftIiQJtaidhOMJtThyf3</td>
+            <td class="mono">in_1TX3BqIiQJtaidhOYrWg3ezQ</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 12:59</td>
+            <td>2026-03-13</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>toporeva2@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TAX8wIiQJtaidhOfyFjj4D6</td>
+            <td class="mono">in_1TX0j1IiQJtaidhOAnTXJ5zR</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 7:28</td>
+            <td>2026-05-13</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>jedebaja@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWZ2vIiQJtaidhODpjx5gYE</td>
+            <td class="mono">in_1TWvYJIiQJtaidhOkcHOYllL</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 7:21</td>
+            <td>2026-05-13</td>
+            <td>1er cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>jltorrente60@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWYvnIiQJtaidhOWe7rGMCY</td>
+            <td class="mono">in_1TWvRcIiQJtaidhOufI1T4BC</td>
+          </tr>
+          <tr>
+            <td>14/5/26, 6:48</td>
+            <td>2026-03-13</td>
+            <td>3er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>jbtarrazo@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TARODIiQJtaidhOsIFJZ49O</td>
+            <td class="mono">in_1TWuwRIiQJtaidhO1Wynr9ps</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 18:24</td>
+            <td>2026-03-12</td>
+            <td>3er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>marcelaguau145@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TAFlcIiQJtaidhOIrk3RjZI</td>
+            <td class="mono">in_1TWjJsIiQJtaidhO41b61ja3</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 17:30</td>
+            <td>2026-03-12</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>pityu650216@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TAEtqIiQJtaidhOlqF28oBL</td>
+            <td class="mono">in_1TWiT3IiQJtaidhO2UtmTouI</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 12:42</td>
+            <td>2026-05-12</td>
+            <td>1er cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>angmartin99@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWHV9IiQJtaidhOWFkQFrWq</td>
+            <td class="mono">in_1TWdzCIiQJtaidhOeocJgMae</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 10:42</td>
+            <td>2026-05-12</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>szendreizsuzsa1@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWFavIiQJtaidhOCoxuGKzz</td>
+            <td class="mono">in_1TWc6JIiQJtaidhO84hSCVjQ</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 7:25</td>
+            <td>2026-05-12</td>
+            <td>1er cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>jsghernando1946@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWCWNIiQJtaidhO8vlx8Vew</td>
+            <td class="mono">in_1TWZ1QIiQJtaidhO0ls1BS6M</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 6:48</td>
+            <td>2026-03-12</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>51tvami@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TA4t7IiQJtaidhO5QmxLZcX</td>
+            <td class="mono">in_1TWYSqIiQJtaidhOc5YPpuOm</td>
+          </tr>
+          <tr>
+            <td>13/5/26, 6:36</td>
+            <td>2026-05-12</td>
+            <td>1er cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>munozjohana491@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TWBmSIiQJtaidhOaq9HPPu8</td>
+            <td class="mono">in_1TWYG7IiQJtaidhOzyNru5b9</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 15:44</td>
+            <td>2026-03-11</td>
+            <td>3er cobro</td>
+            <td>Cross Rep. Checa · 419,00 CZK/month</td>
+            <td>419,00 CZK</td>
+            <td>novakkarel106@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T9qlRIiQJtaidhOu0eO8IwY</td>
+            <td class="mono">in_1TWKKlIiQJtaidhOkHpOBchs</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 13:23</td>
+            <td>2026-05-11</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>mihokl54@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TVvdZIiQJtaidhODeINA2sR</td>
+            <td class="mono">in_1TWI8oIiQJtaidhOD2p9DUoY</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 13:07</td>
+            <td>2026-03-11</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>annahansen029@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T9oKuIiQJtaidhOfRLNnz3u</td>
+            <td class="mono">in_1TWHtjIiQJtaidhO5W0giapV</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 13:03</td>
+            <td>2026-03-11</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>annapilka6739@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T9oFQIiQJtaidhO4CPTqXYK</td>
+            <td class="mono">in_1TWHpAIiQJtaidhOzcX5OfGq</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 10:13</td>
+            <td>2026-03-11</td>
+            <td>3er cobro</td>
+            <td>Cross Portugal · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>jluisreis@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T9lbsIiQJtaidhOsVsG4wbP</td>
+            <td class="mono">in_1TWFBcIiQJtaidhOtfZp7a9k</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 8:02</td>
+            <td>2026-03-11</td>
+            <td>3er cobro</td>
+            <td>Cross Portugal · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>gverissimogomes@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T9iHwIiQJtaidhO0J5A27DJ</td>
+            <td class="mono">in_1TWBr1IiQJtaidhOkAjnUrSm</td>
+          </tr>
+          <tr>
+            <td>12/5/26, 3:53</td>
+            <td>2026-05-11</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>szegedijo54@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TVmiEIiQJtaidhOh3e8R7Mf</td>
+            <td class="mono">in_1TW9D2IiQJtaidhOAybhV6cE</td>
+          </tr>
+          <tr>
+            <td>11/5/26, 15:32</td>
+            <td>2026-05-10</td>
+            <td>1er cobro</td>
+            <td>Default · 19,99 US$/month</td>
+            <td>19,99 US$</td>
+            <td>erikabathoryne@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TVbBxIiQJtaidhOIPgStb7n</td>
+            <td class="mono">in_1TVxhCIiQJtaidhOQHnFrrWD</td>
+          </tr>
+          <tr>
+            <td>11/5/26, 12:49</td>
+            <td>2026-03-05</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>olszewski1955@wp.pl</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T7fyKIiQJtaidhO1uroBVah</td>
+            <td class="mono">in_1TU9YaIiQJtaidhOXA3umc4v</td>
+          </tr>
+          <tr>
+            <td>11/5/26, 11:07</td>
+            <td>2026-05-10</td>
+            <td>1er cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>babe.estades@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1TVWgfIiQJtaidhOZfLz7zZA</td>
+            <td class="mono">in_1TVtBaIiQJtaidhOe0Q8GK1U</td>
+          </tr>
+          <tr>
+            <td>8/5/26, 12:04</td>
+            <td>2026-03-07</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>terjek.laszlo69@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T8Jm3IiQJtaidhOwkJIb9f9</td>
+            <td class="mono">in_1TUnMOIiQJtaidhO93d2IFH6</td>
+          </tr>
+          <tr>
+            <td>8/5/26, 7:50</td>
+            <td>2026-03-07</td>
+            <td>3er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>magdalena.benejam@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T8HUYIiQJtaidhOVSWuKhLn</td>
+            <td class="mono">in_1TUl3JIiQJtaidhOGo3TBMcT</td>
+          </tr>
+          <tr>
+            <td>8/5/26, 5:11</td>
+            <td>2026-03-07</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>lech.patulski@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T8F02IiQJtaidhOU1Yy5OUr</td>
+            <td class="mono">in_1TUiY6IiQJtaidhOvqS4OINB</td>
+          </tr>
+          <tr>
+            <td>7/5/26, 23:46</td>
+            <td>2026-03-02</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>kissmonika7406@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T6T1BIiQJtaidhOypZprrM1</td>
+            <td class="mono">in_1TSwaLIiQJtaidhOtsr3URRG</td>
+          </tr>
+          <tr>
+            <td>7/5/26, 18:27</td>
+            <td>2026-03-06</td>
+            <td>3er cobro</td>
+            <td>Cross Polonia · 49,00 PLN/month</td>
+            <td>49,00 PLN</td>
+            <td>kisspuli6612@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T82SbIiQJtaidhOdY7lFara</td>
+            <td class="mono">in_1TUW28IiQJtaidhOg8tp2lKm</td>
+          </tr>
+          <tr>
+            <td>6/5/26, 19:44</td>
+            <td>2026-03-05</td>
+            <td>3er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>msds2307@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T7hLKIiQJtaidhOqSnmHB50</td>
+            <td class="mono">in_1TUAvMIiQJtaidhO44r8HOxo</td>
+          </tr>
+          <tr>
+            <td>6/5/26, 15:26</td>
+            <td>2026-03-05</td>
+            <td>3er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>mariaterevarona@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T7fV4IiQJtaidhObLLK53EQ</td>
+            <td class="mono">in_1TU95JIiQJtaidhO0XMZdJLU</td>
+          </tr>
+          <tr>
+            <td>6/5/26, 4:00</td>
+            <td>2026-03-05</td>
+            <td>3er cobro</td>
+            <td>Cross España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>josepmariacanyellas@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1T7UvxIiQJtaidhOSIVFIzDW</td>
+            <td class="mono">in_1TTyUrIiQJtaidhOfagXNSdv</td>
+          </tr>
+          <tr>
+            <td>4/5/26, 14:58</td>
+            <td>2026-02-03</td>
+            <td>4º cobro</td>
+            <td>España · 19,99 €/month</td>
+            <td>19,99 €</td>
+            <td>abrahambaron47@gmail.com</td>
+            <td>subscription_cycle</td>
+            <td class="mono">sub_1Swlb4IiQJtaidhOWxbsaYXx</td>
+            <td class="mono">in_1TTOWDIiQJtaidhO2Qp9yREg</td>
+          </tr></tbody></table></div>
+    </div>
+
+    <p class="updated">Generado 3/6/2026, 14:29:35 - Producto prod_TqqQ17wBX3t38I - Altas por fecha de creación; cobros por fecha de pago de invoice; cohortes por fecha original de suscripción.</p>
+  </div>
+
+  <script>
+    const days = ["2026-05-04","2026-05-05","2026-05-06","2026-05-07","2026-05-08","2026-05-09","2026-05-10","2026-05-11","2026-05-12","2026-05-13","2026-05-14","2026-05-15","2026-05-16","2026-05-17","2026-05-18","2026-05-19","2026-05-20","2026-05-21","2026-05-22","2026-05-23","2026-05-24","2026-05-25","2026-05-26","2026-05-27","2026-05-28","2026-05-29","2026-05-30","2026-05-31","2026-06-01","2026-06-02","2026-06-03"];
+    const counts = [0,0,0,0,0,0,4,4,13,9,13,12,7,9,7,7,7,9,5,16,12,8,10,12,4,12,6,4,5,12,9];
+    const cumulative = [0,0,0,0,0,0,4,8,21,30,43,55,62,71,78,85,92,101,106,122,134,142,152,164,168,180,186,190,195,207,216];
+    const priceDatasets = [{"id":"price_1Su25dIiQJtaidhOGQkittUc","label":"Cross España · 19,99 €/month","color":"#38bdf8","data":[0,0,0,0,0,0,0,0,0,0,4,5,3,4,7,4,4,3,1,8,6,5,6,8,2,9,3,1,4,6,5],"revenueData":[0,0,0,0,0,0,0,0,0,0,79.96,99.94999999999999,59.97,79.96,139.92999999999998,79.96,79.96,59.97,19.99,159.92,119.93999999999998,99.94999999999999,119.93999999999998,159.92,39.98,179.91,59.97,19.99,79.96,119.93999999999998,99.94999999999999]},{"id":"price_1T05OHIiQJtaidhOEyBKlduA","label":"Cross Portugal · 19,99 €/month","color":"#4ade80","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"revenueData":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"id":"price_1St8jpIiQJtaidhOGVFFc7dt","label":"Default · 19,99 US$/month","color":"#fbbf24","data":[0,0,0,0,0,0,3,4,7,4,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"revenueData":[0,0,0,0,0,0,59.97,79.96,139.92999999999998,79.96,19.99,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"id":"price_1St9gFIiQJtaidhOIrc57oIQ","label":"España · 19,99 €/month","color":"#f472b6","data":[0,0,0,0,0,0,1,0,6,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"revenueData":[0,0,0,0,0,0,19.99,0,119.93999999999998,99.94999999999999,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"id":"price_1TZxHpIiQJtaidhO9AcDCeOe","label":"Cross Canada · 28,00 CAD/month","color":"#a78bfa","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,1,0,1,0],"revenueData":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,28,0,28,28,0,0,0,28,0,28,0]},{"id":"price_1TTpEdIiQJtaidhOGImimPye","label":"Cross USA · 39,99 US$/month","color":"#fb7185","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,1,1,0,1,1,0,0,1,0,1],"revenueData":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,79.98,39.99,39.99,39.99,0,39.99,39.99,0,0,39.99,0,39.99]},{"id":"price_1Sz2R2IiQJtaidhOeJn7ObxV","label":"Cross Polonia · 49,00 PLN/month","color":"#2dd4bf","data":[0,0,0,0,0,0,0,0,0,0,1,1,0,3,0,0,0,3,0,3,1,1,1,2,1,0,1,0,0,0,0],"revenueData":[0,0,0,0,0,0,0,0,0,0,49,49,0,147,0,0,0,147,0,147,49,49,49,98,49,0,49,0,0,0,0]},{"id":"price_1T05MtIiQJtaidhOA6FWLCOA","label":"Cross Rep. Checa · 419,00 CZK/month","color":"#f97316","data":[0,0,0,0,0,0,0,0,0,0,1,3,1,2,0,2,1,1,4,2,1,0,0,0,0,1,1,2,0,3,1],"revenueData":[0,0,0,0,0,0,0,0,0,0,419,1257,419,838,0,838,419,419,1676,838,419,0,0,0,0,419,419,838,0,1257,419]},{"id":"price_1Sz2RTIiQJtaidhOx0ACsVYK","label":"Cross Hungria · 6800 HUF/month","color":"#818cf8","data":[0,0,0,0,0,0,0,0,0,0,6,3,3,0,0,1,2,2,0,1,2,1,1,1,0,1,1,0,0,2,2],"revenueData":[0,0,0,0,0,0,0,0,0,0,40800,20400,20400,0,0,6800,13600,13600,0,6800,13600,6800,6800,6800,0,6800,6800,0,0,13600,13600]}];
+    const cumulativeByPrice = [{"id":"price_1Su25dIiQJtaidhOGQkittUc","label":"Cross España · 19,99 €/month","color":"#38bdf8","data":[0,0,0,0,0,0,0,0,0,0,4,9,12,16,23,27,31,34,35,43,49,54,60,68,70,79,82,83,87,93,98],"revenueData":[0,0,0,0,0,0,0,0,0,0,79.96,99.94999999999999,59.97,79.96,139.92999999999998,79.96,79.96,59.97,19.99,159.92,119.93999999999998,99.94999999999999,119.93999999999998,159.92,39.98,179.91,59.97,19.99,79.96,119.93999999999998,99.94999999999999]},{"id":"price_1T05OHIiQJtaidhOEyBKlduA","label":"Cross Portugal · 19,99 €/month","color":"#4ade80","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"revenueData":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"id":"price_1St8jpIiQJtaidhOGVFFc7dt","label":"Default · 19,99 US$/month","color":"#fbbf24","data":[0,0,0,0,0,0,3,7,14,18,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19],"revenueData":[0,0,0,0,0,0,59.97,79.96,139.92999999999998,79.96,19.99,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"id":"price_1St9gFIiQJtaidhOIrc57oIQ","label":"España · 19,99 €/month","color":"#f472b6","data":[0,0,0,0,0,0,1,1,7,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12],"revenueData":[0,0,0,0,0,0,19.99,0,119.93999999999998,99.94999999999999,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"id":"price_1TZxHpIiQJtaidhO9AcDCeOe","label":"Cross Canada · 28,00 CAD/month","color":"#a78bfa","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,3,3,3,3,4,4,5,5],"revenueData":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,28,0,28,28,0,0,0,28,0,28,0]},{"id":"price_1TTpEdIiQJtaidhOGImimPye","label":"Cross USA · 39,99 US$/month","color":"#fb7185","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,4,5,5,6,7,7,7,8,8,9],"revenueData":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,79.98,39.99,39.99,39.99,0,39.99,39.99,0,0,39.99,0,39.99]},{"id":"price_1Sz2R2IiQJtaidhOeJn7ObxV","label":"Cross Polonia · 49,00 PLN/month","color":"#2dd4bf","data":[0,0,0,0,0,0,0,0,0,0,1,2,2,5,5,5,5,8,8,11,12,13,14,16,17,17,18,18,18,18,18],"revenueData":[0,0,0,0,0,0,0,0,0,0,49,49,0,147,0,0,0,147,0,147,49,49,49,98,49,0,49,0,0,0,0]},{"id":"price_1T05MtIiQJtaidhOA6FWLCOA","label":"Cross Rep. Checa · 419,00 CZK/month","color":"#f97316","data":[0,0,0,0,0,0,0,0,0,0,1,4,5,7,7,9,10,11,15,17,18,18,18,18,18,19,20,22,22,25,26],"revenueData":[0,0,0,0,0,0,0,0,0,0,419,1257,419,838,0,838,419,419,1676,838,419,0,0,0,0,419,419,838,0,1257,419]},{"id":"price_1Sz2RTIiQJtaidhOx0ACsVYK","label":"Cross Hungria · 6800 HUF/month","color":"#818cf8","data":[0,0,0,0,0,0,0,0,0,0,6,9,12,12,12,13,15,17,17,18,20,21,22,23,23,24,25,25,25,27,29],"revenueData":[0,0,0,0,0,0,0,0,0,0,40800,20400,20400,0,0,6800,13600,13600,0,6800,13600,6800,6800,6800,0,6800,6800,0,0,13600,13600]}];
+    const priceLabels = ["Cross España · 19,99 €/month","Cross Portugal · 19,99 €/month","Default · 19,99 US$/month","España · 19,99 €/month","Cross Canada · 28,00 CAD/month","Cross USA · 39,99 US$/month","Cross Polonia · 49,00 PLN/month","Cross Rep. Checa · 419,00 CZK/month","Cross Hungria · 6800 HUF/month"];
+    const priceCounts = [98,0,19,12,5,9,18,26,29];
+    const priceColors = ["#38bdf8","#4ade80","#fbbf24","#f472b6","#a78bfa","#fb7185","#2dd4bf","#f97316","#818cf8"];
+    const chargeOrdinalDatasets = [{"label":"1er cobro","data":[0,0,0,0,0,0,0,2,2,4,4,4,9,2,7,5,2,7,4,3,5,5,1,3,5,4,1,4,0,4,6],"color":"#4ade80"},{"label":"3er cobro","data":[0,0,3,1,4,0,0,1,5,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"color":"#38bdf8"},{"label":"4º cobro","data":[1,0,0,0,0,0,0,0,0,0,0,0,2,0,4,3,1,0,1,2,2,4,1,0,2,0,1,1,1,2,0],"color":"#fbbf24"},{"label":"5º cobro","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,0],"color":"#f472b6"}];
+    const chargePriceDatasets = [{"id":"price_1Su25dIiQJtaidhOGQkittUc","label":"Cross España · 19,99 €/month","color":"#38bdf8","data":[0,0,3,0,1,0,0,0,0,1,1,1,4,1,6,6,1,4,1,1,3,5,2,1,4,2,1,3,0,3,1],"amountData":[0,0,59.97,0,19.99,0,0,0,0,19.99,19.99,19.99,79.96,19.99,119.93999999999998,119.93999999999998,19.99,79.96,19.99,19.99,59.97,99.94999999999999,39.98,19.99,79.96,39.98,19.99,59.97,0,59.97,19.99]},{"id":"price_1T05OHIiQJtaidhOEyBKlduA","label":"Cross Portugal · 19,99 €/month","color":"#4ade80","data":[0,0,0,0,0,0,0,0,2,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"amountData":[0,0,0,0,0,0,0,0,39.98,0,0,0,0,0,19.99,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"id":"price_1St8jpIiQJtaidhOGVFFc7dt","label":"Default · 19,99 US$/month","color":"#fbbf24","data":[0,0,0,0,0,0,0,1,2,1,3,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],"amountData":[0,0,0,0,0,0,0,19.99,39.98,19.99,59.97,0,19.99,0,0,0,0,0,0,0,0,0,0,0,0,19.99,0,0,0,0,19.99]},{"id":"price_1St9gFIiQJtaidhOIrc57oIQ","label":"España · 19,99 €/month","color":"#f472b6","data":[1,0,0,0,0,0,0,1,0,3,1,0,0,0,0,1,0,0,0,0,0,0,0,2,1,0,0,0,0,0,0],"amountData":[19.99,0,0,0,0,0,0,19.99,0,59.97,19.99,0,0,0,0,19.99,0,0,0,0,0,0,0,39.98,19.99,0,0,0,0,0,0]},{"id":"price_1TZxHpIiQJtaidhO9AcDCeOe","label":"Cross Canada · 28,00 CAD/month","color":"#a78bfa","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1],"amountData":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,28,0,0,0,0,0,0,28]},{"id":"price_1TTpEdIiQJtaidhOGImimPye","label":"Cross USA · 39,99 US$/month","color":"#fb7185","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0],"amountData":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,39.99,0,0,0,0,0,0,0,0,0,0]},{"id":"price_1Sz2R2IiQJtaidhOeJn7ObxV","label":"Cross Polonia · 49,00 PLN/month","color":"#2dd4bf","data":[0,0,0,1,3,0,0,1,2,2,1,1,2,0,3,0,0,0,3,0,3,1,0,1,2,1,0,0,1,1,0],"amountData":[0,0,0,49,147,0,0,49,98,98,49,49,98,0,147,0,0,0,147,0,147,49,0,49,98,49,0,0,49,49,0]},{"id":"price_1T05MtIiQJtaidhOA6FWLCOA","label":"Cross Rep. Checa · 419,00 CZK/month","color":"#f97316","data":[0,0,0,0,0,0,0,0,1,0,0,0,2,1,1,1,2,1,0,4,0,2,0,0,0,0,1,1,0,1,3],"amountData":[0,0,0,0,0,0,0,0,419,0,0,0,838,419,419,419,838,419,0,1676,0,838,0,0,0,0,419,419,0,419,1257]},{"id":"price_1Sz2RTIiQJtaidhOx0ACsVYK","label":"Cross Hungria · 6800 HUF/month","color":"#818cf8","data":[0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,2,1,0,0,1,0,0,1,0,0,1,0,1,0],"amountData":[0,0,0,0,0,0,0,0,0,0,0,13600,13600,0,0,0,0,13600,6800,0,0,6800,0,0,6800,0,0,6800,0,6800,0]}];
+    const cohortDates = ["2026-05-04","2026-05-05","2026-05-06","2026-05-07","2026-05-08","2026-05-09","2026-05-10","2026-05-11","2026-05-12","2026-05-13","2026-05-14","2026-05-15","2026-05-16","2026-05-17","2026-05-18","2026-05-19","2026-05-20","2026-05-21","2026-05-22","2026-05-23","2026-05-24","2026-05-25","2026-05-26","2026-05-27","2026-05-28","2026-05-29","2026-05-30","2026-05-31","2026-06-01","2026-06-02","2026-06-03"];
+    const cohortChargeDatasets = [{"label":"1er cobro","data":[0,0,0,0,0,0,3,2,6,5,4,9,2,7,4,2,6,5,3,6,5,1,4,6,2,1,3,0,2,5,0],"color":"#4ade80"},{"label":"3er cobro","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"color":"#38bdf8"},{"label":"4º cobro","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"color":"#fbbf24"},{"label":"5º cobro","data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"color":"#f472b6"}];
+
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.borderColor = '#334155';
+
+    const baseScales = {
+      x: { ticks: { color: '#64748b', maxRotation: 45 }, grid: { color: '#334155' } },
+      y: { ticks: { color: '#64748b', precision: 0 }, grid: { color: '#334155' }, beginAtZero: true }
+    };
+    const basePlugins = { legend: { labels: { color: '#94a3b8', boxWidth: 12, usePointStyle: true } }, tooltip: { mode: 'index', intersect: false } };
+
+    new Chart(document.getElementById('dailyChart'), {
+      type: 'bar',
+      data: { labels: days.map(d => d.slice(5)), datasets: [{ label: 'Nuevas', data: counts, backgroundColor: 'rgba(56, 189, 248, 0.72)', borderRadius: 4 }] },
+      options: { responsive: true, plugins: basePlugins, scales: baseScales }
+    });
+
+    new Chart(document.getElementById('cumChart'), {
+      type: 'line',
+      data: { labels: days.map(d => d.slice(5)), datasets: [{ label: 'Acumulado', data: cumulative, borderColor: '#4ade80', backgroundColor: 'rgba(74, 222, 128, 0.12)', fill: true, tension: 0.3, pointRadius: 2 }] },
+      options: { responsive: true, plugins: basePlugins, scales: baseScales }
+    });
+
+    new Chart(document.getElementById('dailyPriceChart'), {
+      type: 'bar',
+      data: { labels: days.map(d => d.slice(5)), datasets: priceDatasets.map(ds => ({ label: ds.label, data: ds.data, backgroundColor: ds.color, borderRadius: 3 })) },
+      options: { responsive: true, plugins: basePlugins, scales: { ...baseScales, x: { ...baseScales.x, stacked: true }, y: { ...baseScales.y, stacked: true } } }
+    });
+
+    new Chart(document.getElementById('cumPriceChart'), {
+      type: 'line',
+      data: { labels: days.map(d => d.slice(5)), datasets: cumulativeByPrice.map(ds => ({ label: ds.label, data: ds.data, borderColor: ds.color, backgroundColor: ds.color + '22', tension: 0.3, pointRadius: 2 })) },
+      options: { responsive: true, plugins: basePlugins, scales: baseScales }
+    });
+
+    new Chart(document.getElementById('priceMixChart'), {
+      type: 'doughnut',
+      data: { labels: priceLabels, datasets: [{ data: priceCounts, backgroundColor: priceColors, borderColor: '#1e293b', borderWidth: 2 }] },
+      options: { responsive: true, plugins: basePlugins }
+    });
+
+    new Chart(document.getElementById('revenuePriceChart'), {
+      type: 'bar',
+      data: { labels: days.map(d => d.slice(5)), datasets: priceDatasets.map(ds => ({ label: ds.label, data: ds.revenueData, backgroundColor: ds.color, borderRadius: 3 })) },
+      options: { responsive: true, plugins: basePlugins, scales: { ...baseScales, x: { ...baseScales.x, stacked: true }, y: { ...baseScales.y, stacked: true, ticks: { color: '#64748b', callback: value => '€' + value } } } }
+    });
+
+    new Chart(document.getElementById('chargeOrdinalChart'), {
+      type: 'bar',
+      data: { labels: days.map(d => d.slice(5)), datasets: chargeOrdinalDatasets.map(ds => ({ label: ds.label, data: ds.data, backgroundColor: ds.color, borderRadius: 3 })) },
+      options: { responsive: true, plugins: basePlugins, scales: { ...baseScales, x: { ...baseScales.x, stacked: true }, y: { ...baseScales.y, stacked: true } } }
+    });
+
+    new Chart(document.getElementById('cohortChargeChart'), {
+      type: 'bar',
+      data: { labels: cohortDates.map(d => d.slice(5)), datasets: cohortChargeDatasets.map(ds => ({ label: ds.label, data: ds.data, backgroundColor: ds.color, borderRadius: 3 })) },
+      options: { responsive: true, plugins: basePlugins, scales: { ...baseScales, x: { ...baseScales.x, stacked: true }, y: { ...baseScales.y, stacked: true } } }
+    });
+
+    new Chart(document.getElementById('chargePriceChart'), {
+      type: 'bar',
+      data: { labels: days.map(d => d.slice(5)), datasets: chargePriceDatasets.map(ds => ({ label: ds.label, data: ds.data, backgroundColor: ds.color, borderRadius: 3 })) },
+      options: { responsive: true, plugins: basePlugins, scales: { ...baseScales, x: { ...baseScales.x, stacked: true }, y: { ...baseScales.y, stacked: true } } }
+    });
+
+    new Chart(document.getElementById('chargeAmountPriceChart'), {
+      type: 'bar',
+      data: { labels: days.map(d => d.slice(5)), datasets: chargePriceDatasets.map(ds => ({ label: ds.label, data: ds.amountData, backgroundColor: ds.color, borderRadius: 3 })) },
+      options: { responsive: true, plugins: basePlugins, scales: { ...baseScales, x: { ...baseScales.x, stacked: true }, y: { ...baseScales.y, stacked: true, ticks: { color: '#64748b', callback: value => '€' + value } } } }
+    });
+  </script>
+</body>
+</html>

@@ -206,9 +206,9 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         });
       }
 
-      const email = e.billingDetails?.email || null;
+      const email = e.billingDetails?.email?.toLowerCase().trim() || null;
       const name = e.billingDetails?.name || 
-        (e.billingDetails?.email ? e.billingDetails.email.split("@")[0] : null);
+        (email ? email.split("@")[0] : null);
 
       // Capturar billing address (Apple Pay / Google Pay / Link). Para sales tax USA
       // alcanza con country + postal_code (Stripe mapea ZIP -> estado vía AVS).

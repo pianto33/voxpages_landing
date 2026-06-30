@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Suscripciones nuevas · 30 días · prod_TqqQ17wBX3t38I</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --card: #151a23;
+    --border: #232a36;
+    --text: #e6e9ef;
+    --muted: #8a93a6;
+    --accent: #635bff;
+    --accent2: #00d4b1;
+    --warn: #ffb020;
+    --danger: #ff5c5c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 32px 24px 64px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  header h1 { font-size: 22px; margin: 0 0 4px; }
+  header p { color: var(--muted); margin: 0; font-size: 13px; }
+  code { background: #1f2632; padding: 2px 6px; border-radius: 5px; font-size: 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 24px 0; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .kpi .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  .kpi .value { font-size: 28px; font-weight: 700; margin-top: 6px; }
+  .kpi .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .card h2 { font-size: 14px; margin: 0 0 14px; font-weight: 600; }
+  canvas { max-width: 100%; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .bar-cell { display: flex; align-items: center; gap: 8px; }
+  .bar { height: 8px; border-radius: 4px; background: var(--accent); }
+  .note { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600; }
+  .pill.active { background: rgba(0,212,177,.15); color: var(--accent2); }
+  .pill.past_due { background: rgba(255,176,32,.15); color: var(--warn); }
+  .pill.canceled { background: rgba(255,92,92,.15); color: var(--danger); }
+  .pill.trialing { background: rgba(99,91,255,.18); color: #a59dff; }
+  @media (max-width: 780px){ .kpis{grid-template-columns:repeat(2,1fr)} .grid-2{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Suscripciones nuevas · últimos 30 días</h1>
+    <p>Producto <code id="prod"></code> · fuente: Stripe API (live) · generado <span id="gen"></span></p>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Suscripciones nuevas por día (barras) + acumulado (línea)</h2>
+      <canvas id="dailyChart" height="120"></canvas>
+      <p class="note" id="dailyNote"></p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>Por país / precio</h2>
+        <table id="priceTable">
+          <thead><tr><th>Plan</th><th>Precio</th><th class="num">Subs</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>Estado actual de esas suscripciones</h2>
+        <canvas id="statusChart" height="160"></canvas>
+        <p class="note" id="statusNote"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {"product": "prod_TqqQ17wBX3t38I", "generated_at": "2026-05-28 23:12 UTC", "total_new_subscriptions": 168, "unique_subs_found": 168, "daily": [{"date": "2026-04-28", "count": 0}, {"date": "2026-04-29", "count": 0}, {"date": "2026-04-30", "count": 0}, {"date": "2026-05-01", "count": 0}, {"date": "2026-05-02", "count": 0}, {"date": "2026-05-03", "count": 0}, {"date": "2026-05-04", "count": 0}, {"date": "2026-05-05", "count": 0}, {"date": "2026-05-06", "count": 0}, {"date": "2026-05-07", "count": 0}, {"date": "2026-05-08", "count": 0}, {"date": "2026-05-09", "count": 0}, {"date": "2026-05-10", "count": 4}, {"date": "2026-05-11", "count": 4}, {"date": "2026-05-12", "count": 13}, {"date": "2026-05-13", "count": 9}, {"date": "2026-05-14", "count": 13}, {"date": "2026-05-15", "count": 12}, {"date": "2026-05-16", "count": 7}, {"date": "2026-05-17", "count": 9}, {"date": "2026-05-18", "count": 7}, {"date": "2026-05-19", "count": 7}, {"date": "2026-05-20", "count": 7}, {"date": "2026-05-21", "count": 9}, {"date": "2026-05-22", "count": 5}, {"date": "2026-05-23", "count": 16}, {"date": "2026-05-24", "count": 12}, {"date": "2026-05-25", "count": 8}, {"date": "2026-05-26", "count": 10}, {"date": "2026-05-27", "count": 12}, {"date": "2026-05-28", "count": 4}], "by_price": [{"nickname": "Cross Espa\u00f1a", "currency": "eur", "unit_amount": 1999, "count": 70}, {"nickname": "Cross Hungria", "currency": "huf", "unit_amount": 680000, "count": 23}, {"nickname": "Default", "currency": "usd", "unit_amount": 1999, "count": 19}, {"nickname": "Cross Rep. Checa", "currency": "czk", "unit_amount": 41900, "count": 18}, {"nickname": "Cross Polonia", "currency": "pln", "unit_amount": 4900, "count": 17}, {"nickname": "Espa\u00f1a", "currency": "eur", "unit_amount": 1999, "count": 12}, {"nickname": "Cross USA", "currency": "usd", "unit_amount": 3999, "count": 6}, {"nickname": "Cross Canada", "currency": "cad", "unit_amount": 3, "count": 3}], "by_status": {"past_due": 84, "active": 65, "trialing": 4, "canceled": 15}};
+// fix cad amount (real 2800)
+DATA.by_price.forEach(p => { if (p.nickname === "Cross Canada") p.unit_amount = 2800; });
+
+document.getElementById("prod").textContent = DATA.product;
+document.getElementById("gen").textContent = DATA.generated_at;
+
+function fmtPrice(amount, cur){
+  if (amount == null) return "-";
+  const zeroDec = ["huf","czk","clp","jpy","krw"];
+  const val = zeroDec.includes(cur) ? amount : amount/100;
+  return new Intl.NumberFormat("es", {style:"currency", currency: cur.toUpperCase()}).format(val);
+}
+
+const labels = DATA.daily.map(d => d.date.slice(5));
+const counts = DATA.daily.map(d => d.count);
+let acc = 0; const cum = counts.map(c => acc += c);
+
+const activeDays = DATA.daily.filter(d => d.count > 0);
+const avg = (DATA.total_new_subscriptions / activeDays.length).toFixed(1);
+const best = DATA.daily.reduce((a,b) => b.count > a.count ? b : a);
+
+const statusOk = (DATA.by_status.active||0) + (DATA.by_status.trialing||0);
+const retention = ((statusOk / DATA.total_new_subscriptions)*100).toFixed(0);
+
+const kpis = [
+  {label:"Subs nuevas (30d)", value: DATA.total_new_subscriptions, sub:"clientes que iniciaron suscripción"},
+  {label:"Promedio diario", value: avg, sub:`sobre ${activeDays.length} días con actividad`},
+  {label:"Mejor día", value: best.count, sub: best.date},
+  {label:"Activas + trial hoy", value: `${statusOk} (${retention}%)`, sub:`${DATA.by_status.past_due||0} past_due · ${DATA.by_status.canceled||0} canceladas`},
+];
+document.getElementById("kpis").innerHTML = kpis.map(k =>
+  `<div class="kpi"><div class="label">${k.label}</div><div class="value">${k.value}</div><div class="sub">${k.sub}</div></div>`
+).join("");
+
+document.getElementById("dailyNote").textContent =
+  `El producto empezó a registrar suscripciones el ${activeDays[0].date}. Total acumulado: ${DATA.total_new_subscriptions}.`;
+
+new Chart(document.getElementById("dailyChart"), {
+  data: {
+    labels,
+    datasets: [
+      { type:"bar", label:"Nuevas/día", data: counts, backgroundColor:"#635bff", borderRadius:4, yAxisID:"y" },
+      { type:"line", label:"Acumulado", data: cum, borderColor:"#00d4b1", backgroundColor:"#00d4b1", tension:.3, pointRadius:0, borderWidth:2, yAxisID:"y1" },
+    ]
+  },
+  options: {
+    responsive:true,
+    plugins:{ legend:{ labels:{ color:"#e6e9ef", boxWidth:12 } } },
+    scales:{
+      x:{ ticks:{ color:"#8a93a6", maxRotation:0, autoSkip:true }, grid:{ color:"#1c222d" } },
+      y:{ position:"left", ticks:{ color:"#8a93a6", precision:0 }, grid:{ color:"#1c222d" }, title:{display:true,text:"nuevas/día",color:"#8a93a6"} },
+      y1:{ position:"right", ticks:{ color:"#00d4b1", precision:0 }, grid:{ drawOnChartArea:false }, title:{display:true,text:"acumulado",color:"#00d4b1"} },
+    }
+  }
+});
+
+// price table
+const maxP = Math.max(...DATA.by_price.map(p => p.count));
+document.querySelector("#priceTable tbody").innerHTML = DATA.by_price.map(p => {
+  const w = Math.round((p.count/maxP)*120);
+  return `<tr>
+    <td>${p.nickname}</td>
+    <td>${fmtPrice(p.unit_amount, p.currency)}</td>
+    <td class="num"><div class="bar-cell" style="justify-content:flex-end">
+      <span class="bar" style="width:${w}px"></span><b>${p.count}</b></div></td>
+  </tr>`;
+}).join("");
+
+// status donut
+const sLabels = Object.keys(DATA.by_status);
+const sColors = { active:"#00d4b1", trialing:"#a59dff", past_due:"#ffb020", canceled:"#ff5c5c" };
+new Chart(document.getElementById("statusChart"), {
+  type:"doughnut",
+  data:{ labels:sLabels, datasets:[{ data:sLabels.map(s=>DATA.by_status[s]), backgroundColor:sLabels.map(s=>sColors[s]||"#888"), borderColor:"#151a23", borderWidth:2 }] },
+  options:{ plugins:{ legend:{ position:"bottom", labels:{ color:"#e6e9ef", boxWidth:12 } } }, cutout:"58%" }
+});
+document.getElementById("statusNote").innerHTML =
+  `De las ${DATA.total_new_subscriptions} nuevas: ` +
+  sLabels.map(s => `<span class="pill ${s}">${s} ${DATA.by_status[s]}</span>`).join(" ") +
+  `. <br><b>Ojo:</b> ${DATA.by_status.past_due||0} en past_due (~${Math.round((DATA.by_status.past_due/DATA.total_new_subscriptions)*100)}%) = el cobro post-trial está fallando en muchas.`;
+</script>
+</body>
+</html>

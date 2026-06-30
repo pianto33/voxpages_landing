@@ -3,6 +3,10 @@
 Este documento describe cómo se loguea, qué campos lleva cada log, y
 cómo filtrar y correlacionar en Better Stack.
 
+> **Acceso al dashboard:** [betterstack.com](https://betterstack.com) con
+> `admin@wisdompackets.com`. Referencia multi-proyecto:
+> `voxpages_customer/docs/BETTERSTACK.md`.
+>
 > **Origen de los logs:** Better Stack source `voxpages-landing`, host
 > `s2498376.eu-fsn-3.betterstackdata.com`. Las env vars relevantes son
 > `BETTERSTACK_SOURCE_TOKEN` y `BETTERSTACK_INGESTING_HOST`.

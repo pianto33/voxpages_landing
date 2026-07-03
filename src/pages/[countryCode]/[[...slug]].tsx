@@ -20,7 +20,7 @@ const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => (
         width="42"
         height="21"
         fill="none"
-        viewBox="0 0 22 21"
+        viewBox="0 0 32 21"
         {...props}
     >
         <path
@@ -168,12 +168,14 @@ export default function Home() {
                 </div>
 
                 <div className={styles.ctaFixed}>
-                    <StripeExpressCheckout
-                        label={t("subscribe")}
-                        amount={amount}
-                        currency={currency}
-                        animateButton
-                    />
+                    <div className={styles.ctaInner}>
+                        <StripeExpressCheckout
+                            label={t("subscribe")}
+                            amount={amount}
+                            currency={currency}
+                            animateButton
+                        />
+                    </div>
                     <p className={styles.trialInfo} dangerouslySetInnerHTML={{ __html: trialText }} />
                     <Link
                         href={LEGAL.termsUrl(resolvedCountry)}
@@ -214,13 +216,15 @@ export default function Home() {
                 </div>
 
                 <div className={styles.ctaFixed}>
-                    <Button
-                        animate
-                        endIcon={<ArrowSvg />}
-                        onClick={scrollToHero}
-                    >
-                        {t("subscribe")}
-                    </Button>
+                    <div className={styles.ctaInner}>
+                        <Button
+                            animate
+                            endIcon={<ArrowSvg />}
+                            onClick={scrollToHero}
+                        >
+                            {t("subscribe")}
+                        </Button>
+                    </div>
                     <p className={styles.trialInfo} dangerouslySetInnerHTML={{ __html: trialText }} />
                     <Link
                         href={LEGAL.termsUrl(resolvedCountry)}

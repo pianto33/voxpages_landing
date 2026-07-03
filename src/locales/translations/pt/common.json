@@ -53,6 +53,12 @@
   "go_to_platform": "Ir para o site",
   "go_to_platform_manual": "Ir para o site",
   "loading": "A carregar...",
+  "checkout": {
+    "preparing_payment": "A preparar pagamento...",
+    "almost_ready": "Quase pronto...",
+    "loading_hint": "A configurar métodos de pagamento seguros",
+    "card_fallback_hint": "Se não vês Apple Pay ou Google Pay, experimenta outro navegador"
+  },
   "footer": {
     "company": "Pianto33 LLC",
     "terms_and_conditions": "Termos e condições",

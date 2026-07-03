@@ -7,32 +7,55 @@ interface Props
   href?: string;
   variant?: "contained" | "primary";
   animate?: boolean;
+  loading?: boolean;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   disabled?: boolean;
+  className?: string;
 }
 
 function Button({
   variant = "contained",
   animate = false,
+  loading = false,
   startIcon,
   endIcon,
   children,
+  className: classNameProp,
+  disabled,
   ...props
 }: Props) {
-  const className = `${styles.button} ${styles[variant]} ${animate ? styles.animate : ''}`;
+  const className = [
+    styles.button,
+    styles[variant],
+    animate && !loading ? styles.animate : "",
+    loading ? styles.loading : "",
+    classNameProp,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const content = (
+    <>
+      {loading && <span className={styles.spinner} aria-hidden="true" />}
+      {!loading && startIcon}
+      {children}
+      {!loading && endIcon}
+    </>
+  );
 
   return props.href ? (
     <Link href={props.href} className={className}>
-      {startIcon}
-      {children}
-      {endIcon}
+      {content}
     </Link>
   ) : (
-    <button className={className} {...props}>
-      {startIcon}
-      {children}
-      {endIcon}
+    <button
+      className={className}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...props}
+    >
+      {content}
     </button>
   );
 }

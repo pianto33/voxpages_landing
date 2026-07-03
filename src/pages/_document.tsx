@@ -15,6 +15,7 @@ export default function Document() {
         <link rel="preconnect" href="https://api.stripe.com" />
         <link rel="dns-prefetch" href="https://js.stripe.com" />
         <link rel="dns-prefetch" href="https://api.stripe.com" />
+        <link rel="preload" href="https://js.stripe.com/v3/" as="script" />
         
         {/* Google Pay y servicios de Google */}
         <link rel="preconnect" href="https://pay.google.com" />

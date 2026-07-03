@@ -20,7 +20,6 @@ import { startFunnel, setEmail as setIdentityEmail } from "@/utils/userIdentity"
 import { apiFetch } from "@/utils/apiFetch";
 import { extractTrackingParams, saveTrackingParams, getTrackingParams, addTrackingParams } from "@/utils/trackingParams";
 import Button from "@/components/Button";
-import CardPaymentForm from "@/components/CardPaymentForm";
 import styles from "@/styles/StripeExpressCheckout.module.css";
 
 interface Props {
@@ -37,7 +36,7 @@ const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => (
     width="42"
     height="21"
     fill="none"
-    viewBox="0 0 22 21"
+    viewBox="0 0 32 21"
     {...props}
   >
     <path
@@ -116,6 +115,10 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   // el usuario al clickear. Stripe sólo nos lo dice en el onClick; lo persistimos
   // acá para poder loguearlo también en onCancel/onConfirm y diagnosticar abandonos.
   const walletTypeRef = useRef<string | null>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const [loadingPhase, setLoadingPhase] = useState<"preparing" | "almost">(
+    "preparing"
+  );
 
   // Igual que sr_landing-voxpages
   const isProduction =
@@ -187,6 +190,27 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
     return () => clearTimeout(timeoutId);
   }, [loadingState.ready, loadingState.error, isQA, stripe, elements, priceId, router.query.countryCode]);
+
+  useEffect(() => {
+    if (isStripeReady) return;
+    setLoadingPhase("preparing");
+    const timerId = window.setTimeout(() => setLoadingPhase("almost"), 2500);
+    return () => window.clearTimeout(timerId);
+  }, [isStripeReady]);
+
+  useEffect(() => {
+    if (!isStripeReady || !overlayRef.current) return;
+
+    const overlay = overlayRef.current;
+    void overlay.offsetHeight;
+
+    requestAnimationFrame(() => {
+      overlay.style.transform = "translateZ(0)";
+      requestAnimationFrame(() => {
+        void overlay.offsetHeight;
+      });
+    });
+  }, [isStripeReady]);
 
   const onConfirm = async (e: StripeExpressCheckoutElementConfirmEvent) => {
     try {
@@ -623,6 +647,14 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       availableMethods: availablePaymentMethods,
       readyTime,
     }));
+
+    const hasWallet =
+      Boolean(availablePaymentMethods?.applePay) ||
+      Boolean(availablePaymentMethods?.googlePay);
+
+    if (isProduction && !hasWallet) {
+      setErrorMessage(t("error.stripe"));
+    }
     
     // Solo logear si no es un bot
     if (!isBot()) {
@@ -710,6 +742,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       ...prev,
       error: `${errorType}: ${errorMessage}`,
     }));
+    setErrorMessage(t("error.stripe"));
     
     // Si es un bot, solo logear en debug, no como error crítico
     if (isBot()) {
@@ -748,60 +781,6 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         isProduction,
         currentUrl: typeof window !== 'undefined' ? window.location.href : 'unknown',
         userAgent,
-      });
-    }
-  };
-
-  const handleButtonClick = () => {
-    // Este onClick solo se ejecuta si el ExpressCheckoutElement NO captura el evento
-    // (es decir, cuando NO hay Google Pay/Apple Pay disponible)
-    checkoutConsole("handleButtonClick", {
-      isStripeReady,
-      note: "Clic en capa del botón; el iframe de wallets no capturó el evento",
-    });
-    console.log(
-      "[StripeExpressCheckout] Clic en botón (no capturado por wallet / sin wallet en este navegador)"
-    );
-    
-    if (!isBot()) {
-      sendEvent(GTM_EVENTS.STRIPE_CLICK_FAIL);
-      
-      const now = Date.now();
-      clientLogger.warn('Click en botón — capa superior (diagnóstico wallet)', {
-        context: 'StripeExpressCheckout - handleButtonClick',
-        
-        // Estado de Stripe
-        isStripeReady,
-        stripe: !!stripe,
-        elements: !!elements,
-        
-        // Diagn?stico detallado del ciclo de vida
-        loadingState: {
-          everReady: loadingState.ready,
-          hadError: !!loadingState.error,
-          errorDetails: loadingState.error,
-          availableMethods: loadingState.availableMethods,
-          loadTimeMs: loadingState.readyTime ? (loadingState.readyTime - loadingState.renderTime) : null,
-          timeSinceRenderMs: now - loadingState.renderTime,
-        },
-        
-        // Contexto del usuario
-        priceId,
-        isProduction,
-        isQA,
-        countryCode: router.query.countryCode,
-        path: router.asPath,
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
-        
-        // Info adicional ?til
-        windowSize: typeof window !== 'undefined' ? {
-          width: window.innerWidth,
-          height: window.innerHeight,
-        } : null,
-        isOnline: typeof navigator !== 'undefined' ? navigator.onLine : null,
-        connectionType: typeof navigator !== 'undefined' && 'connection' in navigator 
-          ? (navigator as any).connection?.effectiveType 
-          : null,
       });
     }
   };
@@ -850,37 +829,40 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     }
   }, []); // Solo una vez al montar
 
-  // En QA/staging/localhost, mostrar el formulario de tarjeta de cr?dito
-  if (isQA) {
-    if (!isBot()) {
-      clientLogger.info('Mostrando CardPaymentForm en ambiente QA', {
-        context: 'StripeExpressCheckout - QA mode',
-        priceId,
-        countryCode: router.query.countryCode,
-      });
-    }
-    
-    return (
-      <CardPaymentForm
-        label={label}
-        priceId={priceId}
-        animateButton={animateButton}
-        amount={amount}
-        currency={currency}
-      />
-    );
-  }
+  const buttonLabel = isStripeReady
+    ? label
+    : loadingPhase === "preparing"
+      ? t("checkout.preparing_payment")
+      : t("checkout.almost_ready");
+
+  const displayError =
+    errorMessage ||
+    (loadingState.error && !isStripeReady ? t("error.stripe") : "");
 
   return (
     <>
-      <Button
-        animate={animateButton}
-        endIcon={<ArrowSvg />}
-        onClick={handleButtonClick}
-      >
-        {label}
+      <div className={styles.checkoutWrapper}>
         <div
-          className={`${styles.checkoutContainer} ${
+          className={`${styles.checkoutVisual} ${
+            isStripeReady ? styles.ready : ""
+          }`}
+        >
+          <Button
+            animate={Boolean(animateButton && isStripeReady)}
+            loading={!isStripeReady}
+            endIcon={isStripeReady ? <ArrowSvg /> : undefined}
+          >
+            {buttonLabel}
+          </Button>
+        </div>
+
+        {!isStripeReady && (
+          <div className={styles.checkoutShield} aria-hidden="true" />
+        )}
+
+        <div
+          ref={overlayRef}
+          className={`${styles.checkoutOverlay} ${
             isStripeReady ? styles.loaded : ""
           }`}
         >
@@ -893,17 +875,6 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
               onLoadError={onLoadError}
               options={{
                 paymentMethods: {
-                  // Apple Pay "auto": Stripe sólo muestra el botón si verificó
-                  // que va a poder completar el pago. Con "always" mostrábamos
-                  // el botón aunque después fallara silenciosamente (el user
-                  // veía sheet vacío y cancelaba — 100% cancel rate en 12h).
-                  //
-                  // Google Pay "always": tiene mucho mejor coverage en todos
-                  // los browsers (Chrome/Firefox/Brave) y rara vez falla al
-                  // abrir. Lo mantenemos forzado para que el botón siempre
-                  // exista y el user pueda pagar incluso si Apple Pay queda
-                  // oculto. (Próximo paso: fallback a CardPaymentForm cuando
-                  // ambos vengan false.)
                   applePay: isProduction ? "auto" : "never",
                   googlePay: isProduction ? "always" : "never",
                   link: isProduction ? "never" : "auto",
@@ -927,8 +898,8 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
             />
           </div>
         </div>
-      </Button>
-      {errorMessage && <div className={styles.error}>{errorMessage}</div>}
+      </div>
+      {displayError && <div className={styles.error}>{displayError}</div>}
     </>
   );
 }

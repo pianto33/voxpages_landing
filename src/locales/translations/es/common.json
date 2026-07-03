@@ -54,6 +54,12 @@
   "go_to_platform_manual": "Ir al sitio",
   "": "Necesitarás iniciar sesión manualmente en la plataforma.",
   "loading": "Cargando...",
+  "checkout": {
+    "preparing_payment": "Preparando pago...",
+    "almost_ready": "Casi listo...",
+    "loading_hint": "Configurando métodos de pago seguros",
+    "card_fallback_hint": "Si no ves Apple Pay o Google Pay, probá con otro navegador"
+  },
   "footer": {
     "company": "Pianto33 LLC",
     "terms_and_conditions": "Términos y condiciones",

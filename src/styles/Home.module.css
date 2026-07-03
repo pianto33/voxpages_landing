@@ -2,6 +2,7 @@
 .snapContainer {
   height: 100%;
   overflow-y: scroll;
+  overflow-x: hidden;
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
@@ -22,7 +23,9 @@
   scroll-snap-align: start;
   scroll-snap-stop: always;
   flex-shrink: 0;
-  padding: 0 1.5rem;
+  box-sizing: border-box;
+  padding: 2rem 1.25rem;
+  overflow-x: hidden;
 }
 
 /* ── Top area (fills remaining space) ── */
@@ -85,7 +88,14 @@
   align-items: center;
   width: 100%;
   gap: 0.5rem;
-  padding: 0.75rem 0;
+  padding: 0.75rem 0 4.5rem;
+  flex-shrink: 0;
+}
+
+.ctaInner {
+  width: 100%;
+  max-width: 360px;
+  padding: 0 0.5rem;
 }
 
 .trialInfo {

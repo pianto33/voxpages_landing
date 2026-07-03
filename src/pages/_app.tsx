@@ -2,18 +2,14 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import Script from "next/script";
 import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
+import { StripeElementsOptions } from "@stripe/stripe-js";
+import { stripePromise } from "@/lib/stripeClient";
 import { Analytics } from "@vercel/analytics/react";
 import UserProvider from "@/contexts/user/user-provider";
 import Layout from "@/components/Layout";
 import { useMemo } from "react";
 import { useStripeData } from "@/hooks/useStripeData";
 import "@/locales/i18n";
-
-// Mover esto fuera del componente para que solo se cree una vez
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
-);
 
 export default function App({ Component, pageProps }: AppProps) {
   const { currency } = useStripeData();

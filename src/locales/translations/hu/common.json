@@ -54,6 +54,12 @@
   "go_to_platform_manual": "Ugrás az oldalra",
   "": "Manuálisan kell bejelentkeznie a platformon.",
   "loading": "Betöltés...",
+  "checkout": {
+    "preparing_payment": "Fizetés előkészítése...",
+    "almost_ready": "Majdnem kész...",
+    "loading_hint": "Biztonságos fizetési módok beállítása",
+    "card_fallback_hint": "Ha nem látja az Apple Pay-t vagy Google Pay-t, próbáljon másik böngészőt"
+  },
   "footer": {
     "company": "Pianto33 LLC",
     "terms_and_conditions": "Általános szerződési feltételek",

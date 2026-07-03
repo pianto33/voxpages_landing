@@ -10,6 +10,9 @@
   padding: 0.5rem;
   min-height: 4rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 
   position: relative;
   display: flex;
@@ -18,7 +21,7 @@
   gap: 0.5rem;
   transition: background 300ms, transform 150ms;
 
-  &:active {
+  &:active:not(:disabled) {
     transform: scale(0.98);
   }
 
@@ -27,11 +30,34 @@
     color: var(--clr-white);
   }
 
-  &:disabled {
-    cursor: not-allowed;
+  &:disabled,
+  &.loading {
+    cursor: wait;
     background: var(--clr-gray);
     border-color: var(--clr-gray);
     color: color-mix(in srgb, var(--clr-white) 70%, transparent);
+    box-shadow: none;
+  }
+
+  &.loading::before,
+  &.loading::after {
+    display: none;
+  }
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  border: 2px solid color-mix(in srgb, var(--clr-white) 30%, transparent);
+  border-top-color: var(--clr-white);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

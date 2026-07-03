@@ -5,11 +5,13 @@
   margin-inline: auto;
   text-align: center;
   overflow: hidden;
+  overflow-x: hidden;
   color: var(--clr-text);
   background: var(--clr-bg);
 
   & main {
     height: 100%;
     overflow: hidden;
+    overflow-x: hidden;
   }
 }

@@ -1,50 +1,90 @@
-.checkoutContainer {
-    position: absolute;
-    top: calc(-100vh + 65px + 45px );
-    opacity: 0;
-    overflow: hidden;
-  
-    &.loaded {
-      width: 200vw;
-      height: 100vh;
-      .checkoutPage {
-        width: 100vw;
-        transform: scale(100);
-        transform-origin: 50% 10%;
-      }
-    }
+.checkoutWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.checkoutVisual {
+  width: 100%;
+}
+
+.checkoutVisual.ready {
+  pointer-events: none;
+}
+
+.checkoutShield {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  cursor: wait;
+  border-radius: 16px;
+}
+
+.checkoutOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.checkoutOverlay.loaded {
+  pointer-events: auto;
+  inset: -6px -4px;
+  transform: translateZ(0);
+}
+
+.checkoutPage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkoutOverlay :global(iframe) {
+  opacity: 0 !important;
+  width: 108% !important;
+  height: 75% !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.error {
+  color: var(--clr-error);
+  font-size: var(--text-sm);
+  margin-top: 0.5rem;
+}
+
+.arrow {
+  margin-inline-start: 1em;
+  display: flex;
+  gap: 0.2rem;
+
+  & > :nth-child(1),
+  & > :nth-child(2) {
+    animation: slideArrow 1.5s ease-in-out infinite;
   }
-  
-  .error {
-    color: var(--clr-error);
-    font-size: var(--text-sm);
+  & > :nth-child(1) {
+    animation-delay: 0s;
   }
-  
-  .arrow {
-    margin-inline-start: 1em;
-    display: flex;
-    gap: 0.2rem;
-    
-    & > :nth-child(1),
-    & > :nth-child(2) {
-      animation: slideArrow 1.5s ease-in-out infinite;
-    }
-    & > :nth-child(1) {
-      animation-delay: 0s;
-    }
-    & > :nth-child(2) {
-      animation-delay: 0.3s;
-    }
+  & > :nth-child(2) {
+    animation-delay: 0.3s;
   }
-  
-  @keyframes slideArrow {
-    0%, 100% {
-      transform: translateX(0);
-      opacity: 0.3;
-    }
-    50% {
-      transform: translateX(8px);
-      opacity: 1;
-    }
+}
+
+@keyframes slideArrow {
+  0%, 100% {
+    transform: translateX(0);
+    opacity: 0.3;
   }
-  
+  50% {
+    transform: translateX(8px);
+    opacity: 1;
+  }
+}

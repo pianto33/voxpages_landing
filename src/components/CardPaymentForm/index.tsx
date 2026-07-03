@@ -25,7 +25,7 @@ const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => (
     width="42"
     height="21"
     fill="none"
-    viewBox="0 0 22 21"
+    viewBox="0 0 32 21"
     {...props}
   >
     <path

@@ -53,6 +53,12 @@
   "go_to_platform": "Jít na stránku",
   "go_to_platform_manual": "Jít na stránku",
   "loading": "Načítání...",
+  "checkout": {
+    "preparing_payment": "Příprava platby...",
+    "almost_ready": "Téměř hotovo...",
+    "loading_hint": "Nastavování bezpečných platebních metod",
+    "card_fallback_hint": "Pokud nevidíte Apple Pay nebo Google Pay, zkuste jiný prohlížeč"
+  },
   "footer": {
     "company": "Pianto33 LLC",
     "terms_and_conditions": "Obchodní podmínky",

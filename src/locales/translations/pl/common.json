@@ -54,6 +54,12 @@
   "go_to_platform_manual": "Przejdź do strony",
   "": "Będziesz musiał zalogować się ręcznie na platformie.",
   "loading": "Ładowanie...",
+  "checkout": {
+    "preparing_payment": "Przygotowywanie płatności...",
+    "almost_ready": "Prawie gotowe...",
+    "loading_hint": "Konfigurowanie bezpiecznych metod płatności",
+    "card_fallback_hint": "Jeśli nie widzisz Apple Pay lub Google Pay, spróbuj innej przeglądarki"
+  },
   "footer": {
     "company": "Pianto33 LLC",
     "terms_and_conditions": "Regulamin i warunki",

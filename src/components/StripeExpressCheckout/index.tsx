@@ -74,6 +74,57 @@ function checkoutConsole(label: string, payload: Record<string, unknown>) {
   console.info(`[VoxPages][Checkout] ${label}`, payload);
 }
 
+type ExpressPaymentMethodMode = "always" | "auto" | "never";
+
+/** Wallets por dispositivo también en local/ngrok (no solo en prod). */
+function getExpressPaymentMethods(isProduction: boolean): {
+  applePay: ExpressPaymentMethodMode;
+  googlePay: ExpressPaymentMethodMode;
+  link: ExpressPaymentMethodMode;
+  amazonPay: ExpressPaymentMethodMode;
+  paypal: ExpressPaymentMethodMode;
+} {
+  if (typeof navigator === "undefined") {
+    return {
+      applePay: isProduction ? "auto" : "always",
+      googlePay: "always",
+      link: isProduction ? "never" : "auto",
+      amazonPay: "never",
+      paypal: "never",
+    };
+  }
+
+  const ua = navigator.userAgent;
+  const isAppleMobile = /iPhone|iPad|iPod/i.test(ua);
+  const isMacSafari =
+    /Macintosh/i.test(ua) &&
+    /Safari/i.test(ua) &&
+    !/Chrome|CriOS|Edg|Chromium/i.test(ua);
+  const isApple = isAppleMobile || isMacSafari;
+
+  return {
+    // Apple Pay en iOS/Safari Mac. En prod "auto" evita botón fantasma.
+    applePay: isApple ? (isProduction ? "auto" : "always") : "never",
+    // Google Pay en Android y Chrome/desktop no-Apple.
+    googlePay: isApple ? "never" : "always",
+    // Link solo fuera de prod (útil en local/ngrok sin wallet nativo).
+    link: isProduction ? "never" : "auto",
+    amazonPay: "never",
+    paypal: "never",
+  };
+}
+
+/** return_url correcto cuando se prueba por ngrok aunque .env apunte a prod. */
+function getCheckoutBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname.toLowerCase();
+    if (host.includes("ngrok") || host === "127.0.0.1" || host === "localhost") {
+      return window.location.origin;
+    }
+  }
+  return process.env.NEXT_PUBLIC_BASE_URL || "";
+}
+
 function StripeExpressCheckout({ label, animateButton, amount, currency }: Props) {
   const { t } = useAppTranslation();
   const router = useRouter();
@@ -117,9 +168,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   // acá para poder loguearlo también en onCancel/onConfirm y diagnosticar abandonos.
   const walletTypeRef = useRef<string | null>(null);
   const stripeOverlayRef = useRef<HTMLDivElement>(null);
+  const walletClickReceivedRef = useRef(false);
+  const deadTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [loadingPhase, setLoadingPhase] = useState<"preparing" | "almost">(
     "preparing"
   );
+  const [hasWallet, setHasWallet] = useState(false);
 
   const triggerIframeRecomposite = useCallback(() => {
     return forceIframeRecomposite(stripeOverlayRef.current);
@@ -130,12 +184,15 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     process.env.NODE_ENV === "production" &&
     !process.env.NEXT_PUBLIC_BASE_URL?.includes("localhost") &&
     !process.env.NEXT_PUBLIC_BASE_URL?.includes("qa") &&
-    !process.env.NEXT_PUBLIC_BASE_URL?.includes("staging");
+    !process.env.NEXT_PUBLIC_BASE_URL?.includes("staging") &&
+    !process.env.NEXT_PUBLIC_BASE_URL?.includes("ngrok");
 
   const isQA =
     process.env.NEXT_PUBLIC_BASE_URL?.includes("qa") ||
     process.env.NEXT_PUBLIC_BASE_URL?.includes("staging") ||
     process.env.NEXT_PUBLIC_BASE_URL?.includes("localhost");
+
+  const paymentMethodsConfig = getExpressPaymentMethods(isProduction);
   // Obtener la IP y datos de geolocalización
   useEffect(() => {
     const getIPAddress = async () => {
@@ -421,8 +478,9 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         });
       }
 
-      // Construir return_url con parámetros de tracking preservados
-      const baseReturnUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/${router.query.countryCode}/thanks`;
+      // Construir return_url con parámetros de tracking preservados.
+      // En ngrok/local usamos el origin actual para que Stripe vuelva al túnel.
+      const baseReturnUrl = `${getCheckoutBaseUrl()}/${router.query.countryCode}/thanks`;
       const returnUrl = addTrackingParams(baseReturnUrl, trackingParams);
 
       // Confirmar y redirigir DIRECTO a thanks
@@ -514,6 +572,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   };
 
   const onClick = (event: StripeExpressCheckoutElementClickEvent) => {
+    walletClickReceivedRef.current = true;
+    if (deadTapTimerRef.current) {
+      clearTimeout(deadTapTimerRef.current);
+      deadTapTimerRef.current = null;
+    }
+
     const { resolve } = event;
     // expressPaymentType viene tipado en la Element pero acá lo extraemos via cast
     // para esquivar mismatches de versiones del SDK; el valor real es
@@ -628,15 +692,20 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       googlePay: Boolean(availablePaymentMethods?.googlePay),
       link: Boolean(availablePaymentMethods?.link),
     };
+    const expressWalletAvailable =
+      wallets.applePay || wallets.googlePay || wallets.link;
+
     checkoutConsole("onReady", {
       applePay: wallets.applePay,
       googlePay: wallets.googlePay,
       link: wallets.link,
+      expressWalletAvailable,
+      paymentMethodsConfig,
       loadTimeMs: readyTime - loadingState.renderTime,
       host: typeof window !== "undefined" ? window.location.host : null,
       origin: typeof window !== "undefined" ? window.location.origin : null,
     });
-    setisStripeReady(true);
+
     setLoadingState(prev => ({
       ...prev,
       ready: true,
@@ -644,13 +713,26 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       readyTime,
     }));
 
-    const hasWallet =
-      Boolean(availablePaymentMethods?.applePay) ||
-      Boolean(availablePaymentMethods?.googlePay);
-
-    if (isProduction && !hasWallet) {
+    // Sin wallet: error y el botón NO queda "listo" vacío (sigue en loading).
+    if (!expressWalletAvailable) {
+      setHasWallet(false);
+      setisStripeReady(false);
       setErrorMessage(t("error.stripe"));
+      if (!isBot()) {
+        clientLogger.warn("Sin Apple Pay / Google Pay / Link en este dispositivo", {
+          context: "StripeExpressCheckout - onReady sin wallet",
+          wallets,
+          paymentMethodsConfig,
+          priceId,
+          countryCode: router.query.countryCode,
+        });
+      }
+      return;
     }
+
+    setHasWallet(true);
+    setErrorMessage("");
+    setisStripeReady(true);
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -677,6 +759,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         context: 'StripeExpressCheckout - onReady',
         availablePaymentMethods,
         wallets,
+        paymentMethodsConfig,
         loadTimeMs,
         host: typeof window !== "undefined" ? window.location.host : undefined,
         priceId,
@@ -688,6 +771,34 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         elements: !!elements,
       });
     }
+  };
+
+  /** Tap en el overlay que no dispara onClick de Stripe (hit-test roto). */
+  const handleOverlayPointerDown = () => {
+    if (!isStripeReady || !hasWallet || isBot()) return;
+
+    walletClickReceivedRef.current = false;
+    if (deadTapTimerRef.current) {
+      clearTimeout(deadTapTimerRef.current);
+    }
+
+    deadTapTimerRef.current = setTimeout(() => {
+      if (walletClickReceivedRef.current) return;
+
+      clientLogger.warn("dead_tap: tap en overlay sin onClick de Stripe", {
+        context: "StripeExpressCheckout - dead_tap",
+        priceId,
+        countryCode: router.query.countryCode,
+        path: router.asPath,
+        host: typeof window !== "undefined" ? window.location.host : null,
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+        availableMethods: loadingState.availableMethods,
+        paymentMethodsConfig,
+      });
+
+      // Reintento de hit-test por si el iframe quedó "muerto".
+      triggerIframeRecomposite();
+    }, 400);
   };
 
   const onCancel = () => {
@@ -814,21 +925,25 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         countryCode: router.query.countryCode,
         path: router.asPath,
         baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
+        checkoutBaseUrl: getCheckoutBaseUrl(),
         nodeEnv: process.env.NODE_ENV,
         checkoutDebugEnabled: checkoutDebug,
-        paymentMethodsConfig: {
-          applePay: isProduction ? "auto" : "never",
-          googlePay: isProduction ? "always" : "never",
-          link: isProduction ? "never" : "auto",
-        },
+        paymentMethodsConfig,
       });
       checkoutConsole("mount", {
         priceId,
         path: router.asPath,
         host: typeof window !== "undefined" ? window.location.host : null,
         checkoutDebugEnabled: checkoutDebug,
+        paymentMethodsConfig,
       });
     }
+
+    return () => {
+      if (deadTapTimerRef.current) {
+        clearTimeout(deadTapTimerRef.current);
+      }
+    };
   }, []); // Solo una vez al montar
 
   const buttonLabel = isStripeReady
@@ -841,63 +956,63 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     errorMessage ||
     (loadingState.error && !isStripeReady ? t("error.stripe") : "");
 
+  const overlayActive = isStripeReady && hasWallet;
+
   return (
     <>
       <div className={styles.checkoutWrapper}>
-        <div
-          className={`${styles.checkoutVisual} ${
-            isStripeReady ? styles.ready : ""
-          }`}
+        <Button
+          animate={Boolean(animateButton && overlayActive)}
+          loading={!overlayActive}
+          disabled={!overlayActive}
+          endIcon={overlayActive ? <ArrowSvg /> : undefined}
+          className={styles.checkoutVisual}
+          type="button"
+          tabIndex={overlayActive ? -1 : 0}
+          aria-hidden={overlayActive}
+          aria-live="polite"
         >
-          <Button
-            animate={Boolean(animateButton && isStripeReady)}
-            loading={!isStripeReady}
-            endIcon={isStripeReady ? <ArrowSvg /> : undefined}
-          >
-            {buttonLabel}
-          </Button>
-        </div>
+          {buttonLabel}
+        </Button>
 
-        {!isStripeReady && (
+        {!overlayActive && (
           <div className={styles.checkoutShield} aria-hidden="true" />
         )}
 
         <div
           ref={stripeOverlayRef}
           className={`${styles.checkoutOverlay} ${
-            isStripeReady ? styles.loaded : ""
+            overlayActive ? styles.loaded : ""
           }`}
+          onPointerDownCapture={handleOverlayPointerDown}
+          aria-label={label}
         >
           <div id="checkout-page" className={styles.checkoutPage}>
-            <ExpressCheckoutElement
-              onClick={onClick}
-              onConfirm={onConfirm}
-              onReady={onReady}
-              onCancel={onCancel}
-              onLoadError={onLoadError}
-              options={{
-                paymentMethods: {
-                  applePay: isProduction ? "auto" : "never",
-                  googlePay: isProduction ? "always" : "never",
-                  link: isProduction ? "never" : "auto",
-                  amazonPay: "never",
-                  paypal: "never",
-                },
-                buttonType: {
-                  applePay: "subscribe",
-                  googlePay: "subscribe",
-                },
-                buttonTheme: {
-                  applePay: "black",
-                  googlePay: "black",
-                },
-                layout: {
-                  maxColumns: 1,
-                  overflow: "never",
-                },
-                buttonHeight: 55,
-              }}
-            />
+            {stripe && elements && (
+              <ExpressCheckoutElement
+                onClick={onClick}
+                onConfirm={onConfirm}
+                onReady={onReady}
+                onCancel={onCancel}
+                onLoadError={onLoadError}
+                options={{
+                  paymentMethods: paymentMethodsConfig,
+                  buttonType: {
+                    applePay: "subscribe",
+                    googlePay: "subscribe",
+                  },
+                  buttonTheme: {
+                    applePay: "black",
+                    googlePay: "black",
+                  },
+                  layout: {
+                    maxColumns: 1,
+                    overflow: "never",
+                  },
+                  buttonHeight: 55,
+                }}
+              />
+            )}
           </div>
         </div>
       </div>

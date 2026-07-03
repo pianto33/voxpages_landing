@@ -74,23 +74,15 @@ function checkoutConsole(label: string, payload: Record<string, unknown>) {
   console.info(`[VoxPages][Checkout] ${label}`, payload);
 }
 
-type ExpressPaymentMethodMode = "always" | "auto" | "never";
-
 /** Wallets por dispositivo también en local/ngrok (no solo en prod). */
-function getExpressPaymentMethods(isProduction: boolean): {
-  applePay: ExpressPaymentMethodMode;
-  googlePay: ExpressPaymentMethodMode;
-  link: ExpressPaymentMethodMode;
-  amazonPay: ExpressPaymentMethodMode;
-  paypal: ExpressPaymentMethodMode;
-} {
+function getExpressPaymentMethods(isProduction: boolean) {
   if (typeof navigator === "undefined") {
     return {
-      applePay: isProduction ? "auto" : "always",
-      googlePay: "always",
-      link: isProduction ? "never" : "auto",
-      amazonPay: "never",
-      paypal: "never",
+      applePay: (isProduction ? "auto" : "always") as "auto" | "always",
+      googlePay: "always" as const,
+      link: (isProduction ? "never" : "auto") as "never" | "auto",
+      amazonPay: "never" as const,
+      paypal: "never" as const,
     };
   }
 
@@ -104,13 +96,17 @@ function getExpressPaymentMethods(isProduction: boolean): {
 
   return {
     // Apple Pay en iOS/Safari Mac. En prod "auto" evita botón fantasma.
-    applePay: isApple ? (isProduction ? "auto" : "always") : "never",
+    applePay: (isApple
+      ? isProduction
+        ? "auto"
+        : "always"
+      : "never") as "auto" | "always" | "never",
     // Google Pay en Android y Chrome/desktop no-Apple.
-    googlePay: isApple ? "never" : "always",
+    googlePay: (isApple ? "never" : "always") as "always" | "never",
     // Link solo fuera de prod (útil en local/ngrok sin wallet nativo).
-    link: isProduction ? "never" : "auto",
-    amazonPay: "never",
-    paypal: "never",
+    link: (isProduction ? "never" : "auto") as "never" | "auto",
+    amazonPay: "never" as const,
+    paypal: "never" as const,
   };
 }
 

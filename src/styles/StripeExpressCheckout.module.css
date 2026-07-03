@@ -58,9 +58,9 @@
 }
 
 /* Contenedores internos de Stripe a ancho/alto completo del botón */
-.checkoutPage :global(> div),
-.checkoutPage :global(> div > div),
-.checkoutPage :global(> div > div > div) {
+.checkoutPage > :global(div),
+.checkoutPage > :global(div) > :global(div),
+.checkoutPage > :global(div) > :global(div) > :global(div) {
   width: 100% !important;
   height: 100% !important;
   min-height: 100% !important;

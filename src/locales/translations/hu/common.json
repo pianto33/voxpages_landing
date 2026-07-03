@@ -55,7 +55,7 @@
   "": "Manuálisan kell bejelentkeznie a platformon.",
   "loading": "Betöltés...",
   "checkout": {
-    "preparing_payment": "Fizetés előkészítése...",
+    "preparing_payment": "Előkészítés...",
     "almost_ready": "Majdnem kész...",
     "loading_hint": "Biztonságos fizetési módok beállítása",
     "card_fallback_hint": "Ha nem látja az Apple Pay-t vagy Google Pay-t, próbáljon másik böngészőt"

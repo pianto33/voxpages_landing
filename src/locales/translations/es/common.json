@@ -55,7 +55,7 @@
   "": "Necesitarás iniciar sesión manualmente en la plataforma.",
   "loading": "Cargando...",
   "checkout": {
-    "preparing_payment": "Preparando pago...",
+    "preparing_payment": "Preparando...",
     "almost_ready": "Casi listo...",
     "loading_hint": "Configurando métodos de pago seguros",
     "card_fallback_hint": "Si no ves Apple Pay o Google Pay, probá con otro navegador"

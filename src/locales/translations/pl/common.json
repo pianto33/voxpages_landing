@@ -55,7 +55,7 @@
   "": "Będziesz musiał zalogować się ręcznie na platformie.",
   "loading": "Ładowanie...",
   "checkout": {
-    "preparing_payment": "Przygotowywanie płatności...",
+    "preparing_payment": "Przygotowywanie...",
     "almost_ready": "Prawie gotowe...",
     "loading_hint": "Konfigurowanie bezpiecznych metod płatności",
     "card_fallback_hint": "Jeśli nie widzisz Apple Pay lub Google Pay, spróbuj innej przeglądarki"

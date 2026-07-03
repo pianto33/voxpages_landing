@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import {
   ExpressCheckoutElement,
@@ -19,6 +19,7 @@ import { clientLogger } from "@/utils/clientLogger";
 import { startFunnel, setEmail as setIdentityEmail } from "@/utils/userIdentity";
 import { apiFetch } from "@/utils/apiFetch";
 import { extractTrackingParams, saveTrackingParams, getTrackingParams, addTrackingParams } from "@/utils/trackingParams";
+import { forceIframeRecomposite } from "@/utils/forceIframeRecomposite";
 import Button from "@/components/Button";
 import styles from "@/styles/StripeExpressCheckout.module.css";
 
@@ -115,10 +116,14 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   // el usuario al clickear. Stripe sólo nos lo dice en el onClick; lo persistimos
   // acá para poder loguearlo también en onCancel/onConfirm y diagnosticar abandonos.
   const walletTypeRef = useRef<string | null>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const stripeOverlayRef = useRef<HTMLDivElement>(null);
   const [loadingPhase, setLoadingPhase] = useState<"preparing" | "almost">(
     "preparing"
   );
+
+  const triggerIframeRecomposite = useCallback(() => {
+    return forceIframeRecomposite(stripeOverlayRef.current);
+  }, []);
 
   // Igual que sr_landing-voxpages
   const isProduction =
@@ -199,18 +204,9 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   }, [isStripeReady]);
 
   useEffect(() => {
-    if (!isStripeReady || !overlayRef.current) return;
-
-    const overlay = overlayRef.current;
-    void overlay.offsetHeight;
-
-    requestAnimationFrame(() => {
-      overlay.style.transform = "translateZ(0)";
-      requestAnimationFrame(() => {
-        void overlay.offsetHeight;
-      });
-    });
-  }, [isStripeReady]);
+    if (!isStripeReady) return;
+    return triggerIframeRecomposite();
+  }, [isStripeReady, triggerIframeRecomposite]);
 
   const onConfirm = async (e: StripeExpressCheckoutElementConfirmEvent) => {
     try {
@@ -655,6 +651,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     if (isProduction && !hasWallet) {
       setErrorMessage(t("error.stripe"));
     }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        triggerIframeRecomposite();
+      });
+    });
     
     // Solo logear si no es un bot
     if (!isBot()) {
@@ -861,7 +863,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         )}
 
         <div
-          ref={overlayRef}
+          ref={stripeOverlayRef}
           className={`${styles.checkoutOverlay} ${
             isStripeReady ? styles.loaded : ""
           }`}

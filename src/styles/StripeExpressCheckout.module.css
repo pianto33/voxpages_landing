@@ -34,7 +34,7 @@
 .checkoutOverlay.loaded {
   pointer-events: auto;
   inset: -6px -4px;
-  transform: translateZ(0);
+  will-change: transform, opacity;
 }
 
 .checkoutPage {

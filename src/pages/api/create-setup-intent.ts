@@ -7,6 +7,51 @@ import { getRequestContext, compactContext } from "@/utils/serverContext";
 
 const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY ?? "");
 
+function isActiveOrTrialingSubscription(status: string): boolean {
+  return status === "active" || status === "trialing";
+}
+
+/** Reutiliza customer existente (prioriza el que ya tiene sub) o crea uno nuevo. */
+async function resolveStripeCustomer(params: {
+  email: string;
+  name: string;
+  metadata: Record<string, string>;
+  address?: Stripe.AddressParam;
+}): Promise<{ customerId: string; created: boolean }> {
+  const normalizedEmail = params.email.toLowerCase().trim();
+
+  const existing = await stripe.customers.list({
+    email: normalizedEmail,
+    limit: 100,
+  });
+
+  if (existing.data.length > 0) {
+    for (const customer of existing.data) {
+      const subs = await stripe.subscriptions.list({
+        customer: customer.id,
+        status: "all",
+        limit: 5,
+      });
+      if (subs.data.some((s) => isActiveOrTrialingSubscription(s.status))) {
+        return { customerId: customer.id, created: false };
+      }
+    }
+    return { customerId: existing.data[0].id, created: false };
+  }
+
+  const customer = await stripe.customers.create(
+    {
+      email: normalizedEmail,
+      name: params.name,
+      metadata: params.metadata,
+      ...(params.address ? { address: params.address } : {}),
+    },
+    { idempotencyKey: `voxpages-customer-${normalizedEmail}` }
+  );
+
+  return { customerId: customer.id, created: true };
+}
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -88,7 +133,37 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (billing_line1) metadata.billing_line1 = billing_line1;
     if (billing_line2) metadata.billing_line2 = billing_line2;
 
+    const addressCountry = billing_country || geo_country;
+    const addressState = billing_state || geo_state;
+    const addressCity = billing_city || geo_city;
+    const addressPostal = billing_postal || geo_postal;
+
+    let address: Stripe.AddressParam | undefined;
+    if (addressCountry) {
+      address = { country: addressCountry };
+      if (addressState) address.state = addressState;
+      if (addressCity) address.city = addressCity;
+      if (addressPostal) address.postal_code = addressPostal;
+      if (billing_line1) address.line1 = billing_line1;
+      if (billing_line2) address.line2 = billing_line2;
+    }
+
+    const { customerId, created: customerCreated } = await resolveStripeCustomer({
+      email,
+      name: name || email.split("@")[0],
+      metadata,
+      address,
+    });
+
+    logger.info(customerCreated ? "Customer creado para checkout" : "Customer reutilizado para checkout", {
+      funnel_step: customerCreated ? "customer_created" : "customer_reused",
+      ...ctx,
+      customer_id: customerId,
+      email,
+    });
+
     const setupIntent = await stripe.setupIntents.create({
+      customer: customerId,
       automatic_payment_methods: {
         enabled: true,
         allow_redirects: "never",
@@ -101,6 +176,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       funnel_step: "setup_intent_created",
       ...ctx,
       setup_intent_id: setupIntent.id,
+      customer_id: customerId,
       email,
       price_id: priceId,
       country_code: countryCode,

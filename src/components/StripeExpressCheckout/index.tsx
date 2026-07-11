@@ -431,6 +431,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           });
         }
         
+        if (data.code === "existing_subscription" || data.error === "existing_subscription") {
+          e.paymentFailed({ reason: "fail" });
+          router.push(`/${router.query.countryCode}/error?error=existing_subscription`);
+          return;
+        }
+
         setErrorMessage(t("error.general", { error: data.error }));
         e.paymentFailed({ reason: "fail" });
         return;

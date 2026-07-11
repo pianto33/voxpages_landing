@@ -4,6 +4,7 @@ import { logger } from "@/utils/logger";
 import { withRateLimitAndMonitoring } from "@/lib/rate-limit";
 import { validateWarn, createSubscriptionSchema } from "@/lib/validation";
 import { getRequestContext, compactContext } from "@/utils/serverContext";
+import { isBillableSubscriptionStatus } from "@/lib/stripeSubscriptions";
 
 const STRIPE_PRIVATE_KEY = process.env.STRIPE_PRIVATE_KEY ?? "";
 const stripe = new Stripe(STRIPE_PRIVATE_KEY);
@@ -50,6 +51,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 utm_content,
                 utm_id,
             } = validatedData;
+
+            const existingSubs = await stripe.subscriptions.list({
+                customer: customerId,
+                status: "all",
+                limit: 100,
+            });
+            const billable = existingSubs.data.find((s) =>
+                isBillableSubscriptionStatus(s.status)
+            );
+            if (billable) {
+                logger.info("create-subscription bloqueado: ya tiene suscripción", {
+                    funnel_step: "subscription_create_blocked_existing",
+                    ...ctx,
+                    customer_id: customerId,
+                    subscription_id: billable.id,
+                    subscription_status: billable.status,
+                });
+                return res.status(409).json({
+                    error: "existing_subscription",
+                    code: "existing_subscription",
+                    subscriptionId: billable.id,
+                });
+            }
             
             const metadata: Record<string, string> = {};
             

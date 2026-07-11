@@ -230,6 +230,10 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
           surface: 'card_form',
           error: data.error,
         });
+        if (data.code === "existing_subscription" || data.error === "existing_subscription") {
+          router.push(`/${router.query.countryCode}/error?error=existing_subscription`);
+          return;
+        }
         setErrorMessage(t("error.general", { error: data.error }));
         setIsProcessing(false);
         return;

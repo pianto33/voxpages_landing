@@ -4,12 +4,12 @@ import { logger } from "@/utils/logger";
 import { withRateLimitAndMonitoring } from "@/lib/rate-limit";
 import { validateWarn, createSetupIntentSchema } from "@/lib/validation";
 import { getRequestContext, compactContext } from "@/utils/serverContext";
+import {
+  findCheckoutBlockingSubscriptionForEmail,
+  isBillableSubscriptionStatus,
+} from "@/lib/stripeSubscriptions";
 
 const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY ?? "");
-
-function isActiveOrTrialingSubscription(status: string): boolean {
-  return status === "active" || status === "trialing";
-}
 
 /** Reutiliza customer existente (prioriza el que ya tiene sub) o crea uno nuevo. */
 async function resolveStripeCustomer(params: {
@@ -32,7 +32,7 @@ async function resolveStripeCustomer(params: {
         status: "all",
         limit: 5,
       });
-      if (subs.data.some((s) => isActiveOrTrialingSubscription(s.status))) {
+      if (subs.data.some((s) => isBillableSubscriptionStatus(s.status))) {
         return { customerId: customer.id, created: false };
       }
     }
@@ -71,16 +71,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { data: validatedData } = await validateWarn(
       createSetupIntentSchema,
       req.body,
-      'create-setup-intent',
-      { ip: req.headers['x-forwarded-for']?.toString(), url: req.url }
+      "create-setup-intent",
+      { ip: req.headers["x-forwarded-for"]?.toString(), url: req.url }
     );
 
-    const { 
-      email, 
-      name, 
-      priceId, 
-      countryCode, 
-      ip_address, 
+    const {
+      email,
+      name,
+      priceId,
+      countryCode,
+      ip_address,
       fbclid,
       utm_source,
       utm_medium,
@@ -102,6 +102,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     if (!email || !priceId) {
       return res.status(400).json({ error: "Missing email or priceId" });
+    }
+
+    // Solo active/trialing: past_due puede seguir para actualizar PM vía webhook.
+    const existingBlock = await findCheckoutBlockingSubscriptionForEmail(stripe, email);
+    if (existingBlock) {
+      logger.info("create-setup-intent bloqueado: ya tiene suscripción", {
+        funnel_step: "setup_intent_blocked_existing_subscription",
+        ...ctx,
+        email,
+        customer_id: existingBlock.customerId,
+        subscription_id: existingBlock.subscription.id,
+        subscription_status: existingBlock.subscription.status,
+      });
+      return res.status(409).json({
+        error: "existing_subscription",
+        code: "existing_subscription",
+      });
     }
 
     const metadata: Record<string, string> = {
@@ -155,12 +172,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       address,
     });
 
-    logger.info(customerCreated ? "Customer creado para checkout" : "Customer reutilizado para checkout", {
-      funnel_step: customerCreated ? "customer_created" : "customer_reused",
-      ...ctx,
-      customer_id: customerId,
-      email,
-    });
+    logger.info(
+      customerCreated ? "Customer creado para checkout" : "Customer reutilizado para checkout",
+      {
+        funnel_step: customerCreated ? "customer_created" : "customer_reused",
+        ...ctx,
+        customer_id: customerId,
+        email,
+      }
+    );
 
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
@@ -200,4 +220,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 }
 
 // Exporta con rate limiting (5/min) + monitoreo
-export default withRateLimitAndMonitoring(handler, 'create-setup-intent');
+export default withRateLimitAndMonitoring(handler, "create-setup-intent");

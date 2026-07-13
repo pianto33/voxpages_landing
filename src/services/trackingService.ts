@@ -53,6 +53,9 @@ function setCachedIPData(data: IPData): void {
   }
 }
 
+/** Evita 2 fetches en paralelo si varios effects llaman antes de escribir el caché. */
+let ipDataInFlight: Promise<IPData> | null = null;
+
 /**
  * Obtiene datos de IP usando el sistema centralizado de servicio pago + fallback.
  * Funciona tanto en cliente como en servidor.
@@ -66,6 +69,21 @@ export async function fetchIPData(): Promise<IPData> {
     return cachedData;
   }
 
+  if (typeof window !== "undefined" && ipDataInFlight) {
+    return ipDataInFlight;
+  }
+
+  const request = fetchIPDataUncached();
+  if (typeof window !== "undefined") {
+    ipDataInFlight = request.finally(() => {
+      ipDataInFlight = null;
+    });
+    return ipDataInFlight;
+  }
+  return request;
+}
+
+async function fetchIPDataUncached(): Promise<IPData> {
   const ipData: IPData = {
     ip: null,
     country: null,

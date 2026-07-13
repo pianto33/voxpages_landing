@@ -85,12 +85,15 @@ export default function Home() {
     const benefits = t("benefits_list", { returnObjects: true }) as string[];
     const formattedAmount = (amount / 100).toFixed(2);
     const snapRef = useRef<HTMLDivElement>(null);
+    const didVisitRef = useRef(false);
 
     // Locale resuelto (cookie `_sv_c` > path > default). LEGAL mapea us/ca → en.
     const resolvedCountry = lng;
 
+    // Una sola page view por mount (asPath/locale pueden hidratarse después).
     useEffect(() => {
-        if (!router.isReady) return;
+        if (!router.isReady || didVisitRef.current) return;
+        didVisitRef.current = true;
 
         const countryCode = router.query.countryCode?.toString() || "unknown";
         const cookieCountry = readCookie("_sv_c");

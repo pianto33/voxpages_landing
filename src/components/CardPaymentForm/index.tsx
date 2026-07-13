@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
@@ -69,14 +69,21 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
     line1: string | null;
     line2: string | null;
   } | null>(null);
+  const didBootstrapRef = useRef(false);
+  const didLogMountRef = useRef(false);
 
+  // One-shot: IP + funnel id. No re-run on router/price hydration.
   useEffect(() => {
-    const getIPAddress = async () => {
+    if (didBootstrapRef.current) return;
+    didBootstrapRef.current = true;
+
+    startFunnel();
+
+    void (async () => {
       try {
         const ipData = await fetchIPData();
         if (ipData.ip) {
           setIpAddress(ipData.ip);
-          // Guardar datos de geolocalización para enviar al webhook
           setGeoData({
             country: ipData.country,
             state: ipData.state,
@@ -90,17 +97,21 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
           error,
         });
       }
-    };
+    })();
+  }, []);
 
-    // Guardar parámetros de tracking (fbclid, utm_*, etc.)
+  useEffect(() => {
+    if (!router.isReady) return;
     const trackingParams = extractTrackingParams(router.query);
     if (Object.keys(trackingParams).length > 0) {
       saveTrackingParams(trackingParams);
       logger.info("Parámetros de tracking capturados", trackingParams);
     }
+  }, [router.isReady, router.asPath, router.query]);
 
-    // Iniciar funnel: este intento de compra queda identificado
-    startFunnel();
+  useEffect(() => {
+    if (!router.isReady || !priceId || didLogMountRef.current) return;
+    didLogMountRef.current = true;
     clientLogger.funnel('checkout_mounted', {
       priceId,
       amount,
@@ -109,9 +120,7 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       path: router.asPath,
       surface: 'card_form',
     });
-
-    getIPAddress();
-  }, [router.query, priceId, amount, currency]);
+  }, [router.isReady, router.asPath, router.query.countryCode, priceId, amount, currency]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

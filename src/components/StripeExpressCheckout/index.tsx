@@ -166,6 +166,8 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   const stripeOverlayRef = useRef<HTMLDivElement>(null);
   const walletClickReceivedRef = useRef(false);
   const deadTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didBootstrapRef = useRef(false);
+  const didLogMountRef = useRef(false);
   const [loadingPhase, setLoadingPhase] = useState<"preparing" | "almost">(
     "preparing"
   );
@@ -189,14 +191,18 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     process.env.NEXT_PUBLIC_BASE_URL?.includes("localhost");
 
   const paymentMethodsConfig = getExpressPaymentMethods(isProduction);
-  // Obtener la IP y datos de geolocalización
+  // One-shot: IP + funnel id. No re-run on router/price hydration.
   useEffect(() => {
-    const getIPAddress = async () => {
+    if (didBootstrapRef.current) return;
+    didBootstrapRef.current = true;
+
+    startFunnel();
+
+    void (async () => {
       try {
         const ipData = await fetchIPData();
         if (ipData.ip) {
           setIpAddress(ipData.ip);
-          // Guardar datos de geolocalización para enviar al webhook
           setGeoData({
             country: ipData.country,
             state: ipData.state,
@@ -209,9 +215,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           logger.warn("Error obteniendo IP en cliente", { error });
         }
       }
-    };
+    })();
+  }, []);
 
-    // Guardar parámetros de tracking (fbclid, utm_*, etc.)
+  // Persist UTMs/gclid once router query is ready (may be empty on first paint).
+  useEffect(() => {
+    if (!router.isReady) return;
     const trackingParams = extractTrackingParams(router.query);
     if (Object.keys(trackingParams).length > 0) {
       saveTrackingParams(trackingParams);
@@ -219,9 +228,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         logger.info("Parámetros de tracking capturados", trackingParams);
       }
     }
-
-    getIPAddress();
-  }, [router.query]);
+  }, [router.isReady, router.asPath, router.query]);
 
   // Timeout detector: logear si Stripe no carga en 10 segundos
   useEffect(() => {
@@ -900,13 +907,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     }
   };
 
-  // Log solo una vez cuando el componente se monta (no en cada render)
+  // Log checkout_mounted once price/router are settled — not on every dep flicker.
   useEffect(() => {
-    if (!isBot()) {
-      // Iniciar funnel: este intento de compra queda identificado
-      // hasta payment_succeeded / payment_failed.
-      startFunnel();
+    if (!router.isReady || !priceId || didLogMountRef.current) return;
+    didLogMountRef.current = true;
 
+    if (!isBot()) {
       clientLogger.funnel('checkout_mounted', {
         priceId,
         amount,
@@ -940,13 +946,15 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         paymentMethodsConfig,
       });
     }
+  }, [router.isReady, router.asPath, router.query.countryCode, priceId, amount, currency]);
 
+  useEffect(() => {
     return () => {
       if (deadTapTimerRef.current) {
         clearTimeout(deadTapTimerRef.current);
       }
     };
-  }, []); // Solo una vez al montar
+  }, []);
 
   const buttonLabel = isStripeReady
     ? label

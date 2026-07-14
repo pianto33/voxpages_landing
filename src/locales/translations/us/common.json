@@ -57,7 +57,9 @@
     "preparing_payment": "Preparing...",
     "almost_ready": "Almost ready...",
     "loading_hint": "Setting up secure payment methods",
-    "card_fallback_hint": "If you don't see Apple Pay or Google Pay, try another browser"
+    "card_fallback_hint": "If you don't see Apple Pay or Google Pay, try another browser",
+    "card_page_title": "Complete subscription",
+    "card_page_subtitle": "Google Pay / Apple Pay aren't available on this device. Continue with your card."
   },
   "footer": {
     "company": "Pianto33 LLC",

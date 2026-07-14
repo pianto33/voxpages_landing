@@ -190,6 +190,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       },
       usage: "off_session",
       metadata,
+      // "any" = pedir 3DS siempre que la tarjeta lo soporte (suele ir frictionless:
+      // sin OTP). Más cobertura/liability shift que "automatic", sin forzar challenge.
+      payment_method_options: {
+        card: {
+          request_three_d_secure: "any",
+        },
+      },
     });
 
     logger.info("SetupIntent creado exitosamente", {

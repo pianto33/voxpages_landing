@@ -18,7 +18,13 @@ import { logger } from "@/utils/logger";
 import { clientLogger } from "@/utils/clientLogger";
 import { startFunnel, setEmail as setIdentityEmail } from "@/utils/userIdentity";
 import { apiFetch } from "@/utils/apiFetch";
-import { extractTrackingParams, saveTrackingParams, getTrackingParams, addTrackingParams } from "@/utils/trackingParams";
+import {
+  extractTrackingParams,
+  saveTrackingParams,
+  getTrackingParams,
+  addTrackingParams,
+  pickCheckoutQuery,
+} from "@/utils/trackingParams";
 import { forceIframeRecomposite } from "@/utils/forceIframeRecomposite";
 import Button from "@/components/Button";
 import styles from "@/styles/StripeExpressCheckout.module.css";
@@ -168,10 +174,18 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   const deadTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didBootstrapRef = useRef(false);
   const didLogMountRef = useRef(false);
+  const stripeRef = useRef(stripe);
+  const elementsRef = useRef(elements);
+  const loadingTerminalRef = useRef(false);
   const [loadingPhase, setLoadingPhase] = useState<"preparing" | "almost">(
     "preparing"
   );
   const [hasWallet, setHasWallet] = useState(false);
+
+  stripeRef.current = stripe;
+  elementsRef.current = elements;
+  loadingTerminalRef.current =
+    loadingState.ready || Boolean(loadingState.error);
 
   const triggerIframeRecomposite = useCallback(() => {
     return forceIframeRecomposite(stripeOverlayRef.current);
@@ -230,31 +244,68 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     }
   }, [router.isReady, router.asPath, router.query]);
 
-  // Timeout detector: logear si Stripe no carga en 10 segundos
+  // Soft 10s: solo telemetría (el loader sigue). Hard 30s: error UI si Stripe/elements nunca llegaron.
+  // Timers anclados a renderTime (no a stripe/elements) para no reiniciar el reloj al hidratar.
   useEffect(() => {
-    if (isBot() || isQA) return; // Solo en producci?n y usuarios reales
-    
-    const timeoutId = setTimeout(() => {
-      if (!loadingState.ready && !loadingState.error) {
-        clientLogger.warn('Stripe Express Checkout no carg? despu?s de 10 segundos', {
-          context: 'StripeExpressCheckout - timeout detector',
+    if (isBot() || isQA) return;
+
+    const softId = setTimeout(() => {
+      if (loadingTerminalRef.current) return;
+      clientLogger.warn(
+        "Stripe Express Checkout aún no ready después de 10 segundos",
+        {
+          context: "StripeExpressCheckout - timeout detector",
+          timeout_kind: "soft_10s",
           loadingState: {
-            ready: loadingState.ready,
-            error: loadingState.error,
+            ready: false,
+            error: null,
             timeSinceRenderMs: Date.now() - loadingState.renderTime,
           },
-          stripe: !!stripe,
-          elements: !!elements,
+          stripe: !!stripeRef.current,
+          elements: !!elementsRef.current,
           priceId,
           countryCode: router.query.countryCode,
-          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
-          isOnline: typeof navigator !== 'undefined' ? navigator.onLine : null,
-        });
-      }
-    }, 10000); // 10 segundos
+          userAgent:
+            typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+          isOnline: typeof navigator !== "undefined" ? navigator.onLine : null,
+        }
+      );
+    }, 10_000);
 
-    return () => clearTimeout(timeoutId);
-  }, [loadingState.ready, loadingState.error, isQA, stripe, elements, priceId, router.query.countryCode]);
+    const hardId = setTimeout(() => {
+      if (loadingTerminalRef.current) return;
+      // Si stripe+elements ya están, seguimos esperando onReady (red lenta / wallet detect).
+      if (stripeRef.current && elementsRef.current) return;
+
+      const err = "stripe_elements_unavailable_30s";
+      setLoadingState((prev) => ({ ...prev, error: err }));
+      setErrorMessage(t("error.stripe"));
+      clientLogger.warn(
+        "Stripe/elements no disponibles después de 30 segundos",
+        {
+          context: "StripeExpressCheckout - hard_timeout",
+          timeout_kind: "hard_30s",
+          loadingState: {
+            ready: false,
+            error: err,
+            timeSinceRenderMs: Date.now() - loadingState.renderTime,
+          },
+          stripe: !!stripeRef.current,
+          elements: !!elementsRef.current,
+          priceId,
+          countryCode: router.query.countryCode,
+          userAgent:
+            typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+          isOnline: typeof navigator !== "undefined" ? navigator.onLine : null,
+        }
+      );
+    }, 30_000);
+
+    return () => {
+      clearTimeout(softId);
+      clearTimeout(hardId);
+    };
+  }, [loadingState.renderTime, priceId, router.query.countryCode, t]);
 
   useEffect(() => {
     if (isStripeReady) return;
@@ -715,26 +766,38 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       origin: typeof window !== "undefined" ? window.location.origin : null,
     });
 
-    setLoadingState(prev => ({
-      ...prev,
-      ready: true,
-      availableMethods: availablePaymentMethods,
-      readyTime,
-    }));
-
-    // Sin wallet: error y el botón NO queda "listo" vacío (sigue en loading).
+    // Sin wallet: estado terminal + redirect a checkout-card (sin error UI inmediato).
     if (!expressWalletAvailable) {
       setHasWallet(false);
       setisStripeReady(false);
-      setErrorMessage(t("error.stripe"));
+      setLoadingState((prev) => ({
+        ...prev,
+        error: "no_wallet",
+        availableMethods: availablePaymentMethods ?? null,
+        readyTime,
+      }));
       if (!isBot()) {
-        clientLogger.warn("Sin Apple Pay / Google Pay / Link en este dispositivo", {
-          context: "StripeExpressCheckout - onReady sin wallet",
+        clientLogger.warn("Express Checkout listo sin wallets disponibles", {
+          context: "StripeExpressCheckout - onReady no_wallet",
           wallets,
           paymentMethodsConfig,
           priceId,
+          isProduction,
           countryCode: router.query.countryCode,
+          userAgent:
+            typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+          fallback: "checkout-card",
         });
+      }
+
+      const countryCode = router.query.countryCode?.toString();
+      if (countryCode) {
+        void router.replace({
+          pathname: `/${countryCode}/checkout-card`,
+          query: pickCheckoutQuery(router.query),
+        });
+      } else {
+        setErrorMessage(t("error.stripe"));
       }
       return;
     }
@@ -742,6 +805,13 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     setHasWallet(true);
     setErrorMessage("");
     setisStripeReady(true);
+    setLoadingState((prev) => ({
+      ...prev,
+      ready: true,
+      error: null,
+      availableMethods: availablePaymentMethods ?? null,
+      readyTime,
+    }));
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -964,7 +1034,11 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
   const displayError =
     errorMessage ||
-    (loadingState.error && !isStripeReady ? t("error.stripe") : "");
+    (loadingState.error &&
+    loadingState.error !== "no_wallet" &&
+    !isStripeReady
+      ? t("error.stripe")
+      : "");
 
   const overlayActive = isStripeReady && hasWallet;
 

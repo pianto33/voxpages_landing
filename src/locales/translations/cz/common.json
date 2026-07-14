@@ -57,7 +57,9 @@
     "preparing_payment": "Příprava...",
     "almost_ready": "Téměř hotovo...",
     "loading_hint": "Nastavování bezpečných platebních metod",
-    "card_fallback_hint": "Pokud nevidíte Apple Pay nebo Google Pay, zkuste jiný prohlížeč"
+    "card_fallback_hint": "Pokud nevidíte Apple Pay nebo Google Pay, zkuste jiný prohlížeč",
+    "card_page_title": "Dokončit předplatné",
+    "card_page_subtitle": "Google Pay / Apple Pay na tomto zařízení nejsou k dispozici. Pokračujte kartou."
   },
   "footer": {
     "company": "Pianto33 LLC",

@@ -345,6 +345,11 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
           <PaymentElement
             options={{
               layout: "tabs",
+              wallets: {
+                link: "never",
+                applePay: "never",
+                googlePay: "never",
+              },
               fields: {
                 billingDetails: {
                   address: "auto",

@@ -15,6 +15,30 @@ export const TRACKING_PARAMS = [
   'ttclid',       // TikTok Click ID
 ] as const;
 
+/** Query keys to keep when redirecting between checkout surfaces. */
+export const CHECKOUT_PRESERVE_PARAMS = [
+  ...TRACKING_PARAMS,
+  'pr',
+  'notr',
+] as const;
+
+/**
+ * Builds a query object from the current router query, keeping only
+ * tracking + pricing flags (pr / notr).
+ */
+export const pickCheckoutQuery = (
+  query: Record<string, string | string[] | undefined>
+): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const key of CHECKOUT_PRESERVE_PARAMS) {
+    const value = query[key];
+    if (typeof value === 'string' && value) {
+      out[key] = value;
+    }
+  }
+  return out;
+};
+
 export interface TrackingParams {
   fbclid?: string;
   utm_source?: string;

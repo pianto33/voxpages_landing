@@ -108,6 +108,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 payment_behavior: "default_incomplete",
                 payment_settings: {
                     save_default_payment_method: "on_subscription",
+                    // Renovaciones: automatic. 3DS fuerte solo en SetupIntent (checkout).
+                    payment_method_options: {
+                        card: {
+                            request_three_d_secure: "automatic",
+                        },
+                    },
                 },
                 expand: [
                     "latest_invoice.payment_intent",

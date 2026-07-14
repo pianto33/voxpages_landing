@@ -172,6 +172,8 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
   const stripeOverlayRef = useRef<HTMLDivElement>(null);
   const walletClickReceivedRef = useRef(false);
   const deadTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deadTapCountRef = useRef(0);
+  const deadTapFallbackRef = useRef(false);
   const didBootstrapRef = useRef(false);
   const didLogMountRef = useRef(false);
   const stripeRef = useRef(stripe);
@@ -633,6 +635,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
   const onClick = (event: StripeExpressCheckoutElementClickEvent) => {
     walletClickReceivedRef.current = true;
+    deadTapCountRef.current = 0;
     if (deadTapTimerRef.current) {
       clearTimeout(deadTapTimerRef.current);
       deadTapTimerRef.current = null;
@@ -854,18 +857,22 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
   /** Tap en el overlay que no dispara onClick de Stripe (hit-test roto). */
   const handleOverlayPointerDown = () => {
-    if (!isStripeReady || !hasWallet || isBot()) return;
+    if (!isStripeReady || !hasWallet || isBot() || deadTapFallbackRef.current) return;
 
     walletClickReceivedRef.current = false;
     if (deadTapTimerRef.current) {
       clearTimeout(deadTapTimerRef.current);
     }
 
+    // 800ms: Stripe onClick a veces tarda >400ms en Android → menos falsos positivos.
     deadTapTimerRef.current = setTimeout(() => {
-      if (walletClickReceivedRef.current) return;
+      if (walletClickReceivedRef.current || deadTapFallbackRef.current) return;
 
-      clientLogger.warn("dead_tap: tap en overlay sin onClick de Stripe", {
+      deadTapCountRef.current += 1;
+      const deadTapCount = deadTapCountRef.current;
+      const payload = {
         context: "StripeExpressCheckout - dead_tap",
+        dead_tap_count: deadTapCount,
         priceId,
         countryCode: router.query.countryCode,
         path: router.asPath,
@@ -873,11 +880,34 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         userAgent: typeof navigator !== "undefined" ? navigator.userAgent : null,
         availableMethods: loadingState.availableMethods,
         paymentMethodsConfig,
-      });
+      };
+      clientLogger.warn(
+        "Dead tap en overlay checkout (Stripe onClick no disparó)",
+        payload
+      );
 
       // Reintento de hit-test por si el iframe quedó "muerto".
       triggerIframeRecomposite();
-    }, 400);
+
+      // Tras 4 taps muertos → card form (mismo fallback que no_wallet).
+      if (deadTapCount < 4) return;
+
+      deadTapFallbackRef.current = true;
+      const countryCode = router.query.countryCode?.toString();
+      if (!countryCode) return;
+
+      clientLogger.warn("Dead tap ×4 — redirect a checkout-card", {
+        context: "StripeExpressCheckout - dead_tap_fallback",
+        dead_tap_count: deadTapCount,
+        priceId,
+        path: router.asPath,
+        fallback: "checkout-card",
+      });
+      void router.replace({
+        pathname: `/${countryCode}/checkout-card`,
+        query: pickCheckoutQuery(router.query),
+      });
+    }, 800);
   };
 
   const onCancel = () => {

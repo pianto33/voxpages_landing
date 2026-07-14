@@ -62,6 +62,9 @@ export const PRICE_ID: Record<string, string> = {
     DEFAULT: "price_1St8jpIiQJtaidhOGVFFc7dt",
 };
 
+/** Producto Stripe principal de Voxpages (landing). */
+export const STRIPE_PRODUCT_ID = "prod_TqqQ17wBX3t38I";
+
 // amount expresado en la menor unidad de cada moneda (centavos/fillér/grosz/haléř).
 // Para HUF la menor unidad es fillér: HUF 6.800 → 680000.
 export const STRIPE_DATA: StripeDataMap = {

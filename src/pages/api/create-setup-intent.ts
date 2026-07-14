@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
+import { STRIPE_PRODUCT_ID } from "@/constants";
 import { logger } from "@/utils/logger";
 import { withRateLimitAndMonitoring } from "@/lib/rate-limit";
 import { validateWarn, createSetupIntentSchema } from "@/lib/validation";
@@ -125,6 +126,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       email,
       name: name || "",
       priceId,
+      // Para que el webhook resuelva producto sin expandir el price (eventos tempranos).
+      product_id: STRIPE_PRODUCT_ID,
       countryCode: countryCode || "",
       ip_address: ip_address || "",
       geo_country: geo_country || "",

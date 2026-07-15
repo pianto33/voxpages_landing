@@ -87,7 +87,7 @@ export default function Home() {
     const snapRef = useRef<HTMLDivElement>(null);
     const didVisitRef = useRef(false);
 
-    // Locale resuelto (cookie `_sv_c` > path > default). LEGAL mapea us/ca → en.
+    // Locale resuelto (cookie `_sv_c` > path > default). LEGAL mapea mercados EN → en.
     const resolvedCountry = lng;
 
     // Una sola page view por mount (asPath/locale pueden hidratarse después).

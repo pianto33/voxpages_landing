@@ -1,9 +1,13 @@
-// Mapeo del countryCode del landing (us/es/pt/pl/hu/cz) al locale del sitio
-// principal (voxpages.com). El landing usa "us" para tráfico USA pero el
+// Mapeo del countryCode del landing (us/es/pt/pl/hu/cz/ca/au/mo/hk/sg) al locale del sitio
+// principal (voxpages.com). El landing usa "us" (y mercados EN) para tráfico inglés pero el
 // sitio principal usa "en" como locale inglés. El resto coincide.
 const SITE_LOCALE_MAP: Record<string, string> = {
     us: "en",
     ca: "en",
+    au: "en",
+    mo: "en",
+    hk: "en",
+    sg: "en",
     es: "es",
     pt: "pt",
     pl: "pl",
@@ -58,6 +62,10 @@ export const PRICE_ID: Record<string, string> = {
     CZ: "price_1T05MtIiQJtaidhOA6FWLCOA",
     CA: "price_1TZxHpIiQJtaidhO9AcDCeOe",
     US: "price_1TTpEdIiQJtaidhOGImimPye",
+    AU: "price_1TtVo7IiQJtaidhOOllGeCDd",
+    MO: "price_1TtVoTIiQJtaidhOwZlGa1cw",
+    HK: "price_1TtVooIiQJtaidhOoUDABLqH",
+    SG: "price_1TtVpJIiQJtaidhOVKjfIX7j",
     TEST: "price_1St9gPIiQJtaidhOwIQPuQkA",
     DEFAULT: "price_1St8jpIiQJtaidhOGVFFc7dt",
 };
@@ -99,6 +107,22 @@ export const STRIPE_DATA: StripeDataMap = {
     US: {
         amount: 3999, // 39.99 USD
         currency: "usd",
+    },
+    AU: {
+        amount: 2890, // 28.90 AUD
+        currency: "aud",
+    },
+    MO: {
+        amount: 16000, // 160.00 MOP
+        currency: "mop",
+    },
+    HK: {
+        amount: 15000, // 150.00 HKD
+        currency: "hkd",
+    },
+    SG: {
+        amount: 2599, // 25.99 SGD
+        currency: "sgd",
     },
     DEFAULT: {
         amount: 1999, // 19.99 USD (matchea el priceId DEFAULT cargado en Stripe)

@@ -8,6 +8,10 @@ export const US_CAMPAIGN_PATH_PREFIXES = ["/str-lv12", "/tlf"] as const;
 export const LOCALE_FROM_COUNTRY: Record<string, Locale> = {
     us: "us",
     ca: "ca",
+    au: "au",
+    mo: "mo",
+    hk: "hk",
+    sg: "sg",
 };
 
 export function isUsCampaignPath(pathname: string): boolean {

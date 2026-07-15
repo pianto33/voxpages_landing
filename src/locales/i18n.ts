@@ -42,6 +42,19 @@ i18n
       ca: {
         common: commonUS,
       },
+      // Mercados EN (misma copy que US): Australia, Macao, Hong Kong, Singapur
+      au: {
+        common: commonUS,
+      },
+      mo: {
+        common: commonUS,
+      },
+      hk: {
+        common: commonUS,
+      },
+      sg: {
+        common: commonUS,
+      },
     },
     detection: {
       order: ["navigator", "htmlTag", "path", "subdomain"],

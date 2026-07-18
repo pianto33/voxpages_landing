@@ -203,6 +203,7 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
           email: normalizedEmail,
           name,
           priceId,
+          paymentSurface: "card",
           countryCode: router.query.countryCode,
           ip_address: ipAddress,
           fbclid: trackingParams.fbclid || undefined,

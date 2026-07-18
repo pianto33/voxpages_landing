@@ -80,6 +80,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       email,
       name,
       priceId,
+      paymentSurface,
       countryCode,
       ip_address,
       fbclid,
@@ -153,6 +154,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (billing_line1) metadata.billing_line1 = billing_line1;
     if (billing_line2) metadata.billing_line2 = billing_line2;
 
+    // Wallets ya autentican al usuario en el dispositivo; dejamos que Stripe
+    // pida 3DS solo cuando el emisor/SCA lo requiera. En formulario de tarjeta
+    // mantenemos 3DS para toda tarjeta compatible. Callers legacy sin surface
+    // conservan el comportamiento más estricto ("any").
+    const requestThreeDSecure =
+      paymentSurface === "wallet" ? "automatic" : "any";
+    metadata.payment_surface = paymentSurface || "legacy";
+    metadata.request_three_d_secure = requestThreeDSecure;
+
     const addressCountry = billing_country || geo_country;
     const addressState = billing_state || geo_state;
     const addressCity = billing_city || geo_city;
@@ -193,11 +203,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       },
       usage: "off_session",
       metadata,
-      // "any" = pedir 3DS siempre que la tarjeta lo soporte (suele ir frictionless:
-      // sin OTP). Más cobertura/liability shift que "automatic", sin forzar challenge.
       payment_method_options: {
         card: {
-          request_three_d_secure: "any",
+          request_three_d_secure: requestThreeDSecure,
         },
       },
     });
@@ -209,6 +217,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       customer_id: customerId,
       email,
       price_id: priceId,
+      payment_surface: paymentSurface || "legacy",
+      request_three_d_secure: requestThreeDSecure,
       country_code: countryCode,
       billing_country: billing_country || null,
       billing_postal: billing_postal || null,

@@ -321,6 +321,32 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     return triggerIframeRecomposite();
   }, [isStripeReady, triggerIframeRecomposite]);
 
+  /** Mismo destino que no_wallet / dead taps (página de tarjeta). */
+  const redirectToCheckoutCard = (
+    reason: string,
+    detail?: Record<string, unknown>
+  ) => {
+    const countryCode = router.query.countryCode?.toString();
+    if (!isBot()) {
+      clientLogger.warn("Redirect a checkout-card tras fallo de wallet", {
+        context: "StripeExpressCheckout - checkout_card_redirect",
+        reason,
+        priceId,
+        path: router.asPath,
+        fallback: "checkout-card",
+        ...detail,
+      });
+    }
+    if (!countryCode) {
+      setErrorMessage(t("error.stripe"));
+      return;
+    }
+    void router.replace({
+      pathname: `/${countryCode}/checkout-card`,
+      query: pickCheckoutQuery(router.query),
+    });
+  };
+
   const onConfirm = async (e: StripeExpressCheckoutElementConfirmEvent) => {
     try {
       if (!isBot()) {
@@ -369,6 +395,10 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         const errorMsg = t("error.email");
         setErrorMessage(errorMsg);
         e.paymentFailed({ reason: "fail" });
+        redirectToCheckoutCard("wallet_missing_identity", {
+          hasEmail: Boolean(email),
+          hasName: Boolean(name),
+        });
         return;
       }
 
@@ -387,6 +417,10 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         const errorMsg = t("error.stripe");
         setErrorMessage(errorMsg);
         e.paymentFailed({ reason: "fail" });
+        redirectToCheckoutCard("stripe_or_elements_missing", {
+          hasStripe: Boolean(stripe),
+          hasElements: Boolean(elements),
+        });
         return;
       }
 
@@ -402,6 +436,10 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         const errorMsg = t("error.submit", { error: submitError.message || "Desconocido" });
         setErrorMessage(errorMsg);
         e.paymentFailed({ reason: "fail" });
+        redirectToCheckoutCard("elements_submit_error", {
+          error_type: submitError.type,
+          error_message: submitError.message,
+        });
         return;
       }
 
@@ -435,6 +473,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           email,
           name,
           priceId,
+          paymentSurface: "wallet",
           countryCode: router.query.countryCode,
           ip_address: ipAddress,
           fbclid: trackingParams.fbclid || undefined,
@@ -597,6 +636,11 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           t("error.confirm_setup", { error: error.message || "Desconocido" })
         );
         e.paymentFailed({ reason: "fail" });
+        redirectToCheckoutCard("confirm_setup_error", {
+          stripe_error_code: error.code,
+          stripe_error_type: error.type,
+          stripe_decline_code: (error as any).decline_code,
+        });
       } else if (!isBot()) {
         checkoutConsole("confirmSetup:ok", {
           note: "Stripe no devolvió error; suele seguir redirección 3DS o return_url",
@@ -630,6 +674,11 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       const errorMsg = t("error.general", { error: error.message || "Error desconocido" });
       setErrorMessage(errorMsg);
       e.paymentFailed({ reason: "fail" });
+      redirectToCheckoutCard("on_confirm_exception", {
+        error_name: error?.name,
+        error_code: error?.code,
+        error_message: error?.message,
+      });
     }
   };
 
@@ -994,6 +1043,11 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       errorType,
       errorMessage,
       host: typeof window !== "undefined" ? window.location.host : null,
+    });
+
+    redirectToCheckoutCard("express_checkout_load_error", {
+      error_type: errorType,
+      error_message: errorMessage,
     });
 
     // Si es error de conexión API de un usuario real, investigar

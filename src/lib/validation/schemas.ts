@@ -210,6 +210,7 @@ export const createSetupIntentSchema = z.object({
   email: emailSchema,
   name: nameSchema,
   priceId: stripePriceIdSchema,
+  paymentSurface: z.enum(["wallet", "card"]).optional(),
   countryCode: z.string().max(10).optional(),
   ip_address: ipAddressSchema,
   fbclid: fbclidSchema,

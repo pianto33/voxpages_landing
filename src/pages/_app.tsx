@@ -9,20 +9,21 @@ import UserProvider from "@/contexts/user/user-provider";
 import Layout from "@/components/Layout";
 import { useMemo } from "react";
 import { useStripeData } from "@/hooks/useStripeData";
+import { toStripeAmount } from "@/utils/stripeAmount";
 import "@/locales/i18n";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { currency } = useStripeData();
+  const { amount, currency } = useStripeData();
   const options = useMemo<StripeElementsOptions>(
     () => ({
       mode: "subscription",
-      amount: 0,
+      amount: toStripeAmount(amount, currency),
       currency,
       appearance: { disableAnimations: true },
       setup_future_usage: "off_session",
       // paymentMethodTypes: ["card"], // ← QUITADO: bloqueaba Google Pay y Apple Pay
     }),
-    [currency]
+    [amount, currency]
   );
 
   return (

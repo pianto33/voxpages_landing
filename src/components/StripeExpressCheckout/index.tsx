@@ -26,6 +26,7 @@ import {
   pickCheckoutQuery,
 } from "@/utils/trackingParams";
 import { forceIframeRecomposite } from "@/utils/forceIframeRecomposite";
+import { toStripeAmount } from "@/utils/stripeAmount";
 import Button from "@/components/Button";
 import {
   createRadarSessionId,
@@ -780,7 +781,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           managementURL: "https://www.voxpages.com/cancel",
           billingAgreement: `Free 1-day trial, then ${amountStr} ${currencyUpper}/month. Cancel anytime at voxpages.com/cancel.`,
           regularBilling: {
-            amount,
+            amount: toStripeAmount(amount, currency),
             label: "Monthly subscription",
             recurringPaymentIntervalUnit: "month",
             recurringPaymentIntervalCount: 1,

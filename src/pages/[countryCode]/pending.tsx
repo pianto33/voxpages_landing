@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { extractTrackingParams, buildTrackingQueryString } from "@/utils/trackingParams";
+import { localeFromPathSegment } from "@/utils/locale";
 import Loader from "@/components/Loader";
 import Header from "@/components/Header";
 import styles from "@/styles/Pending.module.css";
@@ -20,7 +21,9 @@ function PendingPage() {
       const trackingQueryString = buildTrackingQueryString(trackingParams);
       
       // Redirigir a thanks
-      router.replace(`/${countryCode}/thanks${trackingQueryString}`);
+      const locale =
+        localeFromPathSegment(countryCode?.toString()) || countryCode;
+      router.replace(`/${locale}/thanks${trackingQueryString}`);
     }
   }, [router.isReady, countryCode, router]);
 

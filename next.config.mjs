@@ -9,6 +9,9 @@ const PRODUCTION_ORIGINS = [
   'https://voxpages.com',
   'https://cross.voxpages.com',
   'https://cross-qa.voxpages.com',
+  'https://cross.summaryvox.com',
+  'https://ldg.summaryvox.com',
+  'https://summaryvox.com',
   'https://suscriptionlanding-git-qa-voxpages-projects.vercel.app',
   'https://resume-book-git-qa-voxpages-projects.vercel.app',
 ];
@@ -88,14 +91,8 @@ if (process.env.NODE_ENV === 'production') {
 const nextConfig = {
   reactStrictMode: true,
   
-  async rewrites() {
-    return [
-      {
-        source: '/.well-known/apple-developer-merchantid-domain-association',
-        destination: '/api/.well-known/apple-developer-merchantid-domain-association',
-      },
-    ];
-  },
+  // El archivo vive en public/.well-known/... (Apple Pay / Stripe).
+  // No reescribir a /api: esa ruta no existía y el middleware mandaba 307 a /es.
   
   async headers() {
     const allowedOrigins = getAllowedOrigins();

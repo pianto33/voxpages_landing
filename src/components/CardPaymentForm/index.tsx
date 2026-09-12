@@ -8,6 +8,7 @@ import { startFunnel, setEmail as setIdentityEmail } from "@/utils/userIdentity"
 import { apiFetch } from "@/utils/apiFetch";
 import { fetchIPData } from "@/services/trackingService";
 import { extractTrackingParams, saveTrackingParams, addTrackingParams, getTrackingParams } from "@/utils/trackingParams";
+import { getCheckoutBaseUrl } from "@/utils/checkoutUrl";
 import Button from "@/components/Button";
 import {
   createRadarSessionId,
@@ -50,7 +51,7 @@ const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Props) {
-  const { t } = useAppTranslation();
+  const { t, lng } = useAppTranslation();
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
@@ -245,7 +246,7 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
           error: data.error,
         });
         if (data.code === "existing_subscription" || data.error === "existing_subscription") {
-          router.push(`/${router.query.countryCode}/error?error=existing_subscription`);
+          router.push(`/${lng}/error?error=existing_subscription`);
           return;
         }
         setErrorMessage(t("error.general", { error: data.error }));
@@ -254,7 +255,7 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
       }
 
       // Construir return_url con parámetros de tracking preservados
-      const baseReturnUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/${router.query.countryCode}/thanks`;
+      const baseReturnUrl = `${getCheckoutBaseUrl()}/${lng}/thanks`;
       const returnUrl = addTrackingParams(baseReturnUrl, trackingParams);
 
       clientLogger.funnel('payment_confirm_request', {

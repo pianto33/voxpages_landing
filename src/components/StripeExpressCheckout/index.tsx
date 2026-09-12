@@ -27,6 +27,7 @@ import {
 } from "@/utils/trackingParams";
 import { forceIframeRecomposite } from "@/utils/forceIframeRecomposite";
 import { toStripeAmount } from "@/utils/stripeAmount";
+import { getCheckoutBaseUrl } from "@/utils/checkoutUrl";
 import Button from "@/components/Button";
 import {
   createRadarSessionId,
@@ -121,19 +122,8 @@ function getExpressPaymentMethods(isProduction: boolean) {
   };
 }
 
-/** return_url correcto cuando se prueba por ngrok aunque .env apunte a prod. */
-function getCheckoutBaseUrl(): string {
-  if (typeof window !== "undefined") {
-    const host = window.location.hostname.toLowerCase();
-    if (host.includes("ngrok") || host === "127.0.0.1" || host === "localhost") {
-      return window.location.origin;
-    }
-  }
-  return process.env.NEXT_PUBLIC_BASE_URL || "";
-}
-
 function StripeExpressCheckout({ label, animateButton, amount, currency }: Props) {
-  const { t } = useAppTranslation();
+  const { t, lng } = useAppTranslation();
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
@@ -331,23 +321,20 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     reason: string,
     detail?: Record<string, unknown>
   ) => {
-    const countryCode = router.query.countryCode?.toString();
     if (!isBot()) {
       clientLogger.warn("Redirect a checkout-card tras fallo de wallet", {
         context: "StripeExpressCheckout - checkout_card_redirect",
         reason,
         priceId,
         path: router.asPath,
+        checkoutLocale: lng,
+        pathCountry: router.query.countryCode,
         fallback: "checkout-card",
         ...detail,
       });
     }
-    if (!countryCode) {
-      setErrorMessage(t("error.stripe"));
-      return;
-    }
     void router.replace({
-      pathname: `/${countryCode}/checkout-card`,
+      pathname: `/${lng}/checkout-card`,
       query: pickCheckoutQuery(router.query),
     });
   };
@@ -537,7 +524,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         
         if (data.code === "existing_subscription" || data.error === "existing_subscription") {
           e.paymentFailed({ reason: "fail" });
-          router.push(`/${router.query.countryCode}/error?error=existing_subscription`);
+          router.push(`/${lng}/error?error=existing_subscription`);
           return;
         }
 
@@ -586,7 +573,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
       // Construir return_url con parámetros de tracking preservados.
       // En ngrok/local usamos el origin actual para que Stripe vuelva al túnel.
-      const baseReturnUrl = `${getCheckoutBaseUrl()}/${router.query.countryCode}/thanks`;
+      const baseReturnUrl = `${getCheckoutBaseUrl()}/${lng}/thanks`;
       const returnUrl = addTrackingParams(baseReturnUrl, trackingParams);
 
       const radarSessionId = await createRadarSessionId(stripe);
@@ -850,15 +837,10 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         });
       }
 
-      const countryCode = router.query.countryCode?.toString();
-      if (countryCode) {
-        void router.replace({
-          pathname: `/${countryCode}/checkout-card`,
-          query: pickCheckoutQuery(router.query),
-        });
-      } else {
-        setErrorMessage(t("error.stripe"));
-      }
+      void router.replace({
+        pathname: `/${lng}/checkout-card`,
+        query: pickCheckoutQuery(router.query),
+      });
       return;
     }
 
@@ -950,18 +932,17 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       if (deadTapCount < 4) return;
 
       deadTapFallbackRef.current = true;
-      const countryCode = router.query.countryCode?.toString();
-      if (!countryCode) return;
 
       clientLogger.warn("Dead tap ×4 — redirect a checkout-card", {
         context: "StripeExpressCheckout - dead_tap_fallback",
         dead_tap_count: deadTapCount,
         priceId,
         path: router.asPath,
+        checkoutLocale: lng,
         fallback: "checkout-card",
       });
       void router.replace({
-        pathname: `/${countryCode}/checkout-card`,
+        pathname: `/${lng}/checkout-card`,
         query: pickCheckoutQuery(router.query),
       });
     }, 800);

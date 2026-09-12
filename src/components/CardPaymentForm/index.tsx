@@ -269,14 +269,44 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
 
       const radarSessionId = await createRadarSessionId(stripe);
 
+      // Mismo payload que wallet: 3DS/emisor ven email+nombre en el PaymentMethod.
+      // Address solo si el PaymentElement ya la capturó (no pedimos campos extra).
+      const billingDetails: {
+        email: string;
+        name: string;
+        address?: Record<string, string>;
+      } = {
+        email: normalizedEmail,
+        name,
+      };
+      if (
+        billingAddress?.country ||
+        billingAddress?.postal_code ||
+        billingAddress?.state ||
+        billingAddress?.city ||
+        billingAddress?.line1
+      ) {
+        billingDetails.address = {
+          ...(billingAddress.country ? { country: billingAddress.country } : {}),
+          ...(billingAddress.state ? { state: billingAddress.state } : {}),
+          ...(billingAddress.city ? { city: billingAddress.city } : {}),
+          ...(billingAddress.postal_code
+            ? { postal_code: billingAddress.postal_code }
+            : {}),
+          ...(billingAddress.line1 ? { line1: billingAddress.line1 } : {}),
+          ...(billingAddress.line2 ? { line2: billingAddress.line2 } : {}),
+        };
+      }
+
       const { error } = await stripe.confirmSetup({
         elements,
         clientSecret: data.clientSecret,
         confirmParams: {
           return_url: returnUrl,
-          ...(radarSessionId
-            ? { payment_method_data: radarPaymentMethodData(radarSessionId) }
-            : {}),
+          payment_method_data: {
+            billing_details: billingDetails,
+            ...radarPaymentMethodData(radarSessionId),
+          },
         },
       });
 
@@ -363,6 +393,9 @@ function CardPaymentForm({ label, priceId, animateButton, amount, currency }: Pr
               },
               fields: {
                 billingDetails: {
+                  // Email/nombre van en confirmSetup (input propio). Address sigue auto.
+                  email: "never",
+                  name: "never",
                   address: "auto",
                 },
               },

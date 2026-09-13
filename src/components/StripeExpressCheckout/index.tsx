@@ -741,23 +741,23 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       });
     }
 
-    // Apple Pay recurringPaymentRequest:
-    //  - trialBilling: ventana de trial (1 día, alineado con
-    //    trial_period_days=1 que usamos al crear la subscription en
-    //    /api/create-subscription). Declararlo permite que la red de tarjetas
-    //    pre-autorice el método sabiendo el monto recurrente, reduciendo
-    //    failures en el cobro del día siguiente.
-    //  - regularBilling: cobro recurrente real, empieza al terminar el trial.
-    //  - billingAgreement: texto legal mostrado en el sheet.
-    //  - Apple valida ESTRICTO: trialBilling requiere amount + label +
-    //    recurringPaymentIntervalUnit + recurringPaymentIntervalCount. Si
-    //    falta alguno, el resolve() rompe y NINGÚN wallet abre (ni Apple ni
-    //    Google). Vimos esto en producción 2026-05-21.
-    const TRIAL_DAYS = 1;
-    const trialStart = new Date();
-    const trialEnd = new Date(trialStart.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-    const amountStr = (amount / 100).toFixed(2);
-    const currencyUpper = currency.toUpperCase();
+    // Apple Pay recurringPaymentRequest: SOLO `regularBilling`.
+    //
+    // NO agregar `trialBilling`, `recurringPaymentStartDate` ni
+    // `billingAgreement`. Aunque la key sea `applePay`, Stripe deriva de este
+    // mismo objeto el `transactionInfo` que le manda a Google Pay, y con el
+    // bloque de trial la hoja de Google abre y muere al instante con
+    // OR_BIBED_06 ("Este comercio tiene problemas para aceptar tu pago").
+    // El usuario ve el error, toca Aceptar y Stripe lo reporta como onCancel,
+    // así que en los logs parece un abandono y no un fallo.
+    //
+    // Verificado el 2026-09-13 sobre un Galaxy S22 con Chrome 153, sirviendo
+    // el bundle de prod parcheado por CDP: con el bloque falla el 100% de las
+    // veces, sin el bloque la hoja abre normal. WisdomPackets y Gistly nunca
+    // lo tuvieron y nunca fallaron.
+    //
+    // El trial de 1 día se sigue aplicando donde corresponde: es
+    // `trial_period_days=1` en /api/create-subscription.
     resolve({
       emailRequired: true,
       phoneNumberRequired: false,
@@ -766,21 +766,11 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         recurringPaymentRequest: {
           paymentDescription: "VoxPages monthly subscription",
           managementURL: "https://www.voxpages.com/cancel",
-          billingAgreement: `Free 1-day trial, then ${amountStr} ${currencyUpper}/month. Cancel anytime at voxpages.com/cancel.`,
           regularBilling: {
             amount: toStripeAmount(amount, currency),
             label: "Monthly subscription",
             recurringPaymentIntervalUnit: "month",
             recurringPaymentIntervalCount: 1,
-            recurringPaymentStartDate: trialEnd,
-          },
-          trialBilling: {
-            amount: 0,
-            label: "Free trial",
-            recurringPaymentIntervalUnit: "day",
-            recurringPaymentIntervalCount: TRIAL_DAYS,
-            recurringPaymentStartDate: trialStart,
-            recurringPaymentEndDate: trialEnd,
           },
         },
       },

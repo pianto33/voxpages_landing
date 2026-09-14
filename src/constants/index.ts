@@ -82,7 +82,10 @@ export const STRIPE_PRODUCT_ID = "prod_TqqQ17wBX3t38I";
 
 // amount expresado en la menor unidad de cada moneda (centavos/fillér/grosz/haléř).
 // Para HUF la menor unidad es fillér: HUF 6.800 → 680000.
-// minPriceStripe: mínimo de cargo Stripe (https://docs.stripe.com/currencies#minimum-and-maximum-charge-amounts).
+// minPriceStripe: floor para Elements/wallets. La tabla Stripe
+// (https://docs.stripe.com/currencies#minimum-and-maximum-charge-amounts)
+// no alcanza si al convertir a USD (settlement) queda < ~0.50 USD: GPay
+// no aparece y Express Checkout cae a /checkout-card.
 export const STRIPE_DATA: StripeDataMap = {
     TEST: {
         amount: 100, // 1.00 USD
@@ -97,7 +100,7 @@ export const STRIPE_DATA: StripeDataMap = {
     CA: {
         amount: 2800, // 28.00 CAD
         currency: "cad",
-        minPriceStripe: 50, // 0.50 CAD
+        minPriceStripe: 100, // 1.00 CAD (tabla 0.50 CAD ≈ 0.36 USD → GPay no aparece)
     },
     PT: {
         amount: 1999, // 19.99 EUR
@@ -127,12 +130,12 @@ export const STRIPE_DATA: StripeDataMap = {
     AU: {
         amount: 2890, // 28.90 AUD
         currency: "aud",
-        minPriceStripe: 50, // 0.50 AUD
+        minPriceStripe: 100, // 1.00 AUD (tabla 0.50 AUD ≈ 0.33 USD → GPay no aparece)
     },
     MO: {
         amount: 16000, // 160.00 MOP
         currency: "mop",
-        minPriceStripe: 400, // 4.00 MOP (no está en la tabla; paridad HKD)
+        minPriceStripe: 800, // 8.00 MOP (~1 USD; 4.00 MOP no alcanzó para GPay)
     },
     HK: {
         amount: 15000, // 150.00 HKD
@@ -142,7 +145,7 @@ export const STRIPE_DATA: StripeDataMap = {
     SG: {
         amount: 2599, // 25.99 SGD
         currency: "sgd",
-        minPriceStripe: 50, // 0.50 SGD
+        minPriceStripe: 100, // 1.00 SGD (tabla 0.50 SGD ≈ 0.37 USD → GPay no aparece)
     },
     DEFAULT: {
         amount: 1999, // 19.99 USD (matchea el priceId DEFAULT cargado en Stripe)

@@ -13,17 +13,19 @@ import { toStripeAmount } from "@/utils/stripeAmount";
 import "@/locales/i18n";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { amount, currency } = useStripeData();
+  const { currency, priceToWallet } = useStripeData();
+  // priceToWallet = minPriceStripe (no 0, no full). 0 rompe Google Pay (OR_BIBED_06);
+  // el trial sigue cobrando 0 el primer día via SetupIntent.
   const options = useMemo<StripeElementsOptions>(
     () => ({
       mode: "subscription",
-      amount: toStripeAmount(amount, currency),
+      amount: toStripeAmount(priceToWallet, currency),
       currency,
       appearance: { disableAnimations: true },
       setup_future_usage: "off_session",
       // paymentMethodTypes: ["card"], // ← QUITADO: bloqueaba Google Pay y Apple Pay
     }),
-    [amount, currency]
+    [priceToWallet, currency]
   );
 
   return (

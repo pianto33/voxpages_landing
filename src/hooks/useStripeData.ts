@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { STRIPE_DATA, PRICE_ID } from "@/constants";
+import { STRIPE_DATA, PRICE_ID, withPriceToWallet } from "@/constants";
 import { readCookie } from "@/utils/cookie";
 import { localeFromPathSegment } from "@/utils/locale";
 
@@ -17,12 +17,12 @@ export const useStripeData = () => {
 
     const cookieCountry = readCookie("_sv_c")?.toUpperCase();
     if (cookieCountry && STRIPE_DATA[cookieCountry]) {
-        return STRIPE_DATA[cookieCountry];
+        return withPriceToWallet(STRIPE_DATA[cookieCountry]);
     }
 
     const priceParam = router.query.pr?.toString().toUpperCase();
     if (priceParam && STRIPE_DATA[priceParam]) {
-        return STRIPE_DATA[priceParam];
+        return withPriceToWallet(STRIPE_DATA[priceParam]);
     }
 
     const rawPath =
@@ -33,10 +33,10 @@ export const useStripeData = () => {
     const countryCode = (mappedPath ?? rawPath).toUpperCase();
 
     if (router.asPath === "/pt-meo" || router.asPath.includes("/pt-meo")) {
-        return STRIPE_DATA["PT_MEO"] || STRIPE_DATA.DEFAULT;
+        return withPriceToWallet(STRIPE_DATA["PT_MEO"] || STRIPE_DATA.DEFAULT);
     }
 
-    return STRIPE_DATA[countryCode] || STRIPE_DATA.DEFAULT;
+    return withPriceToWallet(STRIPE_DATA[countryCode] || STRIPE_DATA.DEFAULT);
 };
 
 export const usePriceId = () => {

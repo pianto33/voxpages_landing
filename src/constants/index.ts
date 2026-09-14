@@ -42,9 +42,16 @@ export const GTM_EVENTS = {
     PAYMENT_FAILED: "payment_failed",
 };
 
-interface StripeData {
+export interface StripeData {
     amount: number;
     currency: string;
+    /** Mínimo de cargo Stripe en unidad menor (mismo formato que amount). */
+    minPriceStripe: number;
+}
+
+/** Monto que se manda a Elements / wallets: el mínimo, no el full. */
+export function withPriceToWallet(data: StripeData): StripeData & { priceToWallet: number } {
+    return { ...data, priceToWallet: data.minPriceStripe };
 }
 
 interface StripeDataMap extends Partial<Record<string, StripeData>> {
@@ -75,58 +82,72 @@ export const STRIPE_PRODUCT_ID = "prod_TqqQ17wBX3t38I";
 
 // amount expresado en la menor unidad de cada moneda (centavos/fillér/grosz/haléř).
 // Para HUF la menor unidad es fillér: HUF 6.800 → 680000.
+// minPriceStripe: mínimo de cargo Stripe (https://docs.stripe.com/currencies#minimum-and-maximum-charge-amounts).
 export const STRIPE_DATA: StripeDataMap = {
     TEST: {
         amount: 100, // 1.00 USD
         currency: "usd",
+        minPriceStripe: 50, // 0.50 USD
     },
     ES: {
         amount: 1999, // 19.99 EUR
         currency: "eur",
+        minPriceStripe: 50, // 0.50 EUR
     },
     CA: {
         amount: 2800, // 28.00 CAD
         currency: "cad",
+        minPriceStripe: 50, // 0.50 CAD
     },
     PT: {
         amount: 1999, // 19.99 EUR
         currency: "eur",
+        minPriceStripe: 50, // 0.50 EUR
     },
     PL: {
         amount: 4900, // 49.00 PLN
         currency: "pln",
+        minPriceStripe: 200, // 2.00 PLN
     },
     HU: {
         amount: 680000, // 6.800 HUF
         currency: "huf",
+        minPriceStripe: 17500, // 175.00 HUF
     },
     CZ: {
         amount: 41900, // 419.00 CZK
         currency: "czk",
+        minPriceStripe: 1500, // 15.00 CZK
     },
     US: {
         amount: 3999, // 39.99 USD
         currency: "usd",
+        minPriceStripe: 50, // 0.50 USD
     },
     AU: {
         amount: 2890, // 28.90 AUD
         currency: "aud",
+        minPriceStripe: 50, // 0.50 AUD
     },
     MO: {
         amount: 16000, // 160.00 MOP
         currency: "mop",
+        minPriceStripe: 400, // 4.00 MOP (no está en la tabla; paridad HKD)
     },
     HK: {
         amount: 15000, // 150.00 HKD
         currency: "hkd",
+        minPriceStripe: 400, // 4.00 HKD
     },
     SG: {
         amount: 2599, // 25.99 SGD
         currency: "sgd",
+        minPriceStripe: 50, // 0.50 SGD
     },
     DEFAULT: {
         amount: 1999, // 19.99 USD (matchea el priceId DEFAULT cargado en Stripe)
         currency: "usd",
+        minPriceStripe: 50, // 0.50 USD
     },
 };
 

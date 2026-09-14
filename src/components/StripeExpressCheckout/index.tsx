@@ -10,7 +10,7 @@ import {
   StripeExpressCheckoutElementConfirmEvent,
 } from "@stripe/stripe-js";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
-import { usePriceId } from "@/hooks/useStripeData";
+import { usePriceId, useStripeData } from "@/hooks/useStripeData";
 import { sendEvent } from "@/utils/gtm";
 import { GTM_EVENTS } from "@/constants";
 import { fetchIPData } from "@/services/trackingService";
@@ -124,6 +124,7 @@ function getExpressPaymentMethods(isProduction: boolean) {
 
 function StripeExpressCheckout({ label, animateButton, amount, currency }: Props) {
   const { t, lng } = useAppTranslation();
+  const { priceToWallet } = useStripeData();
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
@@ -767,7 +768,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           paymentDescription: "VoxPages monthly subscription",
           managementURL: "https://www.voxpages.com/cancel",
           regularBilling: {
-            amount: toStripeAmount(amount, currency),
+            amount: toStripeAmount(priceToWallet, currency),
             label: "Monthly subscription",
             recurringPaymentIntervalUnit: "month",
             recurringPaymentIntervalCount: 1,

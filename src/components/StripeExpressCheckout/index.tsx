@@ -697,34 +697,26 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
     // resolve ANTES de logs/GTM. Google Pay corta con CALLBACK_TIMED_OUT
     // si el callback se gasta la ventana en telemetría.
-    // GPay: solo base. lineItems 0 + deferred, o recurringPaymentRequest,
-    // hacen que la hoja arranque y Google la corte.
-    // Apple: deferred de 1 día. Cualquier otro tipo también va a base,
-    // nunca a recurring (si el tipo no se lee, no puede ser un GPay con recurring).
-    if (expressPaymentType === "google_pay") {
-      resolve(baseResolve);
-    } else if (expressPaymentType === "apple_pay") {
-      const trialEnd = new Date(Date.now() + 864e5);
-      resolve({
-        ...baseResolve,
-        business: { name: "1 Day Free Trial" },
-        lineItems: [{ name: "1 Day Free Trial", amount: 0 }],
-        applePay: {
-          deferredPaymentRequest: {
-            paymentDescription: "1 Day Free Trial",
-            managementURL: "https://www.voxpages.com/cancel",
-            deferredBilling: {
-              label: "1 Day Free Trial",
-              amount: 0,
-              amountType: "final",
-              deferredPaymentDate: trialEnd,
-            },
+    // Mismo payload para Apple y Google Pay (combo TG /es): deferred +
+    // lineItems 0. GPay en base, con Elements en 0, cierra la hoja.
+    const trialEnd = new Date(Date.now() + 864e5);
+    resolve({
+      ...baseResolve,
+      business: { name: "1 Day Free Trial" },
+      lineItems: [{ name: "1 Day Free Trial", amount: 0 }],
+      applePay: {
+        deferredPaymentRequest: {
+          paymentDescription: "1 Day Free Trial",
+          managementURL: "https://www.voxpages.com/cancel",
+          deferredBilling: {
+            label: "1 Day Free Trial",
+            amount: 0,
+            amountType: "final",
+            deferredPaymentDate: trialEnd,
           },
         },
-      } as Parameters<typeof resolve>[0]);
-    } else {
-      resolve(baseResolve);
-    }
+      },
+    } as Parameters<typeof resolve>[0]);
 
     checkoutConsole("onClick", {
       priceId,

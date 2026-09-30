@@ -10,28 +10,26 @@ import Layout from "@/components/Layout";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
 import { useStripeData } from "@/hooks/useStripeData";
-import { toStripeAmount } from "@/utils/stripeAmount";
 import "@/locales/i18n";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const { currency, priceToWallet } = useStripeData();
-  // amount 0 en Elements rompe Google Pay (OR_BIBED_06): la hoja arranca y
-  // Google la corta. El piso es minPriceStripe. El trial del primer día va
-  // por SetupIntent, no por este monto.
-  // No montar hasta que el path esté listo, y recrear si cambian moneda o
-  // monto: elements.update de la moneda también cierra Google Pay.
-  const elementsAmount = toStripeAmount(priceToWallet, currency);
+  const { currency } = useStripeData();
+  // Combo TG /es, todos los países: Elements en 0 desde el mount. Apple y
+  // Google Pay resuelven el mismo deferred + lineItems 0. El piso de
+  // catálogo con deferred deja iOS en 0,50; Elements 0 con GPay en base
+  // cierra Android. No montar hasta que el path esté listo: un update de
+  // moneda también cierra Google Pay.
   const options = useMemo<StripeElementsOptions>(
     () => ({
       mode: "subscription",
-      amount: elementsAmount,
+      amount: 0,
       currency,
       appearance: { disableAnimations: true },
       setup_future_usage: "off_session",
       // paymentMethodTypes: ["card"], // ← QUITADO: bloqueaba Google Pay y Apple Pay
     }),
-    [elementsAmount, currency]
+    [currency]
   );
 
   return (
@@ -76,7 +74,7 @@ export default function App({ Component, pageProps }: AppProps) {
       </Script>
       {router.isReady ? (
         <Elements
-          key={`${currency}-${elementsAmount}`}
+          key={`${currency}-0`}
           stripe={stripePromise}
           options={options}
         >

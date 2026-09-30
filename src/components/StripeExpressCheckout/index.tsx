@@ -26,7 +26,7 @@ import {
   pickCheckoutQuery,
 } from "@/utils/trackingParams";
 import { forceIframeRecomposite } from "@/utils/forceIframeRecomposite";
-import { toStripeAmount } from "@/utils/stripeAmount";
+import { isSpainWalletPath, toStripeAmount } from "@/utils/stripeAmount";
 import { getCheckoutBaseUrl } from "@/utils/checkoutUrl";
 import Button from "@/components/Button";
 import {
@@ -694,20 +694,23 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       ((event as unknown) as { expressPaymentType?: string }).expressPaymentType || null;
     walletTypeRef.current = expressPaymentType;
 
-    // billingAddressRequired solo lo necesitamos para sales tax USA.
-    const isUsUser = currency?.toLowerCase() === "usd";
+    const spainWallet = isSpainWalletPath(router.asPath);
     const baseResolve = {
       emailRequired: true,
       phoneNumberRequired: false,
-      billingAddressRequired: isUsUser,
+      billingAddressRequired: false,
     };
 
     walletOpenedAtRef.current = Date.now();
 
     // resolve ANTES de logs/GTM. Google Pay corta con CALLBACK_TIMED_OUT
     // si el callback se gasta la ventana en telemetría.
-    // Apple y Google, en todos los países: deferred de 1 día (TG /test-9).
-    if (expressPaymentType === "apple_pay" || expressPaymentType === "google_pay") {
+    // /es: deferred €0 en Apple y Google (TG /test-9).
+    // Resto: GPay solo base; Apple recurring de catálogo.
+    if (
+      spainWallet &&
+      (expressPaymentType === "apple_pay" || expressPaymentType === "google_pay")
+    ) {
       const trialEnd = new Date(Date.now() + 864e5);
       resolve({
         ...baseResolve,
@@ -726,6 +729,8 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           },
         },
       } as Parameters<typeof resolve>[0]);
+    } else if (expressPaymentType === "google_pay") {
+      resolve(baseResolve);
     } else {
       resolve({
         ...baseResolve,
@@ -748,8 +753,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       priceId,
       path: router.asPath,
       host: typeof window !== "undefined" ? window.location.host : null,
-      isUsUser,
-      billingAddressRequired: isUsUser,
+      billingAddressRequired: false,
       wallet: expressPaymentType,
     });
     console.log("[StripeExpressCheckout] Wallet clickeado (Express Checkout)");
@@ -762,7 +766,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         currency,
         wallet: expressPaymentType,
         countryCode: router.query.countryCode,
-        billing_address_required: isUsUser,
+        billing_address_required: false,
       });
 
       clientLogger.click('Google Pay / Apple Pay abriendo', {
@@ -774,13 +778,13 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         countryCode: router.query.countryCode,
         path: router.asPath,
         userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
-        billingAddressRequired: isUsUser,
+        billingAddressRequired: false,
       });
     }
 
     checkoutConsole("onClick:resolve", {
       emailRequired: true,
-      billingAddressRequired: isUsUser,
+      billingAddressRequired: false,
       wallet: expressPaymentType,
     });
   };

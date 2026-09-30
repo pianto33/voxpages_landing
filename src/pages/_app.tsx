@@ -10,28 +10,25 @@ import Layout from "@/components/Layout";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
 import { useStripeData } from "@/hooks/useStripeData";
-import { isSpainWalletPath, toStripeAmount } from "@/utils/stripeAmount";
 import "@/locales/i18n";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const { currency, priceToWallet } = useStripeData();
+  const { currency } = useStripeData();
   // No montar hasta que el path esté listo: si no, el primer mount cae al
   // DEFAULT (USD) y el update de moneda remonta Express Checkout. Google Pay
-  // abre y se cierra. /es nace en amount 0; el resto, en el piso de catálogo.
-  // La key recrea Elements si cambian moneda o monto, en vez de elements.update.
-  const spainWallet = isSpainWalletPath(router.asPath);
-  const elementsAmount = spainWallet ? 0 : toStripeAmount(priceToWallet, currency);
+  // abre y se cierra. En todos los países el wallet nace en amount 0.
+  // La key recrea Elements si cambia la moneda, en vez de elements.update.
   const options = useMemo<StripeElementsOptions>(
     () => ({
       mode: "subscription",
-      amount: elementsAmount,
+      amount: 0,
       currency,
       appearance: { disableAnimations: true },
       setup_future_usage: "off_session",
       // paymentMethodTypes: ["card"], // ← QUITADO: bloqueaba Google Pay y Apple Pay
     }),
-    [elementsAmount, currency]
+    [currency]
   );
 
   return (
@@ -76,7 +73,7 @@ export default function App({ Component, pageProps }: AppProps) {
       </Script>
       {router.isReady ? (
         <Elements
-          key={`${currency}-${elementsAmount}`}
+          key={`${currency}-0`}
           stripe={stripePromise}
           options={options}
         >

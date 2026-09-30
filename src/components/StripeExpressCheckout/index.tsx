@@ -10,7 +10,7 @@ import {
   StripeExpressCheckoutElementConfirmEvent,
 } from "@stripe/stripe-js";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
-import { usePriceId, useStripeData } from "@/hooks/useStripeData";
+import { usePriceId } from "@/hooks/useStripeData";
 import { sendEvent } from "@/utils/gtm";
 import { GTM_EVENTS } from "@/constants";
 import { fetchIPData } from "@/services/trackingService";
@@ -26,7 +26,6 @@ import {
   pickCheckoutQuery,
 } from "@/utils/trackingParams";
 import { forceIframeRecomposite } from "@/utils/forceIframeRecomposite";
-import { isSpainWalletPath, toStripeAmount } from "@/utils/stripeAmount";
 import { getCheckoutBaseUrl } from "@/utils/checkoutUrl";
 import Button from "@/components/Button";
 import {
@@ -124,7 +123,6 @@ function getExpressPaymentMethods(isProduction: boolean) {
 
 function StripeExpressCheckout({ label, animateButton, amount, currency }: Props) {
   const { t, lng } = useAppTranslation();
-  const { priceToWallet } = useStripeData();
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
@@ -686,15 +684,9 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       deadTapTimerRef.current = null;
     }
 
-    const { resolve } = event;
-    // expressPaymentType viene tipado en la Element pero acá lo extraemos via cast
-    // para esquivar mismatches de versiones del SDK; el valor real es
-    // 'apple_pay' | 'google_pay' | 'link' | 'amazon_pay' | 'paypal'.
-    const expressPaymentType =
-      ((event as unknown) as { expressPaymentType?: string }).expressPaymentType || null;
+    const { resolve, expressPaymentType } = event;
     walletTypeRef.current = expressPaymentType;
 
-    const spainWallet = isSpainWalletPath(router.asPath);
     const baseResolve = {
       emailRequired: true,
       phoneNumberRequired: false,
@@ -705,12 +697,13 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
     // resolve ANTES de logs/GTM. Google Pay corta con CALLBACK_TIMED_OUT
     // si el callback se gasta la ventana en telemetría.
-    // /es: deferred €0 en Apple y Google (TG /test-9).
-    // Resto: GPay solo base; Apple recurring de catálogo.
-    if (
-      spainWallet &&
-      (expressPaymentType === "apple_pay" || expressPaymentType === "google_pay")
-    ) {
+    // GPay: solo base. lineItems 0 + deferred, o recurringPaymentRequest,
+    // hacen que la hoja arranque y Google la corte.
+    // Apple: deferred de 1 día. Cualquier otro tipo también va a base,
+    // nunca a recurring (si el tipo no se lee, no puede ser un GPay con recurring).
+    if (expressPaymentType === "google_pay") {
+      resolve(baseResolve);
+    } else if (expressPaymentType === "apple_pay") {
       const trialEnd = new Date(Date.now() + 864e5);
       resolve({
         ...baseResolve,
@@ -729,24 +722,8 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           },
         },
       } as Parameters<typeof resolve>[0]);
-    } else if (expressPaymentType === "google_pay") {
-      resolve(baseResolve);
     } else {
-      resolve({
-        ...baseResolve,
-        applePay: {
-          recurringPaymentRequest: {
-            paymentDescription: "VoxPages monthly subscription",
-            managementURL: "https://www.voxpages.com/cancel",
-            regularBilling: {
-              amount: toStripeAmount(priceToWallet, currency),
-              label: "Monthly subscription",
-              recurringPaymentIntervalUnit: "month",
-              recurringPaymentIntervalCount: 1,
-            },
-          },
-        },
-      });
+      resolve(baseResolve);
     }
 
     checkoutConsole("onClick", {

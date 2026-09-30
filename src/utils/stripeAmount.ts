@@ -14,10 +14,3 @@ export function toStripeAmount(amount: number, currency: string): number {
   if (ZERO_DECIMAL.has(currency.toLowerCase())) return Math.round(amount / 100);
   return Math.round(amount);
 }
-
-/** `/es` y `/es/...`. El wallet de ese path monta con amount 0. */
-export function isSpainWalletPath(asPath: string): boolean {
-  const path = asPath.split("?")[0].split("#")[0];
-  const segment = path.split("/").filter(Boolean)[0]?.toLowerCase();
-  return segment === "es";
-}

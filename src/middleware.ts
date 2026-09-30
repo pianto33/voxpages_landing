@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { defaultLocale, locales } from "@/locales/config";
+import { isWalletTestPath } from "@/lib/walletTestMatrix";
 import {
   campaignLocaleFromPathname,
   hasLocalePrefix,
@@ -21,6 +22,18 @@ export function middleware(request: NextRequest) {
 
   // Apple Pay / Stripe pegan acá sin locale. No redirigir a /es/...
   if (pathname.startsWith("/.well-known")) {
+    return NextResponse.next();
+  }
+
+  // /test-0 … /test-9: la URL no cambia, la página es la landing /es.
+  if (isWalletTestPath(pathname)) {
+    const testUrl = request.nextUrl.clone();
+    testUrl.pathname = "/es";
+    testUrl.searchParams.set("_wt", pathname.replace(/^\//, ""));
+    return withPrivateCache(NextResponse.rewrite(testUrl));
+  }
+
+  if (pathname === "/test-wallets") {
     return NextResponse.next();
   }
 

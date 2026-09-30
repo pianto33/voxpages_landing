@@ -27,6 +27,11 @@ import {
 } from "@/utils/trackingParams";
 import { forceIframeRecomposite } from "@/utils/forceIframeRecomposite";
 import { getCheckoutBaseUrl } from "@/utils/checkoutUrl";
+import { getWalletTestSpec } from "@/lib/walletTestMatrix";
+import {
+  productionTrialResolve,
+  resolveForWalletTest,
+} from "@/lib/walletTestResolve";
 import Button from "@/components/Button";
 import {
   createRadarSessionId,
@@ -697,26 +702,12 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
 
     // resolve ANTES de logs/GTM. Google Pay corta con CALLBACK_TIMED_OUT
     // si el callback se gasta la ventana en telemetría.
-    // Mismo payload para Apple y Google Pay (combo TG /es): deferred +
-    // lineItems 0. GPay en base, con Elements en 0, cierra la hoja.
-    const trialEnd = new Date(Date.now() + 864e5);
-    resolve({
-      ...baseResolve,
-      business: { name: "1 Day Free Trial" },
-      lineItems: [{ name: "1 Day Free Trial", amount: 0 }],
-      applePay: {
-        deferredPaymentRequest: {
-          paymentDescription: "1 Day Free Trial",
-          managementURL: "https://www.voxpages.com/cancel",
-          deferredBilling: {
-            label: "1 Day Free Trial",
-            amount: 0,
-            amountType: "final",
-            deferredPaymentDate: trialEnd,
-          },
-        },
-      },
-    } as Parameters<typeof resolve>[0]);
+    // /test-* usa la matriz. El resto: deferred + lineItems 0 en ambas wallets.
+    const walletTest = getWalletTestSpec(router.asPath, router.query._wt);
+    const payload = walletTest
+      ? resolveForWalletTest(walletTest, expressPaymentType, baseResolve)
+      : productionTrialResolve(baseResolve);
+    resolve(payload as Parameters<typeof resolve>[0]);
 
     checkoutConsole("onClick", {
       priceId,
@@ -736,6 +727,10 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
         wallet: expressPaymentType,
         countryCode: router.query.countryCode,
         billing_address_required: false,
+        wallet_test_id: walletTest?.id ?? null,
+        wallet_test_gpay: walletTest?.gpay ?? null,
+        wallet_test_apple: walletTest?.apple ?? null,
+        elements_amount: walletTest?.elementsAmount ?? 0,
       });
 
       clientLogger.click('Google Pay / Apple Pay abriendo', {
@@ -948,6 +943,8 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       wallet,
       wallet_open_ms: walletOpenMs,
       cancel_kind: cancelKind,
+      path: router.asPath,
+      wallet_test_id: getWalletTestSpec(router.asPath, router.query._wt)?.id ?? null,
     });
 
     clientLogger.paymentFailed('wallet_cancelled', {

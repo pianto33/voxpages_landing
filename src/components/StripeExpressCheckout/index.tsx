@@ -695,17 +695,54 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     walletTypeRef.current = expressPaymentType;
 
     // billingAddressRequired solo lo necesitamos para sales tax USA.
-    // Para EU/UK/resto del mundo lo dejamos en false: el wallet sheet de
-    // Apple/Google Pay queda como antes (menor fricción, menos abandonos).
-    //
-    // Importante: NO miramos el locale (router.query.countryCode). El locale
-    // determina el idioma del HTML, no el país de cobro. El driver real es
-    // la moneda — si vamos a cobrar en USD (?pr=us, vía useStripeData), el
-    // usuario es US y necesitamos billing address para sales tax. Si cobramos
-    // en EUR (ES y resto), no.
     const isUsUser = currency?.toLowerCase() === "usd";
+    const baseResolve = {
+      emailRequired: true,
+      phoneNumberRequired: false,
+      billingAddressRequired: isUsUser,
+    };
 
     walletOpenedAtRef.current = Date.now();
+
+    // resolve ANTES de logs/GTM. Google Pay corta con CALLBACK_TIMED_OUT
+    // si el callback se gasta la ventana en telemetría.
+    // Apple y Google, en todos los países: deferred de 1 día (TG /test-9).
+    if (expressPaymentType === "apple_pay" || expressPaymentType === "google_pay") {
+      const trialEnd = new Date(Date.now() + 864e5);
+      resolve({
+        ...baseResolve,
+        business: { name: "1 Day Free Trial" },
+        lineItems: [{ name: "1 Day Free Trial", amount: 0 }],
+        applePay: {
+          deferredPaymentRequest: {
+            paymentDescription: "1 Day Free Trial",
+            managementURL: "https://www.voxpages.com/cancel",
+            deferredBilling: {
+              label: "1 Day Free Trial",
+              amount: 0,
+              amountType: "final",
+              deferredPaymentDate: trialEnd,
+            },
+          },
+        },
+      } as Parameters<typeof resolve>[0]);
+    } else {
+      resolve({
+        ...baseResolve,
+        applePay: {
+          recurringPaymentRequest: {
+            paymentDescription: "VoxPages monthly subscription",
+            managementURL: "https://www.voxpages.com/cancel",
+            regularBilling: {
+              amount: toStripeAmount(priceToWallet, currency),
+              label: "Monthly subscription",
+              recurringPaymentIntervalUnit: "month",
+              recurringPaymentIntervalCount: 1,
+            },
+          },
+        },
+      });
+    }
 
     checkoutConsole("onClick", {
       priceId,
@@ -717,8 +754,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
     });
     console.log("[StripeExpressCheckout] Wallet clickeado (Express Checkout)");
     sendEvent(GTM_EVENTS.STRIPE_CLICK);
-    
-    // Solo logear si no es un bot
+
     if (!isBot()) {
       clientLogger.funnel('checkout_clicked', {
         priceId,
@@ -742,44 +778,10 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
       });
     }
 
-    // Apple Pay recurringPaymentRequest: SOLO `regularBilling`.
-    //
-    // NO agregar `trialBilling`, `recurringPaymentStartDate` ni
-    // `billingAgreement`. Aunque la key sea `applePay`, Stripe deriva de este
-    // mismo objeto el `transactionInfo` que le manda a Google Pay, y con el
-    // bloque de trial la hoja de Google abre y muere al instante con
-    // OR_BIBED_06 ("Este comercio tiene problemas para aceptar tu pago").
-    // El usuario ve el error, toca Aceptar y Stripe lo reporta como onCancel,
-    // así que en los logs parece un abandono y no un fallo.
-    //
-    // Verificado el 2026-09-13 sobre un Galaxy S22 con Chrome 153, sirviendo
-    // el bundle de prod parcheado por CDP: con el bloque falla el 100% de las
-    // veces, sin el bloque la hoja abre normal. WisdomPackets y Gistly nunca
-    // lo tuvieron y nunca fallaron.
-    //
-    // El trial de 1 día se sigue aplicando donde corresponde: es
-    // `trial_period_days=1` en /api/create-subscription.
-    resolve({
-      emailRequired: true,
-      phoneNumberRequired: false,
-      billingAddressRequired: isUsUser,
-      applePay: {
-        recurringPaymentRequest: {
-          paymentDescription: "VoxPages monthly subscription",
-          managementURL: "https://www.voxpages.com/cancel",
-          regularBilling: {
-            amount: toStripeAmount(priceToWallet, currency),
-            label: "Monthly subscription",
-            recurringPaymentIntervalUnit: "month",
-            recurringPaymentIntervalCount: 1,
-          },
-        },
-      },
-    });
-
     checkoutConsole("onClick:resolve", {
       emailRequired: true,
       billingAddressRequired: isUsUser,
+      wallet: expressPaymentType,
     });
   };
 

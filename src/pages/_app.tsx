@@ -9,23 +9,23 @@ import UserProvider from "@/contexts/user/user-provider";
 import Layout from "@/components/Layout";
 import { useMemo } from "react";
 import { useStripeData } from "@/hooks/useStripeData";
-import { toStripeAmount } from "@/utils/stripeAmount";
 import "@/locales/i18n";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { currency, priceToWallet } = useStripeData();
-  // priceToWallet = minPriceStripe (no 0, no full). 0 rompe Google Pay (OR_BIBED_06);
-  // el trial sigue cobrando 0 el primer día via SetupIntent.
+  const { currency } = useStripeData();
+  // Trial €0 / $0 en el wallet para todos los países, desde el primer mount.
+  // Pasar de 0,50 → 0 remonta Express Checkout y Google Pay hace timeout.
+  // La moneda es la del cobro (no se fuerza eur). El price de Stripe no cambia.
   const options = useMemo<StripeElementsOptions>(
     () => ({
       mode: "subscription",
-      amount: toStripeAmount(priceToWallet, currency),
+      amount: 0,
       currency,
       appearance: { disableAnimations: true },
       setup_future_usage: "off_session",
       // paymentMethodTypes: ["card"], // ← QUITADO: bloqueaba Google Pay y Apple Pay
     }),
-    [priceToWallet, currency]
+    [currency]
   );
 
   return (

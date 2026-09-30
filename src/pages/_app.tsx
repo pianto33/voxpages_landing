@@ -10,27 +10,24 @@ import Layout from "@/components/Layout";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
 import { useStripeData } from "@/hooks/useStripeData";
-import { getWalletTestSpec } from "@/lib/walletTestMatrix";
 import "@/locales/i18n";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const { currency } = useStripeData();
-  // Producción: Elements en 0. En /test-* el monto sale de la matriz.
-  // No montar hasta que el path esté listo, y recrear si cambian moneda o
-  // monto: elements.update también cierra Google Pay.
-  const walletTest = getWalletTestSpec(router.asPath, router.query._wt);
-  const elementsAmount = walletTest?.elementsAmount ?? 0;
+  // Combo TG /es, todos los países: Elements en 0 desde el mount. Apple y
+  // Google Pay resuelven el mismo deferred + lineItems 0. No montar hasta
+  // que el path esté listo: un update de moneda también cierra Google Pay.
   const options = useMemo<StripeElementsOptions>(
     () => ({
       mode: "subscription",
-      amount: elementsAmount,
+      amount: 0,
       currency,
       appearance: { disableAnimations: true },
       setup_future_usage: "off_session",
       // paymentMethodTypes: ["card"], // ← QUITADO: bloqueaba Google Pay y Apple Pay
     }),
-    [elementsAmount, currency]
+    [currency]
   );
 
   return (
@@ -75,7 +72,7 @@ export default function App({ Component, pageProps }: AppProps) {
       </Script>
       {router.isReady ? (
         <Elements
-          key={`${currency}-${elementsAmount}`}
+          key={`${currency}-0`}
           stripe={stripePromise}
           options={options}
         >

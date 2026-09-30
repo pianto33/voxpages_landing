@@ -12,7 +12,6 @@ import { clientLogger } from "@/utils/clientLogger";
 import { readCookie } from "@/utils/cookie";
 import { detectLocaleMismatch } from "@/utils/locale";
 import { LEGAL } from "@/constants";
-import { getWalletTestSpec } from "@/lib/walletTestMatrix";
 import logoText from "../../../public/images/logo-text.png";
 
 const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => (
@@ -143,7 +142,6 @@ export default function Home() {
         amount: formattedAmount,
         currency: currency.toUpperCase(),
     });
-    const walletTest = getWalletTestSpec(router.asPath, router.query._wt);
 
     return (
         <div className={styles.snapContainer} ref={snapRef}>
@@ -174,24 +172,6 @@ export default function Home() {
 
                 <div className={styles.ctaFixed}>
                     <div className={styles.ctaInner}>
-                        {walletTest ? (
-                            <p
-                                style={{
-                                    fontSize: 12,
-                                    lineHeight: 1.4,
-                                    color: "#92400e",
-                                    textAlign: "center",
-                                    margin: "0 0 8px",
-                                }}
-                            >
-                                <strong>{walletTest.id}</strong> — Elements{" "}
-                                {walletTest.elementsAmount} {currency.toUpperCase()}
-                                {" · "}Apple {walletTest.apple}
-                                {" · "}GPay {walletTest.gpay}
-                                <br />
-                                {walletTest.label}
-                            </p>
-                        ) : null}
                         <StripeExpressCheckout
                             label={t("subscribe")}
                             amount={amount}

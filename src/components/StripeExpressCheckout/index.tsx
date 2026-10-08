@@ -16,7 +16,7 @@ import { GTM_EVENTS } from "@/constants";
 import { fetchIPData } from "@/services/trackingService";
 import { logger } from "@/utils/logger";
 import { clientLogger } from "@/utils/clientLogger";
-import { startFunnel, setEmail as setIdentityEmail } from "@/utils/userIdentity";
+import { getAnonId, startFunnel, setEmail as setIdentityEmail } from "@/utils/userIdentity";
 import { apiFetch } from "@/utils/apiFetch";
 import {
   extractTrackingParams,
@@ -467,6 +467,7 @@ function StripeExpressCheckout({ label, animateButton, amount, currency }: Props
           paymentSurface: "wallet",
           countryCode: router.query.countryCode,
           ip_address: ipAddress,
+          device_id: getAnonId(),
           fbclid: trackingParams.fbclid || undefined,
           utm_source: trackingParams.utm_source || undefined,
           utm_medium: trackingParams.utm_medium || undefined,

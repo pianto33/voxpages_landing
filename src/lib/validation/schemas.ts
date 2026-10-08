@@ -213,6 +213,7 @@ export const createSetupIntentSchema = z.object({
   paymentSurface: z.enum(["wallet", "card"]).optional(),
   countryCode: z.string().max(10).optional(),
   ip_address: ipAddressSchema,
+  device_id: z.string().max(80).optional(),
   fbclid: fbclidSchema,
   utm_source: utmParamSchema,
   utm_medium: utmParamSchema,

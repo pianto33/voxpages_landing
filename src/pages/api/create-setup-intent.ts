@@ -10,6 +10,7 @@ import {
   isBillableSubscriptionStatus,
 } from "@/lib/stripeSubscriptions";
 import { freeTrialRadarMetadata } from "@/lib/stripeFreeTrialRadar";
+import { checkoutIp, sanitizeDeviceId } from "@/lib/checkoutEvidence";
 
 const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY ?? "");
 
@@ -84,6 +85,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       paymentSurface,
       countryCode,
       ip_address,
+      device_id,
       fbclid,
       utm_source,
       utm_medium,
@@ -165,6 +167,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     metadata.payment_surface = paymentSurface || "legacy";
     metadata.request_three_d_secure = requestThreeDSecure;
 
+    const evidenceIp = checkoutIp(req, ip_address);
+    const evidenceDeviceId = sanitizeDeviceId(device_id);
+    if (evidenceIp) {
+      metadata.ip_address = evidenceIp;
+      metadata.customer_ip = evidenceIp;
+    } else {
+      delete metadata.ip_address;
+    }
+    if (evidenceDeviceId) metadata.device_id = evidenceDeviceId;
+
     const addressCountry = billing_country || geo_country;
     const addressState = billing_state || geo_state;
     const addressCity = billing_city || geo_city;
@@ -196,6 +208,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         email,
       }
     );
+
+    metadata.account_id = customerId;
 
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,

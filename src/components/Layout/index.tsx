@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { useEffect } from "react";
 import { Inter, Orbitron } from "next/font/google";
 import styles from "@/styles/Layout.module.css";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
@@ -19,8 +20,23 @@ interface Props {
   children: React.ReactNode;
 }
 
+function htmlLang(lng: string): string {
+  if (lng === "ksa") return "ar";
+  if (lng === "br") return "pt-BR";
+  if (lng === "mys") return "ms";
+  if (lng === "mx") return "es-MX";
+  if (lng === "cl") return "es-CL";
+  return lng || "es";
+}
+
 function Layout({ children }: Props) {
-  const { t } = useAppTranslation();
+  const { t, lng } = useAppTranslation();
+
+  useEffect(() => {
+    const html = document.documentElement;
+    html.lang = htmlLang(lng);
+    html.dir = lng === "ksa" ? "rtl" : "ltr";
+  }, [lng]);
 
   return (
     <>

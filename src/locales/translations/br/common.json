@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "title": "VoxPages",
+    "description": "Histórias que ficam com você"
+  },
+  "welcome_intro": "+1000 resumos de livros em áudio.<br/>Ouça, aprenda e evolua onde você estiver.",
+  "one_step_away": "Você está a um passo",
+  "online_activation": "Ativação online",
+  "accessIn3Steps": "Acesse em 3 passos simples",
+  "step1": "Comece a ativação",
+  "step2": "Assine",
+  "step3": "Acesse e aproveite",
+  "subscribe": "Continuar",
+  "email_placeholder": "voce@email.com",
+  "processing": "Processando...",
+  "enjoy_free_trial": "Tenha acesso completo <b>grátis no primeiro dia</b>. Depois, o plano mensal custa {{amount}} {{currency}}.",
+  "benefits_premium": "Benefícios Premium",
+  "benefits_list": [
+    "Acesso ilimitado a todos os resumos de livros",
+    "Atualizações regulares de conteúdo",
+    "Conteúdo exclusivo para assinantes",
+    "Disponível em vários dispositivos",
+    "Experiência 100% segura e sem anúncios",
+    "Baixe os áudios que você mais gosta",
+    "Prioridade nas novas atualizações",
+    "Controles avançados de áudio",
+    "E muito mais..."
+  ],
+  "error": {
+    "email": "O e-mail não foi digitado corretamente.",
+    "stripe": "O Stripe não está pronto. Tente de novo mais tarde.",
+    "submit": "Erro ao enviar: {{error}}",
+    "create_customer": "Erro ao criar o cliente.",
+    "confirm_setup": "Erro ao confirmar a assinatura: {{error}}",
+    "general": "Erro geral: {{error}}",
+    "create_user": "Erro ao criar o usuário. Sua assinatura foi criada, fale com a gente para resolver isso.",
+    "default": "Erro. Algo deu errado, tente de novo",
+    "existing_subscription": "Você já tem uma assinatura ativa",
+    "existing_customer": "Já existe um cliente com este e-mail"
+  },
+  "need_help_subscription": "Precisa de ajuda para assinar?",
+  "need_help_client": "Precisa de ajuda para entrar na plataforma?",
+  "contact": "Enviar relato",
+  "retry": "Tentar de novo",
+  "creating_subscription": "Estamos criando sua assinatura",
+  "thanks": {
+    "title": "Obrigado!",
+    "subtitle": "Sua assinatura está sendo processada",
+    "email_confirmation": "Você vai receber um e-mail de confirmação em {{email}}",
+    "processing_message": "Em alguns segundos você terá acesso à sua conta premium."
+  },
+  "you_will_be_redirected": "Você será redirecionado para o site em {{seconds}} segundos...",
+  "go_to_platform": "Ir para o site",
+  "go_to_platform_manual": "Ir para o site",
+  "loading": "Carregando...",
+  "checkout": {
+    "preparing_payment": "Preparando...",
+    "almost_ready": "Quase pronto...",
+    "loading_hint": "Configurando formas de pagamento seguras",
+    "card_fallback_hint": "Se você não vir Apple Pay ou Google Pay, tente outro navegador",
+    "card_page_title": "Concluir assinatura",
+    "card_page_subtitle": "Google Pay / Apple Pay não estão disponíveis neste dispositivo. Continue com o cartão."
+  },
+  "footer": {
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "Termos e condições",
+    "privacy_policy": "Política de privacidade",
+    "subscription_policy": "Política de assinatura",
+    "contact": "Contato"
+  }
+}

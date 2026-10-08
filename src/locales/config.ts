@@ -12,5 +12,10 @@ export const locales = [
   "mo",
   "hk",
   "sg",
+  "br",
+  "mx",
+  "cl",
+  "mys",
+  "ksa",
 ] as const;
 export const defaultLocale: Locale = "es";

@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "title": "VoxPages",
+    "description": "Cerita yang kekal bersama anda"
+  },
+  "welcome_intro": "+1000 ringkasan buku audio.<br/>Dengar, belajar dan berkembang di mana sahaja anda berada.",
+  "one_step_away": "Anda hanya perlukan satu langkah lagi",
+  "online_activation": "Pengaktifan dalam talian",
+  "accessIn3Steps": "Dapatkan akses dalam 3 langkah mudah",
+  "step1": "Mulakan pengaktifan",
+  "step2": "Langgan",
+  "step3": "Akses dan nikmati",
+  "subscribe": "Teruskan",
+  "email_placeholder": "anda@emel.com",
+  "processing": "Memproses...",
+  "enjoy_free_trial": "Dapatkan akses penuh <b>percuma pada hari pertama</b>. Selepas itu, pelan bulanan bernilai {{amount}} {{currency}}.",
+  "benefits_premium": "Faedah Premium",
+  "benefits_list": [
+    "Akses tanpa had kepada semua ringkasan buku",
+    "Kemas kini kandungan secara berkala",
+    "Kandungan eksklusif untuk pelanggan",
+    "Boleh diakses pada pelbagai peranti",
+    "Pengalaman 100% selamat dan bebas iklan",
+    "Muat turun audio kegemaran anda",
+    "Keutamaan untuk kemas kini baharu",
+    "Kawalan audio lanjutan",
+    "Dan banyak lagi..."
+  ],
+  "error": {
+    "email": "Emel tidak dimasukkan dengan betul.",
+    "stripe": "Stripe belum sedia. Sila cuba lagi kemudian.",
+    "submit": "Ralat penghantaran: {{error}}",
+    "create_customer": "Ralat mencipta pelanggan.",
+    "confirm_setup": "Ralat mengesahkan langganan: {{error}}",
+    "general": "Ralat am: {{error}}",
+    "create_user": "Ralat mencipta pengguna. Langganan anda telah berjaya dicipta, sila hubungi kami untuk menyelesaikan isu ini.",
+    "default": "Ralat. Sesuatu tidak kena, sila cuba lagi",
+    "existing_subscription": "Anda sudah mempunyai langganan aktif",
+    "existing_customer": "Pelanggan dengan emel ini sudah wujud"
+  },
+  "need_help_subscription": "Perlukan bantuan untuk melanggan?",
+  "need_help_client": "Perlukan bantuan untuk log masuk ke platform?",
+  "contact": "Hantar laporan",
+  "retry": "Cuba lagi",
+  "creating_subscription": "Kami sedang mencipta langganan anda",
+  "thanks": {
+    "title": "Terima kasih!",
+    "subtitle": "Langganan anda sedang diproses",
+    "email_confirmation": "Anda akan menerima emel pengesahan di {{email}}",
+    "processing_message": "Dalam beberapa saat anda akan mendapat akses ke akaun premium anda."
+  },
+  "you_will_be_redirected": "Anda akan dialihkan ke laman dalam {{seconds}} saat...",
+  "go_to_platform": "Pergi ke laman",
+  "go_to_platform_manual": "Pergi ke laman",
+  "loading": "Memuatkan...",
+  "checkout": {
+    "preparing_payment": "Menyediakan...",
+    "almost_ready": "Hampir sedia...",
+    "loading_hint": "Menyediakan kaedah pembayaran yang selamat",
+    "card_fallback_hint": "Jika anda tidak nampak Apple Pay atau Google Pay, cuba pelayar lain",
+    "card_page_title": "Lengkapkan langganan",
+    "card_page_subtitle": "Google Pay / Apple Pay tidak tersedia pada peranti ini. Teruskan dengan kad anda."
+  },
+  "footer": {
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "Terma dan syarat",
+    "privacy_policy": "Dasar privasi",
+    "subscription_policy": "Dasar langganan",
+    "contact": "Hubungi"
+  }
+}

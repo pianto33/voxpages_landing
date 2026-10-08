@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
-import { GTM_EVENTS, LEGAL } from "@/constants";
+import { GTM_EVENTS, LEGAL, toSiteLocale } from "@/constants";
 import { generateAutoLoginToken, buildLoginUrl } from "@/api/voxpages";
 import { sendEvent } from "@/utils/gtm";
 import { useStripeData } from "@/hooks/useStripeData";
@@ -57,7 +57,7 @@ function ErrorPage() {
       (async () => {
         try {
           const token = await generateAutoLoginToken(email);
-          setMagicLink(buildLoginUrl(token, lng));
+          setMagicLink(buildLoginUrl(token, toSiteLocale(lng)));
         } catch (error) {
           logger.error("Error getting magic link", error, {
             email,

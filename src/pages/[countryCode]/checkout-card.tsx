@@ -7,6 +7,7 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { useStripeData, usePriceId } from "@/hooks/useStripeData";
 import { clientLogger } from "@/utils/clientLogger";
 import styles from "@/styles/CheckoutCard.module.css";
+import { formatCatalogAmount } from "@/utils/stripeAmount";
 
 /**
  * Fallback cuando Express Checkout no tiene wallets (GPay/Apple Pay).
@@ -17,7 +18,7 @@ export default function CheckoutCardPage() {
   const { t } = useAppTranslation();
   const { amount, currency } = useStripeData();
   const priceId = usePriceId();
-  const formattedAmount = (amount / 100).toFixed(2);
+  const formattedAmount = formatCatalogAmount(amount, currency);
   const didVisitRef = useRef(false);
 
   useEffect(() => {

@@ -5,7 +5,7 @@ import { useStripeData } from "@/hooks/useStripeData";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { generateAutoLoginToken, buildLoginUrl } from "@/api/voxpages";
 import { sendEvent } from "@/utils/gtm";
-import { GTM_EVENTS } from "@/constants";
+import { GTM_EVENTS, toSiteLocale } from "@/constants";
 import { extractTrackingParams, saveTrackingParams } from "@/utils/trackingParams";
 import Button from "@/components/Button";
 import Header from "@/components/Header";
@@ -201,7 +201,7 @@ function ThanksPage() {
                 });
 
                 const token = await generateAutoLoginToken(email);
-                const link = buildLoginUrl(token, lng);
+                const link = buildLoginUrl(token, toSiteLocale(lng));
                 setMagicLink(link);
                 setIsLoading(false);
 

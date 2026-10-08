@@ -15,6 +15,27 @@ export const CAMPAIGN_SLUG_TO_LOCALE: Record<string, Locale> = {
     tlf: "us",
 };
 
+/**
+ * Cookie / ?pr= ISO2 cuando el path de mercado no es el ISO
+ * (`SA` → /ksa, `MY` → /mys).
+ */
+const SEGMENT_ALIASES: Record<string, Locale> = {
+    sa: "ksa",
+    my: "mys",
+};
+
+/** Clave de STRIPE_DATA / PRICE_ID. Acepta ISO2 y el slug de mercado. */
+const MARKET_KEY_ALIASES: Record<string, string> = {
+    my: "mys",
+    sa: "ksa",
+};
+
+export function marketKey(raw: string | undefined | null): string {
+    const key = (raw || "").trim().toLowerCase();
+    if (!key) return "";
+    return (MARKET_KEY_ALIASES[key] ?? key).toUpperCase();
+}
+
 const LOCALE_SET = new Set<string>(locales);
 
 /** Cookie ISO country → locale del landing (cuando difieren). */
@@ -25,6 +46,13 @@ export const LOCALE_FROM_COUNTRY: Record<string, Locale> = {
     mo: "mo",
     hk: "hk",
     sg: "sg",
+    br: "br",
+    mx: "mx",
+    cl: "cl",
+    sa: "ksa",
+    ksa: "ksa",
+    my: "mys",
+    mys: "mys",
 };
 
 export function firstPathSegment(pathname: string): string | undefined {
@@ -44,6 +72,7 @@ export function localeFromPathSegment(
     if (!segment) return undefined;
     const lower = segment.toLowerCase();
     if (LOCALE_SET.has(lower)) return lower as Locale;
+    if (SEGMENT_ALIASES[lower]) return SEGMENT_ALIASES[lower];
     return CAMPAIGN_SLUG_TO_LOCALE[lower];
 }
 
@@ -51,7 +80,7 @@ export function localeFromPathSegment(
 export function campaignLocaleFromPathname(pathname: string): Locale | undefined {
     const segment = firstPathSegment(pathname);
     if (!segment || LOCALE_SET.has(segment)) return undefined;
-    return CAMPAIGN_SLUG_TO_LOCALE[segment];
+    return SEGMENT_ALIASES[segment] ?? CAMPAIGN_SLUG_TO_LOCALE[segment];
 }
 
 export function isUsCampaignPath(pathname: string): boolean {
@@ -104,7 +133,7 @@ export function detectLocaleMismatch(params: {
     currency: string;
 }): LocaleMismatchInfo | null {
     const issues: string[] = [];
-    const cookie = params.cookieCountry?.toUpperCase() ?? null;
+    const cookie = params.cookieCountry ? marketKey(params.cookieCountry) : null;
     const path = params.pathCountry?.toLowerCase();
 
     if (cookie && STRIPE_DATA[cookie]) {

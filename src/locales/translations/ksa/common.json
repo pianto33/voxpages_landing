@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "title": "VoxPages",
+    "description": "قصص تبقى معك"
+  },
+  "welcome_intro": "+1000 ملخصًا صوتيًا للكتب.<br/>استمع وتعلّم وانمُ أينما كنت.",
+  "one_step_away": "أنت على بعد خطوة واحدة",
+  "online_activation": "تفعيل عبر الإنترنت",
+  "accessIn3Steps": "احصل على الوصول في 3 خطوات بسيطة",
+  "step1": "ابدأ التفعيل",
+  "step2": "اشترك",
+  "step3": "ادخل واستمتع",
+  "subscribe": "متابعة",
+  "email_placeholder": "you@email.com",
+  "processing": "جارٍ المعالجة...",
+  "enjoy_free_trial": "احصل على وصول كامل <b>مجانًا في اليوم الأول</b>. بعد ذلك، تبلغ تكلفة الخطة الشهرية {{amount}} {{currency}}.",
+  "benefits_premium": "مزايا بريميوم",
+  "benefits_list": [
+    "وصول غير محدود إلى جميع ملخصات الكتب",
+    "تحديثات منتظمة للمحتوى",
+    "محتوى حصري للمشتركين",
+    "متاح على أجهزة متعددة",
+    "تجربة آمنة 100% وخالية من الإعلانات",
+    "نزّل الملفات الصوتية المفضلة لديك",
+    "أولوية في التحديثات الجديدة",
+    "عناصر تحكم صوتية متقدمة",
+    "والمزيد..."
+  ],
+  "error": {
+    "email": "لم يتم إدخال البريد الإلكتروني بشكل صحيح.",
+    "stripe": "Stripe غير جاهز. يرجى المحاولة لاحقًا.",
+    "submit": "خطأ في الإرسال: {{error}}",
+    "create_customer": "خطأ في إنشاء العميل.",
+    "confirm_setup": "خطأ في تأكيد الاشتراك: {{error}}",
+    "general": "خطأ عام: {{error}}",
+    "create_user": "خطأ في إنشاء المستخدم. تم إنشاء اشتراكك بنجاح، يرجى التواصل معنا لحل هذه المشكلة.",
+    "default": "حدث خطأ. حاول مرة أخرى",
+    "existing_subscription": "لديك اشتراك نشط بالفعل",
+    "existing_customer": "يوجد عميل بهذا البريد الإلكتروني بالفعل"
+  },
+  "need_help_subscription": "هل تحتاج مساعدة في الاشتراك؟",
+  "need_help_client": "هل تحتاج مساعدة للدخول إلى المنصة؟",
+  "contact": "إرسال بلاغ",
+  "retry": "إعادة المحاولة",
+  "creating_subscription": "نحن ننشئ اشتراكك",
+  "thanks": {
+    "title": "شكرًا لك!",
+    "subtitle": "جارٍ معالجة اشتراكك",
+    "email_confirmation": "ستصلك رسالة تأكيد على {{email}}",
+    "processing_message": "خلال ثوانٍ ستتمكن من الوصول إلى حسابك المميز."
+  },
+  "you_will_be_redirected": "سيتم تحويلك إلى الموقع خلال {{seconds}} ثانية...",
+  "go_to_platform": "الذهاب إلى الموقع",
+  "go_to_platform_manual": "الذهاب إلى الموقع",
+  "loading": "جارٍ التحميل...",
+  "checkout": {
+    "preparing_payment": "جارٍ التحضير...",
+    "almost_ready": "أوشكنا على الانتهاء...",
+    "loading_hint": "جارٍ إعداد طرق دفع آمنة",
+    "card_fallback_hint": "إذا لم يظهر Apple Pay أو Google Pay، جرّب متصفحًا آخر",
+    "card_page_title": "إكمال الاشتراك",
+    "card_page_subtitle": "Google Pay / Apple Pay غير متاحين على هذا الجهاز. تابع باستخدام بطاقتك."
+  },
+  "footer": {
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "الشروط والأحكام",
+    "privacy_policy": "سياسة الخصوصية",
+    "subscription_policy": "سياسة الاشتراك",
+    "contact": "تواصل معنا"
+  }
+}

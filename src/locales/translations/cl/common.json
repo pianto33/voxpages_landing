@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "title": "VoxPages",
+    "description": "Historias que se quedan contigo"
+  },
+  "welcome_intro": "+1000 resúmenes de libros en audio.<br/>Escucha, aprende y crece donde estés.",
+  "one_step_away": "Estás a un solo paso",
+  "online_activation": "Activación en línea",
+  "accessIn3Steps": "Entra en 3 pasos simples",
+  "step1": "Inicia la activación",
+  "step2": "Suscríbete",
+  "step3": "Entra y disfruta",
+  "subscribe": "Continuar",
+  "email_placeholder": "tu@email.com",
+  "processing": "Procesando...",
+  "enjoy_free_trial": "Accede a todo el contenido <b>gratis el primer día</b>. Después, el plan mensual tiene un valor de {{amount}} {{currency}}.",
+  "benefits_premium": "Beneficios Premium",
+  "benefits_list": [
+    "Acceso ilimitado a todos los resúmenes de libros",
+    "Actualizaciones regulares de contenido",
+    "Contenido exclusivo para suscriptores",
+    "Disponible en varios dispositivos",
+    "Experiencia 100% segura y sin anuncios",
+    "Descarga los audios que más te gusten",
+    "Prioridad en las nuevas actualizaciones",
+    "Controles avanzados de audio",
+    "Y mucho más..."
+  ],
+  "error": {
+    "email": "El correo no se ingresó correctamente.",
+    "stripe": "Stripe no está listo. Inténtalo más tarde.",
+    "submit": "Error al enviar: {{error}}",
+    "create_customer": "Error al crear el cliente.",
+    "confirm_setup": "Error al confirmar la suscripción: {{error}}",
+    "general": "Error general: {{error}}",
+    "create_user": "Error al crear el usuario. Tu suscripción se creó correctamente, contáctanos para resolverlo.",
+    "default": "Error. Algo salió mal, inténtalo de nuevo",
+    "existing_subscription": "Ya tienes una suscripción activa",
+    "existing_customer": "Ya existe un cliente con este correo"
+  },
+  "need_help_subscription": "¿Necesitas ayuda para suscribirte?",
+  "need_help_client": "¿Necesitas ayuda para entrar a la plataforma?",
+  "contact": "Enviar reporte",
+  "retry": "Reintentar",
+  "creating_subscription": "Estamos creando tu suscripción",
+  "thanks": {
+    "title": "¡Gracias!",
+    "subtitle": "Tu suscripción se está procesando",
+    "email_confirmation": "Recibirás un correo de confirmación en {{email}}",
+    "processing_message": "En unos segundos tendrás acceso a tu cuenta premium."
+  },
+  "you_will_be_redirected": "Te vamos a redirigir al sitio en {{seconds}} segundos...",
+  "go_to_platform": "Ir al sitio",
+  "go_to_platform_manual": "Ir al sitio",
+  "loading": "Cargando...",
+  "checkout": {
+    "preparing_payment": "Preparando...",
+    "almost_ready": "Casi listo...",
+    "loading_hint": "Configurando métodos de pago seguros",
+    "card_fallback_hint": "Si no ves Apple Pay o Google Pay, prueba con otro navegador",
+    "card_page_title": "Completar suscripción",
+    "card_page_subtitle": "Google Pay / Apple Pay no están disponibles en este dispositivo. Continúa con tu tarjeta."
+  },
+  "footer": {
+    "company": "Pianto33 LLC",
+    "terms_and_conditions": "Términos y condiciones",
+    "privacy_policy": "Política de privacidad",
+    "subscription_policy": "Política de suscripción",
+    "contact": "Contacto"
+  }
+}

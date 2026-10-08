@@ -12,6 +12,7 @@ import { clientLogger } from "@/utils/clientLogger";
 import { readCookie } from "@/utils/cookie";
 import { detectLocaleMismatch } from "@/utils/locale";
 import { LEGAL } from "@/constants";
+import { formatCatalogAmount } from "@/utils/stripeAmount";
 import logoText from "../../../public/images/logo-text.png";
 
 const ArrowSvg = (props: React.SVGProps<SVGSVGElement>) => (
@@ -83,7 +84,7 @@ export default function Home() {
     const { t, lng } = useAppTranslation();
     const { amount, currency } = useStripeData();
     const benefits = t("benefits_list", { returnObjects: true }) as string[];
-    const formattedAmount = (amount / 100).toFixed(2);
+    const formattedAmount = formatCatalogAmount(amount, currency);
     const snapRef = useRef<HTMLDivElement>(null);
     const didVisitRef = useRef(false);
 

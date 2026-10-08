@@ -1,4 +1,4 @@
-// Mapeo del countryCode del landing (us/es/pt/pl/hu/cz/ca/au/mo/hk/sg) al locale del sitio
+// Mapeo del countryCode del landing (us/es/pt/pl/hu/cz/ca/au/mo/hk/sg/br/mx/cl/mys/ksa) al locale del sitio
 // principal (voxpages.com). El landing usa "us" (y mercados EN) para tráfico inglés pero el
 // sitio principal usa "en" como locale inglés. El resto coincide.
 const SITE_LOCALE_MAP: Record<string, string> = {
@@ -13,9 +13,15 @@ const SITE_LOCALE_MAP: Record<string, string> = {
     pl: "pl",
     hu: "hu",
     cz: "cz",
+    // voxpages.com solo tiene en/es/pt.
+    br: "pt",
+    mx: "es",
+    cl: "es",
+    mys: "en",
+    ksa: "en",
 };
 
-function toSiteLocale(lng: string): string {
+export function toSiteLocale(lng: string): string {
     return SITE_LOCALE_MAP[lng.toLowerCase()] ?? "es";
 }
 
@@ -73,6 +79,11 @@ export const PRICE_ID: Record<string, string> = {
     MO: "price_1TtVoTIiQJtaidhOwZlGa1cw",
     HK: "price_1TtVooIiQJtaidhOoUDABLqH",
     SG: "price_1TtVpJIiQJtaidhOVKjfIX7j",
+    BR: "price_1UONanIiQJtaidhOsodkTnuj",
+    MX: "price_1UONbtIiQJtaidhOGn1kQHXR",
+    CL: "price_1UONevIiQJtaidhOu3bt93sb",
+    MYS: "price_1UONe5IiQJtaidhOVBzhC6Pt",
+    KSA: "price_1UONdAIiQJtaidhOrtude6pq",
     TEST: "price_1St9gPIiQJtaidhOwIQPuQkA",
     DEFAULT: "price_1St8jpIiQJtaidhOGVFFc7dt",
 };
@@ -146,6 +157,31 @@ export const STRIPE_DATA: StripeDataMap = {
         amount: 2599, // 25.99 SGD
         currency: "sgd",
         minPriceStripe: 100, // 1.00 SGD (tabla 0.50 SGD ≈ 0.37 USD → GPay no aparece)
+    },
+    BR: {
+        amount: 3500, // 35.00 BRL
+        currency: "brl",
+        minPriceStripe: 300, // 3.00 BRL (tabla 0.50 BRL ≈ 0.09 USD → GPay no aparece)
+    },
+    MX: {
+        amount: 19000, // 190.00 MXN
+        currency: "mxn",
+        minPriceStripe: 2000, // 20.00 MXN (tabla 10 MXN ≈ 0.55 USD, justo para GPay)
+    },
+    CL: {
+        amount: 800000, // 8.000 CLP (zero-decimal; se divide /100 al cobrar)
+        currency: "clp",
+        minPriceStripe: 50000, // 500 CLP
+    },
+    MYS: {
+        amount: 3500, // 35.00 MYR
+        currency: "myr",
+        minPriceStripe: 300, // 3.00 MYR (tabla 2.00 MYR ≈ 0.45 USD → GPay no aparece)
+    },
+    KSA: {
+        amount: 3000, // 30.00 SAR
+        currency: "sar",
+        minPriceStripe: 300, // 3.00 SAR
     },
     DEFAULT: {
         amount: 1999, // 19.99 USD (matchea el priceId DEFAULT cargado en Stripe)

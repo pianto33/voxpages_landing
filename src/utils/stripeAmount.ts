@@ -14,3 +14,10 @@ export function toStripeAmount(amount: number, currency: string): number {
   if (ZERO_DECIMAL.has(currency.toLowerCase())) return Math.round(amount / 100);
   return Math.round(amount);
 }
+
+/** Precio visible en el landing (CLP sin decimales). */
+export function formatCatalogAmount(amount: number, currency: string): string {
+  const major = amount / 100;
+  if (ZERO_DECIMAL.has(currency.toLowerCase())) return String(Math.round(major));
+  return major.toFixed(2);
+}

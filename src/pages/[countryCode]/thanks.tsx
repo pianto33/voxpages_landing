@@ -25,6 +25,7 @@ function ThanksPage() {
     
     // Ref para prevenir múltiples ejecuciones del procesamiento de pago
     const paymentProcessedRef = useRef(false);
+    const paymentLoggedRef = useRef(false);
     // Flag persistente en sessionStorage para prevenir duplicados incluso si el componente se desmonta
     const [processingComplete, setProcessingComplete] = useState(false);
     
@@ -193,6 +194,30 @@ function ThanksPage() {
                 setIdentityEmail(email);
                 if (customerId) setCustomerId(customerId);
 
+                if (!paymentLoggedRef.current) {
+                    paymentLoggedRef.current = true;
+                    if (resolvedAmount && resolvedCurrency) {
+                        await logger.paymentSuccess(
+                            email,
+                            resolvedAmount,
+                            resolvedCurrency,
+                            customerId,
+                            {
+                                lng,
+                                identitySource: identity.source,
+                                setupIntentId: setupIntentId || null,
+                            }
+                        );
+                    } else {
+                        logger.warn("Thanks page: payment_succeeded omitido por falta de amount/currency", {
+                            email,
+                            resolvedAmount,
+                            resolvedCurrency,
+                            identitySource: identity.source,
+                        });
+                    }
+                }
+
                 clientLogger.funnel("magic_link_requested", {
                     email,
                     customerId,
@@ -215,27 +240,6 @@ function ThanksPage() {
                 logger.info("Thanks page: magic link generado exitosamente", {
                     email,
                 });
-
-                if (resolvedAmount && resolvedCurrency) {
-                    logger.paymentSuccess(
-                        email,
-                        resolvedAmount,
-                        resolvedCurrency,
-                        customerId,
-                        {
-                            lng,
-                            identitySource: identity.source,
-                            setupIntentId: setupIntentId || null,
-                        }
-                    );
-                } else {
-                    logger.warn("Thanks page: payment_succeeded omitido por falta de amount/currency", {
-                        email,
-                        resolvedAmount,
-                        resolvedCurrency,
-                        identitySource: identity.source,
-                    });
-                }
 
                 endFunnel();
 

@@ -8,16 +8,17 @@ import { Analytics } from "@vercel/analytics/react";
 import UserProvider from "@/contexts/user/user-provider";
 import Layout from "@/components/Layout";
 import { useMemo } from "react";
-import { useRouter } from "next/router";
+import { useRouteSignals } from "@/lib/browserRoute";
 import { useStripeData } from "@/hooks/useStripeData";
 import "@/locales/i18n";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const router = useRouter();
+  const { ready } = useRouteSignals();
   const { currency } = useStripeData();
   // Combo TG /es, todos los países: Elements en 0 desde el mount. Apple y
-  // Google Pay resuelven el mismo deferred + lineItems 0. No montar hasta
-  // que el path esté listo: un update de moneda también cierra Google Pay.
+  // Google Pay resuelven el mismo deferred + lineItems 0. La moneda sale de
+  // la URL pública (cookie / ?pr= / path) antes de router.isReady: un update
+  // de moneda después del mount cierra Google Pay.
   const options = useMemo<StripeElementsOptions>(
     () => ({
       mode: "subscription",
@@ -70,7 +71,7 @@ export default function App({ Component, pageProps }: AppProps) {
           })(window,document,"clarity","script");
         `}
       </Script>
-      {router.isReady ? (
+      {ready ? (
         <Elements
           key={`${currency}-0`}
           stripe={stripePromise}

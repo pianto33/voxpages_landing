@@ -1,5 +1,5 @@
-import { useRouter } from "next/router";
 import { STRIPE_DATA, PRICE_ID, withPriceToWallet } from "@/constants";
+import { useRouteSignals } from "@/lib/browserRoute";
 import { readCookie } from "@/utils/cookie";
 import { localeFromPathSegment, marketKey } from "@/utils/locale";
 
@@ -13,26 +13,24 @@ import { localeFromPathSegment, marketKey } from "@/utils/locale";
  */
 
 export const useStripeData = () => {
-    const router = useRouter();
+    const { countryCode: routedCountry, priceParam: routedPrice, asPath } =
+        useRouteSignals();
 
     const cookieCountry = marketKey(readCookie("_sv_c"));
     if (cookieCountry && STRIPE_DATA[cookieCountry]) {
         return withPriceToWallet(STRIPE_DATA[cookieCountry]);
     }
 
-    const priceParam = marketKey(router.query.pr?.toString());
+    const priceParam = marketKey(routedPrice);
     if (priceParam && STRIPE_DATA[priceParam]) {
         return withPriceToWallet(STRIPE_DATA[priceParam]);
     }
 
-    const rawPath =
-        typeof router.query.countryCode === "string"
-            ? router.query.countryCode
-            : "";
+    const rawPath = routedCountry;
     const mappedPath = localeFromPathSegment(rawPath);
     const countryCode = marketKey(mappedPath ?? rawPath);
 
-    if (router.asPath === "/pt-meo" || router.asPath.includes("/pt-meo")) {
+    if (asPath === "/pt-meo" || asPath.includes("/pt-meo")) {
         return withPriceToWallet(STRIPE_DATA["PT_MEO"] || STRIPE_DATA.DEFAULT);
     }
 
@@ -40,23 +38,24 @@ export const useStripeData = () => {
 };
 
 export const usePriceId = () => {
-    const router = useRouter();
+    const { countryCode: routedCountry, priceParam: routedPrice, asPath } =
+        useRouteSignals();
 
     const cookieCountry = marketKey(readCookie("_sv_c"));
     if (cookieCountry && PRICE_ID[cookieCountry]) {
         return PRICE_ID[cookieCountry];
     }
 
-    const priceParam = marketKey(router.query.pr?.toString());
+    const priceParam = marketKey(routedPrice);
     if (priceParam && PRICE_ID[priceParam]) {
         return PRICE_ID[priceParam];
     }
 
-    const rawPath = router.query.countryCode?.toString() || "";
+    const rawPath = routedCountry;
     const mappedPath = localeFromPathSegment(rawPath);
     const countryCode = marketKey(mappedPath ?? rawPath) || "DEFAULT";
 
-    if (router.asPath === "/pt-meo" || router.asPath.includes("/pt-meo")) {
+    if (asPath === "/pt-meo" || asPath.includes("/pt-meo")) {
         return PRICE_ID.PT_MEO;
     }
 

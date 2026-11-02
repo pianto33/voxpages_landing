@@ -9,10 +9,27 @@ export const US_CAMPAIGN_PATH_PREFIXES = ["/str-lv12", "/tlf"] as const;
  * `/ca-28` y `/str-ca28` matcheaban `startsWith('/ca')` y Stripe no tiene CA-28.
  */
 export const CAMPAIGN_SLUG_TO_LOCALE: Record<string, Locale> = {
-    "ca-28": "ca",
-    "str-ca28": "ca",
+    // Espejo de los pathRules de la Lambda@Edge (ab-test-cloudfront-unificado.md).
+    // La Lambda ya reescribe `/slug` → `/{locale}/slug` + ?pr= + cookie `_sv_c`;
+    // este mapa cubre el fallback cuando el browser lee la URL pública sin cookie.
+    // mid.theauravibe.com
     "str-lv12": "us",
+    "str-lv13": "us",
+    ldmop: "us",
+    "str-ca28": "ca",
+    "str-ksa": "ksa",
+    "str-myr": "mys",
+    "str-aud": "au",
+    "str-mx": "mx",
     tlf: "us",
+    // landing-g.todosgamers.com
+    "slmb-cl": "cl",
+    // oneplay-g / oneplay.todosgamers.com
+    "ca-28": "ca",
+    "hk-2": "hk",
+    "mo-2": "mo",
+    // oneplay-g.playcher.com → Chequia (CZK, copy cs). El locale es `cz`, no `cze`.
+    cze: "cz",
 };
 
 /**
@@ -30,8 +47,28 @@ const MARKET_KEY_ALIASES: Record<string, string> = {
     sa: "ksa",
 };
 
+/**
+ * Prefijo que la Lambda@Edge antepone a `?pr=` y a la cookie `_sv_c` cuando el
+ * destino es un landing cross (`xmx`, `xcz`). Acá hay un solo producto Stripe,
+ * así que el prefijo solo se tolera (se descarta); la señal la usa Gistly.
+ * Ningún locale ni ISO2 empieza con `x`, no hay colisión.
+ */
+export const CROSS_PREFIX = "x";
+
+export function hasCrossPrefix(value: string | null | undefined): boolean {
+    if (!value) return false;
+    const v = value.trim().toLowerCase();
+    return v.length > CROSS_PREFIX.length && v.startsWith(CROSS_PREFIX);
+}
+
+/** `xmx` → `mx`; valores sin prefijo se devuelven igual (trim + lowercase). */
+export function stripCrossPrefix(value: string): string {
+    const v = value.trim().toLowerCase();
+    return hasCrossPrefix(v) ? v.slice(CROSS_PREFIX.length) : v;
+}
+
 export function marketKey(raw: string | undefined | null): string {
-    const key = (raw || "").trim().toLowerCase();
+    const key = raw ? stripCrossPrefix(raw) : "";
     if (!key) return "";
     return (MARKET_KEY_ALIASES[key] ?? key).toUpperCase();
 }
@@ -49,6 +86,7 @@ export const LOCALE_FROM_COUNTRY: Record<string, Locale> = {
     br: "br",
     mx: "mx",
     cl: "cl",
+    cz: "cz",
     sa: "ksa",
     ksa: "ksa",
     my: "mys",
@@ -70,7 +108,7 @@ export function localeFromPathSegment(
     segment: string | null | undefined
 ): Locale | undefined {
     if (!segment) return undefined;
-    const lower = segment.toLowerCase();
+    const lower = stripCrossPrefix(segment);
     if (LOCALE_SET.has(lower)) return lower as Locale;
     if (SEGMENT_ALIASES[lower]) return SEGMENT_ALIASES[lower];
     return CAMPAIGN_SLUG_TO_LOCALE[lower];
@@ -101,7 +139,7 @@ export function resolveAppLocale(
     cookieCountry: string | null | undefined,
     pathCountry: string | null | undefined
 ): Locale {
-    const cookie = cookieCountry?.toLowerCase();
+    const cookie = cookieCountry ? stripCrossPrefix(cookieCountry) : undefined;
     if (cookie) {
         const mapped = LOCALE_FROM_COUNTRY[cookie] ?? cookie;
         if (LOCALE_SET.has(mapped)) {

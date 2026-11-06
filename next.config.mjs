@@ -88,9 +88,31 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// Prod de cross: JS/CSS salen de este host para no contar estáticos en el
+// Worker de Cloudflare (playcher y el resto de ads). QA y local siguen relativos.
+const ASSET_ORIGIN =
+  process.env.VERCEL_ENV === 'production' ? 'https://cross.voxpages.com' : undefined;
+
+if (ASSET_ORIGIN) {
+  const csp = securityHeaders.find((h) => h.key === 'Content-Security-Policy');
+  if (csp) {
+    csp.value = csp.value
+      .replace("script-src 'self'", `script-src 'self' ${ASSET_ORIGIN}`)
+      .replace("style-src 'self'", `style-src 'self' ${ASSET_ORIGIN}`)
+      .replace("font-src 'self'", `font-src 'self' ${ASSET_ORIGIN}`);
+  }
+}
+
 const nextConfig = {
   reactStrictMode: true,
-  
+  // assetPrefix no cubre /_next/image. El loader de next/image tiene que ir al mismo host.
+  ...(ASSET_ORIGIN
+    ? {
+        assetPrefix: ASSET_ORIGIN,
+        images: { path: `${ASSET_ORIGIN}/_next/image` },
+      }
+    : {}),
+
   // El archivo vive en public/.well-known/... (Apple Pay / Stripe).
   // No reescribir a /api: esa ruta no existía y el middleware mandaba 307 a /es.
   

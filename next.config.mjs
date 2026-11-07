@@ -88,8 +88,11 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Prod de cross: JS/CSS salen de este host para no contar estáticos en el
-// Worker de Cloudflare (playcher y el resto de ads). QA y local siguen relativos.
+// Producción de cross.voxpages.com. No volver a dejar /_next relativo.
+// El HTML de la variante B se ve en el host de ads (playcher, landing-g, mid…).
+// Si un deploy publica JS, CSS, fuentes o /_next/image como ruta relativa, el
+// browser los pide en ese host y se queda con el bundle de A (cache de EKS) o
+// con un 404. QA y local no entran acá: VERCEL_ENV !== 'production'.
 const ASSET_ORIGIN =
   process.env.VERCEL_ENV === 'production' ? 'https://cross.voxpages.com' : undefined;
 
@@ -105,7 +108,8 @@ if (ASSET_ORIGIN) {
 
 const nextConfig = {
   reactStrictMode: true,
-  // assetPrefix no cubre /_next/image. El loader de next/image tiene que ir al mismo host.
+  // assetPrefix solo mueve /_next/static. next/image sigue en /_next/image y,
+  // si queda relativo, también pega al ALB de A. Mantener los dos absolutos.
   ...(ASSET_ORIGIN
     ? {
         assetPrefix: ASSET_ORIGIN,

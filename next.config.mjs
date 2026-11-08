@@ -14,6 +14,13 @@ const PRODUCTION_ORIGINS = [
   'https://summaryvox.com',
   'https://suscriptionlanding-git-qa-voxpages-projects.vercel.app',
   'https://resume-book-git-qa-voxpages-projects.vercel.app',
+  // Hosts de ads (HTML de B). El browser llama a /api en cross.* → CORS.
+  'https://landing-g.todosgamers.com',
+  'https://oneplay.todosgamers.com',
+  'https://oneplay-g.todosgamers.com',
+  'https://landing-g.slumbrapp.com',
+  'https://oneplay-g.playcher.com',
+  'https://mid.theauravibe.com',
 ];
 
 const DEV_ORIGINS = [
@@ -99,10 +106,13 @@ const ASSET_ORIGIN =
 if (ASSET_ORIGIN) {
   const csp = securityHeaders.find((h) => h.key === 'Content-Security-Policy');
   if (csp) {
+    // 'self' en CSP = origen de la barra de URL (host de ads), no Vercel.
+    // Assets y /api absolutos a cross.* tienen que estar permitidos acá.
     csp.value = csp.value
       .replace("script-src 'self'", `script-src 'self' ${ASSET_ORIGIN}`)
       .replace("style-src 'self'", `style-src 'self' ${ASSET_ORIGIN}`)
-      .replace("font-src 'self'", `font-src 'self' ${ASSET_ORIGIN}`);
+      .replace("font-src 'self'", `font-src 'self' ${ASSET_ORIGIN}`)
+      .replace("connect-src 'self'", `connect-src 'self' ${ASSET_ORIGIN}`);
   }
 }
 

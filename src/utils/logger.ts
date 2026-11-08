@@ -1,5 +1,6 @@
 import { betterStack } from '@/monitoring/services/betterStackService';
 import { getShortSessionId } from './sessionId';
+import { resolveApiUrl } from './apiBase';
 
 type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug';
 
@@ -187,7 +188,7 @@ class Logger {
     // Si estamos en el cliente, enviar a través de la API
     if (typeof window !== 'undefined') {
       try {
-        await fetch('/api/log', {
+        await fetch(resolveApiUrl('/api/log'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -310,7 +311,7 @@ class Logger {
     // Si estamos en el cliente, enviar a través de la API
     if (typeof window !== 'undefined') {
       try {
-        await fetch('/api/log', {
+        await fetch(resolveApiUrl('/api/log'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -345,7 +346,7 @@ class Logger {
 
     if (typeof window !== 'undefined') {
       try {
-        await fetch('/api/log', {
+        await fetch(resolveApiUrl('/api/log'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

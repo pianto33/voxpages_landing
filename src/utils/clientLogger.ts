@@ -27,6 +27,7 @@
 
 import { getClientLogContext, getAnonId, getFunnelId } from './userIdentity';
 import { getSessionId } from './sessionId';
+import { resolveApiUrl } from './apiBase';
 
 type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'red-alert' | 'visit' | 'click';
 
@@ -59,7 +60,7 @@ class ClientLogger {
         timestamp: new Date().toISOString(),
       };
 
-      fetch('/api/log', {
+      fetch(resolveApiUrl('/api/log'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

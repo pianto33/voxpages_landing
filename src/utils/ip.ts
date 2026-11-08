@@ -1,8 +1,9 @@
 import { logger } from "./logger";
+import { resolveApiUrl } from "./apiBase";
 
 export async function getIpAddress(): Promise<string | null> {
   try {
-    const response = await fetch("/api/get-ip");
+    const response = await fetch(resolveApiUrl("/api/get-ip"));
     if (!response.ok) {
       throw new Error("Error al obtener la IP");
     }

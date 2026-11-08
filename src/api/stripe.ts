@@ -4,6 +4,7 @@ import {
   CreatePaymentIntentResponse,
   type PaymentIntentResponse,
 } from "@/interfaces/payment-intent";
+import { resolveApiUrl } from "@/utils/apiBase";
 
 export const getPaymentIntent = async ({
   intentId,
@@ -30,7 +31,7 @@ export const getPaymentIntent = async ({
 };
 
 export const createPaymentIntent = async (payload: CreateIntentPayload) => {
-  const response = await fetch("/api/create-intent", {
+  const response = await fetch(resolveApiUrl("/api/create-intent"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -60,7 +61,7 @@ export interface SetupIntentCheckoutResponse {
 export const fetchSetupIntentCheckout = async (
   setupIntentId: string
 ): Promise<SetupIntentCheckoutResponse> => {
-  const response = await fetch("/api/check-setup-intent", {
+  const response = await fetch(resolveApiUrl("/api/check-setup-intent"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ setupIntentId }),

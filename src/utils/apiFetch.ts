@@ -5,10 +5,12 @@
  * X-Session-Id, X-Funnel-Id, X-Customer-Id) sin que cada call site
  * tenga que recordarlo.
  *
- * Comportamiento idéntico a fetch nativo en todo lo demás.
+ * Si NEXT_PUBLIC_API_BASE está seteada (build Vercel / variante B),
+ * resuelve `/api/...` a URL absoluta para no pegarle al host de ads/EKS.
  */
 
 import { getTelemetryHeaders } from './userIdentity';
+import { resolveApiUrl } from './apiBase';
 
 export async function apiFetch(
   input: RequestInfo | URL,
@@ -21,7 +23,10 @@ export async function apiFetch(
     ...(init.headers || {}),
   };
 
-  return fetch(input, {
+  const resolved =
+    typeof input === 'string' ? resolveApiUrl(input) : input;
+
+  return fetch(resolved, {
     ...init,
     headers: mergedHeaders,
   });

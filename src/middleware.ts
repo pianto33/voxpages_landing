@@ -6,6 +6,7 @@ import {
   hasLocalePrefix,
   localeFromPathSegment,
 } from "@/utils/locale";
+import { apiCorsHeaderPairs } from "@/utils/cors";
 
 const LOCALE_SET = new Set<string>(locales);
 
@@ -16,8 +17,24 @@ function withPrivateCache(res: NextResponse) {
   return res;
 }
 
+function withApiCors(request: NextRequest, res: NextResponse) {
+  for (const [key, value] of apiCorsHeaderPairs(request.headers.get("origin"))) {
+    res.headers.set(key, value);
+  }
+  return res;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // /api en cross.*: el browser de B llama desde el host de ads (cross-origin).
+  // OPTIONS acá → 204 con CORS (si no, el handler responde 405).
+  if (pathname.startsWith("/api")) {
+    if (request.method === "OPTIONS") {
+      return withApiCors(request, new NextResponse(null, { status: 204 }));
+    }
+    return withApiCors(request, NextResponse.next());
+  }
 
   // Apple Pay / Stripe pegan acá sin locale. No redirigir a /es/...
   if (pathname.startsWith("/.well-known")) {
@@ -53,5 +70,8 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/((?!api|_next/static|_next/image|favicon.png|\\.well-known).*)",
+  matcher: [
+    "/api/:path*",
+    "/((?!_next/static|_next/image|favicon.png|\\.well-known).*)",
+  ],
 };

@@ -1,4 +1,5 @@
 import { logger } from "@/utils/logger";
+import { resolveApiUrl } from "@/utils/apiBase";
 
 const platformUrl =
   process.env.NEXT_PUBLIC_PLATFORM_URL || "https://voxpages.com";
@@ -12,7 +13,7 @@ export const generateAutoLoginToken = async (
   email: string
 ): Promise<string> => {
   try {
-    const response = await fetch("/api/generate-token", {
+    const response = await fetch(resolveApiUrl("/api/generate-token"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
